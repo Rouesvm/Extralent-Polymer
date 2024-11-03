@@ -19,7 +19,6 @@ import java.util.Set;
 
 public class TransmitterBlockEntity extends BlockEntity implements TickableBlockEntity {
     private int ticks;
-    private final int maxDist = 5;
     private Set<BlockPos> blocks = new HashSet<>();
 
     private final SimpleEnergyStorage energyStorage = new SimpleEnergyStorage(450_000, 1_000, 1_000) {
@@ -37,20 +36,35 @@ public class TransmitterBlockEntity extends BlockEntity implements TickableBlock
     @Override
     public void tick() {
         if (this.ticks++ % 5 == 0) {
-            this.blocks.forEach(block -> insertPowerToBlock(false, block));
+            this.blocks.forEach(block -> {
+                if (!insertPowerToBlock(false, block)) removeBlock(block);
+            });
         }
     }
 
-    public void putBlock(BlockPos pos) {
-        if (this.blocks.contains(pos)) return;
+    public String putBlock(BlockPos pos) {
+        if (this.blocks.contains(pos)) return "SAME";
+        if (this.world == null) return "FAIL";
+        if (this.world.isClient) return "FAIL";
 
+        int maxDist = 5;
         if (pos.isWithinDistance(this.pos, maxDist)) {
-            if (this.world != null && !this.world.isClient) {
-                if (insertPowerToBlock(true, pos)) {
-                    this.blocks.add(pos);
-                }
+            if (insertPowerToBlock(true, pos)) {
+                this.blocks.add(pos);
+                return "SUCCESS";
             }
+        } else {
+            return "FAR";
         }
+        return "FAIL";
+    }
+
+    public boolean removeBlock(BlockPos pos) {
+        if (this.blocks.contains(pos)) {
+            this.blocks.remove(pos);
+            return true;
+        }
+        return false;
     }
 
     private boolean insertPowerToBlock(boolean checkEnergyStorage, BlockPos blockpos) {
@@ -95,6 +109,10 @@ public class TransmitterBlockEntity extends BlockEntity implements TickableBlock
                 this.blocks.add(BlockPos.fromLong(blockPos));
             }
         }
+    }
+
+    public Set<BlockPos> getBlocks() {
+        return this.blocks;
     }
 
     public SimpleEnergyStorage getEnergyStorage() {
