@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "extralent",
+  "version": "${version}",
+
+  "name": "Key Item",
+  "description": "Adds a key item.",
+  "authors": [
+    "Rouesvm"
+  ],
+
+  "license": "MIT",
+  "icon": "assets/extralent/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.rouesvm.extralent.Main"
+    ]
+  },
+  "mixins": [
+    "fabric.mixin.json"
+  ],
+
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "1.21.x",
+    "java": ">=21"
+  }
+}
