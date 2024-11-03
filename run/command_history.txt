@@ -1,0 +1,34 @@
+/gamemode survival
+/datapack list
+/gamemode creative
+/datapack list
+/reload
+/polymer dev
+/polymer dev is_bedrock
+/polymer client-item
+/give @p extralent:generator
+/polymer pick
+/gamemode spectator
+/gamemode creative
+/effect give Player803 minecraft:night_vision
+/polymer pick
+/give @p extralent:generator
+/give @p extralent:quary
+/polymer pick
+/polymer client-item
+/give @p extralent:transmitter
+/give @p extralent:connector
+/give @p extralent:transmitter
+/give @p extralent:generator
+/give @p extralent:transmitter
+/give @p extralent:connector
+/give @p extralent:transmitter
+/give @p extralent:quary
+/give @p extralent:connector
+/give @p extralent:generator
+/give @p extralent:quary
+/give @p extralent:transmitter
+/give @p extralent:connector
+/give @p extralent:generator
+/polymer pick
+/give @p extralent:connector

@@ -1,0 +1,185 @@
+---- Minecraft Crash Report ----
+// You're mean.
+
+Time: 2024-11-03 16:00:20
+Description: Ticking block entity
+
+java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because the return value of "net.fabricmc.fabric.api.registry.FuelRegistry.get(net.minecraft.item.ItemConvertible)" is null
+	at com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity.validFuel(GeneratorBlockEntity.java:86)
+	at com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity.tick(GeneratorBlockEntity.java:55)
+	at com.rouesvm.extralent.interfaces.block.TickableBlockEntity.lambda$getTicker$0(TickableBlockEntity.java:13)
+	at net.minecraft.world.chunk.WorldChunk$DirectBlockEntityTickInvoker.tick(WorldChunk.java:683)
+	at net.minecraft.world.chunk.WorldChunk$WrappedBlockEntityTickInvoker.tick(WorldChunk.java:737)
+	at net.minecraft.world.World.tickBlockEntities(World.java:488)
+	at net.minecraft.server.world.ServerWorld.tick(ServerWorld.java:413)
+	at net.minecraft.server.MinecraftServer.tickWorlds(MinecraftServer.java:1021)
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:912)
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:114)
+	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:697)
+	at net.minecraft.server.MinecraftServer.method_29739(MinecraftServer.java:281)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Server thread
+Stacktrace:
+	at com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity.validFuel(GeneratorBlockEntity.java:86)
+	at com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity.tick(GeneratorBlockEntity.java:55)
+	at com.rouesvm.extralent.interfaces.block.TickableBlockEntity.lambda$getTicker$0(TickableBlockEntity.java:13)
+	at net.minecraft.world.chunk.WorldChunk$DirectBlockEntityTickInvoker.tick(WorldChunk.java:683)
+	at net.minecraft.world.chunk.WorldChunk$WrappedBlockEntityTickInvoker.tick(WorldChunk.java:737)
+	at net.minecraft.world.World.tickBlockEntities(World.java:488)
+
+-- Block entity being ticked --
+Details:
+	Name: extralent:generator_block_entity // com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity
+	Block: Block{extralent:generator}
+	Block location: World: (19,93,-27), Section: (at 3,13,5 in 1,5,-2; chunk contains blocks 16,-64,-32 to 31,319,-17), Region: (0,-1; contains chunks 0,-32 to 31,-1, blocks 0,-64,-512 to 511,319,-1)
+	Block: Block{extralent:generator}
+	Block location: World: (19,93,-27), Section: (at 3,13,5 in 1,5,-2; chunk contains blocks 16,-64,-32 to 31,319,-17), Region: (0,-1; contains chunks 0,-32 to 31,-1, blocks 0,-64,-512 to 511,319,-1)
+Stacktrace:
+	at net.minecraft.world.chunk.WorldChunk$DirectBlockEntityTickInvoker.tick(WorldChunk.java:683)
+	at net.minecraft.world.chunk.WorldChunk$WrappedBlockEntityTickInvoker.tick(WorldChunk.java:737)
+	at net.minecraft.world.World.tickBlockEntities(World.java:488)
+	at net.minecraft.server.world.ServerWorld.tick(ServerWorld.java:413)
+	at net.minecraft.server.MinecraftServer.tickWorlds(MinecraftServer.java:1021)
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:912)
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:114)
+	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:697)
+	at net.minecraft.server.MinecraftServer.method_29739(MinecraftServer.java:281)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+-- Affected level --
+Details:
+	All players: 0 total; []
+	Chunk stats: 841
+	Level dimension: minecraft:overworld
+	Level spawn location: World: (16,95,-48), Section: (at 0,15,0 in 1,5,-3; chunk contains blocks 16,-64,-48 to 31,319,-33), Region: (0,-1; contains chunks 0,-32 to 31,-1, blocks 0,-64,-512 to 511,319,-1)
+	Level time: 23963 game time, 23963 day time
+	Level name: Yay
+	Level game mode: Game mode: creative (ID 1). Hardcore: false. Commands: true
+	Level weather: Rain time: 6215 (now: false), thunder time: 4712 (now: true)
+	Known server brands: fabric
+	Removed feature flags: 
+	Level was modded: true
+	Level storage version: 0x04ABD - Anvil
+	Loaded entity count: 50
+Stacktrace:
+	at net.minecraft.server.world.ServerWorld.addDetailsToCrashReport(ServerWorld.java:1693)
+	at net.minecraft.server.MinecraftServer.tickWorlds(MinecraftServer.java:1024)
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:912)
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:114)
+	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:697)
+	at net.minecraft.server.MinecraftServer.method_29739(MinecraftServer.java:281)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.21
+	Minecraft Version ID: 1.21
+	Operating System: Linux (amd64) version 6.11.5-arch1-1
+	Java Version: 21.0.4, Amazon.com Inc.
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Amazon.com Inc.
+	Memory: 194778456 bytes (185 MiB) / 692060160 bytes (660 MiB) up to 4148166656 bytes (3956 MiB)
+	CPUs: 12
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz
+	Identifier: Intel64 Family 6 Model 165 Stepping 3
+	Microarchitecture: Comet Lake
+	Frequency (GHz): 2.90
+	Number of physical packages: 1
+	Number of physical CPUs: 6
+	Number of logical CPUs: 12
+	Graphics card #0 name: Baffin [Radeon RX 550 640SP / RX 560/560X]
+	Graphics card #0 vendor: Advanced Micro Devices, Inc. [AMD/ATI] (0x1002)
+	Graphics card #0 VRAM (MiB): 258.00
+	Graphics card #0 deviceId: 0x67ff
+	Graphics card #0 versionInfo: unknown
+	Virtual memory max (MiB): 9446.96
+	Virtual memory used (MiB): 11545.54
+	Swap memory total (MiB): 1535.99
+	Swap memory used (MiB): 783.68
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 7907.25, total: 7910.96
+	Space in storage for workdir (MiB): available: 308819.06, total: 937790.69
+	JVM Flags: 0 total; 
+	Fabric Mods: 
+		extralent: Key Item 1.0.0
+		fabric-api: Fabric API 0.102.0+1.21
+		fabric-api-base: Fabric API Base 0.4.42+6573ed8cd1
+		fabric-api-lookup-api-v1: Fabric API Lookup API (v1) 1.6.68+b5597344d1
+		fabric-biome-api-v1: Fabric Biome API (v1) 13.0.29+5bd9f1bcd1
+		fabric-block-api-v1: Fabric Block API (v1) 1.0.22+0af3f5a7d1
+		fabric-block-view-api-v2: Fabric BlockView API (v2) 1.0.10+6573ed8cd1
+		fabric-blockrenderlayer-v1: Fabric BlockRenderLayer Registration (v1) 1.1.52+0af3f5a7d1
+		fabric-client-tags-api-v1: Fabric Client Tags 1.1.15+6573ed8cd1
+		fabric-command-api-v1: Fabric Command API (v1) 1.2.49+f71b366fd1
+		fabric-command-api-v2: Fabric Command API (v2) 2.2.28+6ced4dd9d1
+		fabric-commands-v0: Fabric Commands (v0) 0.2.66+df3654b3d1
+		fabric-content-registries-v0: Fabric Content Registries (v0) 8.0.16+b5597344d1
+		fabric-convention-tags-v1: Fabric Convention Tags 2.0.19+7f945d5bd1
+		fabric-convention-tags-v2: Fabric Convention Tags (v2) 2.5.0+c5e2b5c6d1
+		fabric-crash-report-info-v1: Fabric Crash Report Info (v1) 0.2.29+0af3f5a7d1
+		fabric-data-attachment-api-v1: Fabric Data Attachment API (v1) 1.1.27+6a6dfa19d1
+		fabric-data-generation-api-v1: Fabric Data Generation API (v1) 20.2.16+16c4ae25d1
+		fabric-dimensions-v1: Fabric Dimensions API (v1) 4.0.0+6fc22b99d1
+		fabric-entity-events-v1: Fabric Entity Events (v1) 1.6.12+6fc22b99d1
+		fabric-events-interaction-v0: Fabric Events Interaction (v0) 0.7.12+ba9dae06d1
+		fabric-game-rule-api-v1: Fabric Game Rule API (v1) 1.0.53+6ced4dd9d1
+		fabric-gametest-api-v1: Fabric Game Test API (v1) 2.0.4+6fc22b99d1
+		fabric-item-api-v1: Fabric Item API (v1) 11.0.0+afdfc921d1
+		fabric-item-group-api-v1: Fabric Item Group API (v1) 4.1.4+78017270d1
+		fabric-key-binding-api-v1: Fabric Key Binding API (v1) 1.0.47+0af3f5a7d1
+		fabric-keybindings-v0: Fabric Key Bindings (v0) 0.2.45+df3654b3d1
+		fabric-lifecycle-events-v1: Fabric Lifecycle Events (v1) 2.3.12+6c1df360d1
+		fabric-loot-api-v2: Fabric Loot API (v2) 3.0.14+3f89f5a5d1
+		fabric-loot-api-v3: Fabric Loot API (v3) 1.0.2+3f89f5a5d1
+		fabric-message-api-v1: Fabric Message API (v1) 6.0.13+6573ed8cd1
+		fabric-model-loading-api-v1: Fabric Model Loading API (v1) 2.0.0+fe474d6bd1
+		fabric-networking-api-v1: Fabric Networking API (v1) 4.2.2+60c3209bd1
+		fabric-object-builder-api-v1: Fabric Object Builder API (v1) 15.2.0+a551f7a4d1
+		fabric-particles-v1: Fabric Particles (v1) 4.0.2+6573ed8cd1
+		fabric-recipe-api-v1: Fabric Recipe API (v1) 5.0.12+65089712d1
+		fabric-registry-sync-v0: Fabric Registry Sync (v0) 5.1.2+60c3209bd1
+		fabric-renderer-api-v1: Fabric Renderer API (v1) 3.4.0+c705a49cd1
+		fabric-renderer-indigo: Fabric Renderer - Indigo 1.7.0+c705a49cd1
+		fabric-renderer-registries-v1: Fabric Renderer Registries (v1) 3.2.68+df3654b3d1
+		fabric-rendering-data-attachment-v1: Fabric Rendering Data Attachment (v1) 0.3.48+73761d2ed1
+		fabric-rendering-fluids-v1: Fabric Rendering Fluids (v1) 3.1.6+b5597344d1
+		fabric-rendering-v0: Fabric Rendering (v0) 1.1.71+df3654b3d1
+		fabric-rendering-v1: Fabric Rendering (v1) 5.0.5+df16efd0d1
+		fabric-resource-conditions-api-v1: Fabric Resource Conditions API (v1) 4.3.0+8dc279b1d1
+		fabric-resource-loader-v0: Fabric Resource Loader (v0) 1.3.0+56599129d1
+		fabric-screen-api-v1: Fabric Screen API (v1) 2.0.24+b5597344d1
+		fabric-screen-handler-api-v1: Fabric Screen Handler API (v1) 1.3.86+b5597344d1
+		fabric-sound-api-v1: Fabric Sound API (v1) 1.0.23+6573ed8cd1
+		fabric-transfer-api-v1: Fabric Transfer API (v1) 5.1.16+3dccd343d1
+		fabric-transitive-access-wideners-v1: Fabric Transitive Access Wideners (v1) 6.1.0+176f9036d1
+		fabricloader: Fabric Loader 0.16.5
+		java: OpenJDK 64-Bit Server VM 21
+		minecraft: Minecraft 1.21
+		mixinextras: MixinExtras 0.4.1
+		packet_tweaker: Packet Tweaker 0.5.5+1.21
+		polymer-blocks: Polymer (Textured Blocks) 0.9.9+1.21
+		polymer-common: Polymer (Common) 0.9.9+1.21
+		polymer-core: Polymer (Core) 0.9.9+1.21
+		polymer-networking: Polymer (Networking) 0.9.9+1.21
+		polymer-registry-sync-manipulator: Polymer (Registry Sync Manipulator) 0.9.9+1.21
+		polymer-resource-pack: Polymer (Resource Pack) 0.9.9+1.21
+		sgui: sgui 1.6.0+1.21
+		team_reborn_energy: Energy 4.1.0
+	Server Running: true
+	Player Count: 0 / 8; []
+	Active Data Packs: vanilla, fabric, fabric-convention-tags-v2, fabric-gametest-api-v1, $polymer-resources, file/chestlock
+	Available Data Packs: $polymer-resources, bundle, fabric, fabric-convention-tags-v2, fabric-gametest-api-v1, file/chestlock, trade_rebalance, vanilla
+	Enabled Feature Flags: minecraft:vanilla
+	World Generation: Stable
+	World Seed: -3474209588133012256
+	Type: Integrated Server (map_client.txt)
+	Is Modded: Definitely; Client brand changed to 'fabric'; Server brand changed to 'fabric'
+	Launched Version: Fabric

@@ -1,0 +1,11 @@
+#[[\$]]#execute if block ~ ~ ~ \#minecraft:doors[half=lower,facing=south] if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~ ~2 ~-.5 0 0.1 0 1 1
+#[[\$]]#execute if block ~ ~ ~ \#minecraft:doors[half=lower,facing=north] if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~ ~2 ~.5 0 0.1 0 1 1
+#[[\$]]#execute if block ~ ~ ~ \#minecraft:doors[half=lower,facing=east] if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~-.5 ~2 ~ 0 0.1 0 1 1
+#[[\$]]#execute if block ~ ~ ~ \#minecraft:doors[half=lower,facing=west] if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~.5 ~2 ~ 0 0.1 0 1 1
+
+#[[\$]]#execute if block ~ ~ ~ \#minecraft:doors[half=upper,facing=south] if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~ ~1 ~-.5 0 0.1 0 1 1
+#[[\$]]#execute if block ~ ~ ~ \#minecraft:doors[half=upper,facing=north] if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~ ~1 ~.5 0 0.1 0 1 1
+#[[\$]]#execute if block ~ ~ ~ \#minecraft:doors[half=upper,facing=east] if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~-.5 ~1 ~ 0 0.1 0 1 1
+#[[\$]]#execute if block ~ ~ ~ \#minecraft:doors[half=upper,facing=west] if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~.5 ~1 ~ 0 0.1 0 1 1
+
+#[[\$]]#execute unless block ~ ~ ~ \#minecraft:doors if entity @a[distance=..4, nbt={SelectedItem:{components:{"minecraft:custom_data":{"key_id":#[[\$]]#(compare)}}}}] run particle minecraft:vault_connection ~ ~1.5 ~ 0 0.1 0 1 1

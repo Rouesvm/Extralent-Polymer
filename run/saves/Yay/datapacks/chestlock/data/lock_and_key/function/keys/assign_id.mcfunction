@@ -1,0 +1,2 @@
+item modify entity @s weapon.mainhand lock_and_key:remove_item
+#[[\$]]#give @s #[[\$]]#(new_key_item_id)[minecraft:custom_data='{"key_id":#[[\$]]#(new_key_id)}',minecraft:lore=['{"text":"","extra":[{"text":"Id \##[[\$]]#(new_key_id)","italic":false,"color":"\#AAAAAA"}]}']]
