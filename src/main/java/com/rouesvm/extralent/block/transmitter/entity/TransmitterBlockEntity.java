@@ -22,7 +22,7 @@ public class TransmitterBlockEntity extends BlockEntity implements TickableBlock
     private final int maxDist = 5;
     private Set<BlockPos> blocks = new HashSet<>();
 
-    private final SimpleEnergyStorage energyStorage = new SimpleEnergyStorage(100_000, 1_000, 1_000) {
+    private final SimpleEnergyStorage energyStorage = new SimpleEnergyStorage(450_000, 1_000, 1_000) {
         @Override
         protected void onFinalCommit() {
             super.onFinalCommit();
@@ -54,7 +54,7 @@ public class TransmitterBlockEntity extends BlockEntity implements TickableBlock
     }
 
     private boolean insertPowerToBlock(boolean checkEnergyStorage, BlockPos blockpos) {
-        EnergyStorage storage = EnergyStorage.SIDED.find(this.world, blockpos, Direction.UP);
+        EnergyStorage storage = EnergyStorage.SIDED.find(this.world, blockpos, null);
         if (storage != null && storage.supportsInsertion()) {
             if (checkEnergyStorage) return true;
 
@@ -74,15 +74,27 @@ public class TransmitterBlockEntity extends BlockEntity implements TickableBlock
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
+        readConnections(nbt);
+
         if (nbt.contains("energy", NbtElement.LONG_TYPE)) {
-            energyStorage.amount = nbt.getLong("energy");
+            this.energyStorage.amount = nbt.getLong("energy");
         }
     }
 
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
+        nbt.putLongArray("blocks", blocks.stream().map(BlockPos::asLong).toList());
         nbt.putLong("energy", this.energyStorage.amount);
+    }
+
+    private void readConnections(NbtCompound nbt) {
+        if(nbt.contains("blocks", NbtElement.LONG_ARRAY_TYPE)) {
+            long[] positions = nbt.getLongArray("blocks");
+            for(long blockPos : positions) {
+                this.blocks.add(BlockPos.fromLong(blockPos));
+            }
+        }
     }
 
     public SimpleEnergyStorage getEnergyStorage() {

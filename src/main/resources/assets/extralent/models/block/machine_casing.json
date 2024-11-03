@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_column",
+  "textures": {
+    "end": "extralent:blocks/machine_top",
+    "side": "extralent:blocks/machine_side"
+  }
+}
