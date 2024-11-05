@@ -23,7 +23,7 @@ public class InfoText extends ElementHolder {
 
         this.basicPoweredEntity = basicPoweredEntity;
         this.display = new TextDisplayElement(basicPoweredEntity.infoOnClicked());
-        this.display.setViewRange(0.3f);
+        this.display.setViewRange(0.2f);
         this.display.setShadow(false);
         this.display.setBackground(0);
         this.display.setBrightness(new Brightness(15, 15));

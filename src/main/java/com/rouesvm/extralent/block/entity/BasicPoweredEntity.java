@@ -78,7 +78,7 @@ public class BasicPoweredEntity extends BlockEntity implements TickableBlockEnti
                 .append("/")
                 .append(String.valueOf(this.energyStorage.getCapacity()));
 
-        return text.copy().append(Text.literal("   ")
+        return text.copy().append(Text.literal("    ")
                 .append(energyAmount.copy())
                 .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID))
         );
