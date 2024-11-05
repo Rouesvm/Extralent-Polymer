@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class TransmitterBlockEntity extends BasicPoweredEntity {
     private int ticks;
-    private Set<BlockPos> blocks = new HashSet<>();
+    private final Set<BlockPos> blocks = new HashSet<>();
 
     public TransmitterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSMITTER_BLOCK_ENTITY, pos, state);

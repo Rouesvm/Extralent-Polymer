@@ -1,7 +1,6 @@
 package com.rouesvm.extralent.entity;
 
 import com.rouesvm.extralent.block.entity.BasicPoweredEntity;
-import com.rouesvm.extralent.utils.ProgressBarRenderer;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
@@ -9,11 +8,8 @@ import net.minecraft.entity.decoration.Brightness;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class InfoText extends ElementHolder {
     private int timer;
