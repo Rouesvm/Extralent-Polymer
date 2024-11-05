@@ -11,6 +11,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -42,8 +43,10 @@ public class InfoItem extends BasicPolymerItem {
             var blockEntityResult = world.getBlockEntity(context.getBlockPos());
             if (blockEntityResult instanceof BasicPoweredEntity basicPoweredEntity) {
                 if (this.floatingText != null) this.floatingText.setDestroy(true);
-                Vec3d direction = context.getPlayer().getRotationVector();
-                Vec3d displayPos = context.getBlockPos().toCenterPos().subtract(new Vec3d(direction.x * 1.5, 0, direction.z * 1.5));
+                Direction direction = context.getPlayer().getHorizontalFacing().getOpposite();
+                Vec3d displayPos = context.getBlockPos().toCenterPos().offset(direction, 1.25)
+                        .add(new Vec3d(0, 0.275, 0));
+
                 this.floatingText = InfoText.createText(displayPos, basicPoweredEntity, world);
             }
         }
