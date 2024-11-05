@@ -23,29 +23,6 @@ public class GeneratorBlock extends BasicPolymerBlock implements BlockEntityProv
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (world.isClient) return ActionResult.PASS;
-        if (player == null) return ActionResult.PASS;
-
-        var blockEntityResult = world.getBlockEntity(pos, BlockEntityRegistry.GENERATOR_BLOCK_ENTITY);
-        if (blockEntityResult.isPresent()) {
-            GeneratorBlockEntity blockEntity = blockEntityResult.get();
-            if (player.isSneaking()) {
-
-                player.sendMessage(
-                        Text.of("Energy:" +
-                                blockEntity.getEnergyStorage().amount
-                                + " "
-                                + blockEntity.getInventory().getStack(0)
-                                + " ").copy().append(blockEntity.getProgress()),
-                        true);
-            }
-        }
-
-        return ActionResult.SUCCESS_NO_ITEM_USED;
-    }
-
-    @Override
     public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return BlockEntityRegistry.GENERATOR_BLOCK_ENTITY.instantiate(pos, state);
     }
