@@ -1,20 +1,17 @@
-package com.rouesvm.extralent.item.connector;
+package com.rouesvm.extralent.item.custom;
 
 import com.rouesvm.extralent.block.transmitter.entity.TransmitterBlockEntity;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.List;
 import java.util.Set;
 
 public class ConnectorItem extends BasicPolymerItem {
@@ -22,16 +19,6 @@ public class ConnectorItem extends BasicPolymerItem {
 
     public ConnectorItem(Settings settings) {
         super("connector", settings, Items.COAL);
-    }
-
-    @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
-        if (this.currentBlockEntity != null) {
-            tooltip.add(Text.literal("Connected to one transmitter"));
-            tooltip.add(Text.literal("Now able to bind blocks"));
-        } else {
-            tooltip.add(Text.literal("Not connected"));
-        }
     }
 
     @Override
