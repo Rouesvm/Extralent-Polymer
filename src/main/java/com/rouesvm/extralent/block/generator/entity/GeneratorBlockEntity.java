@@ -1,19 +1,17 @@
 package com.rouesvm.extralent.block.generator.entity;
 
-import com.rouesvm.extralent.interfaces.block.TickableBlockEntity;
+import com.rouesvm.extralent.block.entity.BasicPoweredEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -22,17 +20,10 @@ import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class GeneratorBlockEntity extends BlockEntity implements TickableBlockEntity {
+public class GeneratorBlockEntity extends BasicPoweredEntity {
     private int progress;
     private int burnTime;
 
-    private final SimpleEnergyStorage energyStorage = new SimpleEnergyStorage(100_000, 0, 1_000) {
-        @Override
-        protected void onFinalCommit() {
-            super.onFinalCommit();
-            markDirty();
-        }
-    };
     private final SimpleInventory inventory = new SimpleInventory(1) {
         @Override
         public void markDirty() {
@@ -45,6 +36,11 @@ public class GeneratorBlockEntity extends BlockEntity implements TickableBlockEn
 
     public GeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.GENERATOR_BLOCK_ENTITY, pos, state);
+    }
+
+    @Override
+    public SimpleEnergyStorage createEnergyStorage() {
+        return super.createEnergyStorage(500000, 0, 1000);
     }
 
     @Override
@@ -98,10 +94,6 @@ public class GeneratorBlockEntity extends BlockEntity implements TickableBlockEn
         this.progress = nbt.getInt("progress");
         this.burnTime = nbt.getInt("burnTime");
         Inventories.readNbt(nbt, this.inventory.getHeldStacks(), registryLookup);
-
-        if (nbt.contains("energy", NbtElement.LONG_TYPE)) {
-            energyStorage.amount = nbt.getLong("energy");
-        }
     }
 
     @Override
@@ -109,7 +101,6 @@ public class GeneratorBlockEntity extends BlockEntity implements TickableBlockEn
         super.writeNbt(nbt, registryLookup);
         nbt.putInt("progress", this.progress);
         nbt.putInt("burnTime", this.burnTime);
-        nbt.putLong("energy", this.energyStorage.amount);
         Inventories.writeNbt(nbt, this.inventory.getHeldStacks(), registryLookup);
     }
 
@@ -125,14 +116,6 @@ public class GeneratorBlockEntity extends BlockEntity implements TickableBlockEn
 
     public SimpleInventory getInventory() {
         return this.inventory;
-    }
-
-    public SimpleEnergyStorage getEnergyProvider(Direction direction) {
-        return this.energyStorage;
-    }
-
-    public SimpleEnergyStorage getEnergyStorage() {
-        return this.energyStorage;
     }
 
     public Text getProgress() {

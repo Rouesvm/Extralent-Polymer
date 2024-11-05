@@ -1,46 +1,39 @@
 package com.rouesvm.extralent.block.quary.entity;
 
-import com.rouesvm.extralent.interfaces.block.TickableBlockEntity;
+import com.rouesvm.extralent.block.entity.BasicPoweredEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import org.jetbrains.annotations.Nullable;
-import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuaryBlockEntity extends BlockEntity implements TickableBlockEntity {
+public class QuaryBlockEntity extends BasicPoweredEntity {
     private int progress;
     private BlockPos miningPos = this.pos.down();
 
-    private final SimpleEnergyStorage energyStorage = new SimpleEnergyStorage(100_000, 1_000, 0) {
-        @Override
-        protected void onFinalCommit() {
-            super.onFinalCommit();
-            markDirty();
-        }
-    };
-
     public QuaryBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.QUARY_BLOCK_ENTITY, pos, state);
+    }
+
+    @Override
+    public SimpleEnergyStorage createEnergyStorage() {
+        return super.createEnergyStorage(100000, 1000, 0);
     }
 
     @Override
@@ -106,10 +99,6 @@ public class QuaryBlockEntity extends BlockEntity implements TickableBlockEntity
         super.readNbt(nbt, registryLookup);
         this.progress = nbt.getInt("progress");
         this.miningPos = BlockPos.fromLong(nbt.getLong("mining_pos"));
-
-        if (nbt.contains("energy", NbtElement.LONG_TYPE)) {
-            energyStorage.amount = nbt.getLong("energy");
-        }
     }
 
     @Override
@@ -117,18 +106,9 @@ public class QuaryBlockEntity extends BlockEntity implements TickableBlockEntity
         super.writeNbt(nbt, registryLookup);
         nbt.putInt("progress", this.progress);
         nbt.putLong("mining_pos", this.miningPos.asLong());
-        nbt.putLong("energy", this.energyStorage.amount);
     }
 
     public int getProgress() {
         return this.progress;
-    }
-
-    public SimpleEnergyStorage getEnergyStorage() {
-        return this.energyStorage;
-    }
-
-    public @Nullable EnergyStorage getEnergyProvider(@Nullable Direction direction) {
-        return this.energyStorage;
     }
 }
