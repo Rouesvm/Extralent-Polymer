@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,18 +23,13 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     private int progress;
     private int burnTime;
 
-    private final SimpleInventory inventory = new SimpleInventory(1) {
-        @Override
-        public void markDirty() {
-            super.markDirty();
-            update();
-        }
-    };
-
-    private final InventoryStorage inventoryStorage = InventoryStorage.of(inventory, null);
-
     public GeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.GENERATOR_BLOCK_ENTITY, pos, state);
+    }
+
+    @Override
+    public SimpleInventory createInventory() {
+        return super.createInventory(1);
     }
 
     @Override
@@ -93,7 +87,6 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         super.readNbt(nbt, registryLookup);
         this.progress = nbt.getInt("progress");
         this.burnTime = nbt.getInt("burnTime");
-        Inventories.readNbt(nbt, this.inventory.getHeldStacks(), registryLookup);
     }
 
     @Override
@@ -101,24 +94,5 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         super.writeNbt(nbt, registryLookup);
         nbt.putInt("progress", this.progress);
         nbt.putInt("burnTime", this.burnTime);
-        Inventories.writeNbt(nbt, this.inventory.getHeldStacks(), registryLookup);
-    }
-
-    private void update() {
-        markDirty();
-        if (world != null)
-            world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_ALL);
-    }
-
-    public InventoryStorage getInventoryProvider(Direction direction) {
-        return this.inventoryStorage;
-    }
-
-    public SimpleInventory getInventory() {
-        return this.inventory;
-    }
-
-    public Text getProgress() {
-        return Text.of(this.progress + "/" + this.burnTime);
     }
 }

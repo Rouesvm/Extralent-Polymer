@@ -47,7 +47,11 @@ public class InfoItem extends BasicPolymerItem {
                 Vec3d displayPos = context.getBlockPos().toCenterPos().offset(direction, 1.25)
                         .add(new Vec3d(0, 0.275, 0));
 
+                if (basicPoweredEntity.infoOnClicked() == null)
+                    return ActionResult.PASS;
+
                 this.floatingText = InfoText.createText(displayPos, basicPoweredEntity, world);
+                return ActionResult.SUCCESS;
             }
         }
         return ActionResult.PASS;

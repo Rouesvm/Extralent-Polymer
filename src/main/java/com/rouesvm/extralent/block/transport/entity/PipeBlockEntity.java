@@ -2,6 +2,7 @@ package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -13,10 +14,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PipeBlockEntity extends BasicMachineBlockEntity {
+    public int ticks;
     public final Set<BlockPos> blocks = new HashSet<>();
 
     public PipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+
+    public void onUpdate() {
+        if (this.blocks.isEmpty()) return;
+        Set<BlockPos> posToRemove = new HashSet<>();
+        this.blocks.forEach(pos -> {
+            if (blockExists(pos))
+                extractBlock(pos);
+            else posToRemove.add(pos);
+        });
+        if (!posToRemove.isEmpty()) posToRemove.forEach(this::removeBlock);
     }
 
     public boolean removeBlock(BlockPos pos) {
@@ -37,11 +50,22 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
             if (correctBlock(pos)) {
                 this.blocks.add(pos);
                 return PipeState.SUCCESS;
-            }
-        } else {
-            return PipeState.FAR;
+            } else return PipeState.TYPE_ERROR;
+        } else return PipeState.FAR;
+    }
+
+    public boolean blockExists(BlockPos blockPos) {
+        if (this.world != null && !this.world.isClient) {
+            BlockEntity block = this.world.getBlockEntity(blockPos);
+            if (block != null && block.isRemoved())
+                return false;
+            return block != null;
         }
-        return PipeState.FAIL;
+        return false;
+    }
+
+    @ApiStatus.OverrideOnly
+    public void extractBlock(BlockPos blockPos) {
     }
 
     @ApiStatus.OverrideOnly

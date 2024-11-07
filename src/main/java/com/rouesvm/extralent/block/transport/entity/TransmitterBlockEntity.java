@@ -7,9 +7,12 @@ import net.minecraft.util.math.BlockPos;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class TransmitterBlockEntity extends PipeBlockEntity {
-    public int ticks;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+public class TransmitterBlockEntity extends PipeBlockEntity {
     public TransmitterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSMITTER_BLOCK_ENTITY, pos, state);
     }
@@ -22,9 +25,8 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     @Override
     public void tick() {
         if (this.ticks++ % 5 == 0) {
-            this.getBlocks().forEach(block -> {
-                if (!insertPowerToBlock(block)) removeBlock(block);
-            });
+            if (this.energyStorage.getCapacity() <= 0) return;
+            onUpdate();
         }
     }
 
@@ -34,7 +36,8 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
         return storage != null && storage.supportsInsertion();
     }
 
-    private boolean insertPowerToBlock(BlockPos blockPos) {
+    @Override
+    public void extractBlock(BlockPos blockPos) {
         EnergyStorage storage = EnergyStorage.SIDED.find(this.world, blockPos, null);
         if (storage != null && storage.supportsInsertion()) {
             try (Transaction transaction = Transaction.openOuter()) {
@@ -43,9 +46,7 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
 
                 this.energyStorage.amount += extracted - inserted;
                 transaction.commit();
-                return true;
             }
         }
-        return false;
     }
 }

@@ -37,13 +37,13 @@ public class InfoText extends ElementHolder {
     @Override
     protected void onTick() {
         super.onTick();
-        if (this.destroy) {
-            this.destroy = false;
-            this.destroy();
-        }
+        if (this.machineBlockEntity.isRemoved())
+            this.destroy = true;
+        if (this.destroy)
+            this.timer = 0;
 
         if (this.timer-- == 0) {
-            this.destroy = true;
+            this.destroy();
         } else if (this.timer == 5) {
             this.display.setScale(new Vector3f(0));
             this.display.setInterpolationDuration(5);

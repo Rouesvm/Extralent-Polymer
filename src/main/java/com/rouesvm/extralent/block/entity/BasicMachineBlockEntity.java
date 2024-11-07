@@ -9,6 +9,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
@@ -116,14 +117,25 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
     }
 
     private Text getFormattedInfo() {
-        Text text = ProgressBarRenderer.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity());
-        Text energyAmount = Text.literal(String.valueOf(this.energyStorage.getAmount()))
-                .append("/")
-                .append(String.valueOf(this.energyStorage.getCapacity()));
+        Text text = null;
+        if (this.inventory != null) {
+            text = Text.empty();
+            for (ItemStack stack : this.inventory.getHeldStacks()) {
+                text = text.copy().append("\n").append(stack.getCount() + " ").append(stack.getName());
+            }
+        }
+        if (this.energyStorage != null) {
+            if (text == null) text = Text.empty();
 
-        return text.copy().append(Text.literal("    ")
-                .append(energyAmount.copy())
-                .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID))
-        );
+            text = text.copy().append("\n\n").append(ProgressBarRenderer.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity()));
+            Text energyAmount = Text.literal(String.valueOf(this.energyStorage.getAmount()))
+                    .append("/")
+                    .append(String.valueOf(this.energyStorage.getCapacity()));
+
+            text = text.copy().append(Text.literal("\n")
+                    .append(energyAmount.copy())
+                    .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID)));
+        }
+        return text;
     }
 }

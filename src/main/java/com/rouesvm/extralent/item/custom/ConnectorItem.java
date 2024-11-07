@@ -1,7 +1,7 @@
 package com.rouesvm.extralent.item.custom;
 
+import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.PipeState;
-import com.rouesvm.extralent.block.transport.entity.TransmitterBlockEntity;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
@@ -16,7 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.Set;
 
 public class ConnectorItem extends BasicPolymerItem {
-    private TransmitterBlockEntity currentBlockEntity;
+    private PipeBlockEntity currentBlockEntity;
 
     public ConnectorItem(Settings settings) {
         super("connector", settings, Items.COAL);
@@ -28,9 +28,12 @@ public class ConnectorItem extends BasicPolymerItem {
             ServerWorld world = (ServerWorld) context.getWorld();
             var blockEntityResult = world.getBlockEntity(context.getBlockPos());
 
-            if (blockEntityResult instanceof TransmitterBlockEntity transmitterBlockEntity) {
+            if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
                 if (this.currentBlockEntity != null) {
-                    if (this.currentBlockEntity == transmitterBlockEntity) {
+                    if (this.currentBlockEntity.isRemoved())
+                        this.currentBlockEntity = null;
+
+                    if (this.currentBlockEntity == pipeBlockEntity) {
                         context.getPlayer().sendMessage(Text.literal("Disconnected"), true);
                         this.currentBlockEntity = null;
                     } else {
@@ -39,7 +42,9 @@ public class ConnectorItem extends BasicPolymerItem {
                     return ActionResult.SUCCESS;
                 }
 
-                this.currentBlockEntity = transmitterBlockEntity;
+                pipeBlockEntity.onUpdate();
+
+                this.currentBlockEntity = pipeBlockEntity;
                 context.getStack().set(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT);
                 context.getPlayer().sendMessage(Text.literal("Connected"), true);
 
@@ -73,6 +78,7 @@ public class ConnectorItem extends BasicPolymerItem {
             case SUCCESS -> player.sendMessage(Text.literal("Bound"), true);
             case IDENTICAL -> player.sendMessage(Text.literal("Already bound"), true);
             case FAR -> player.sendMessage(Text.literal("Too far"), true);
+            case TYPE_ERROR -> player.sendMessage(Text.literal("Wrong type"), true);
         }
     }
 

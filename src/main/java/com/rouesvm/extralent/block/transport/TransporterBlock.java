@@ -20,7 +20,7 @@ public class TransporterBlock extends BasicPolymerBlock implements BlockEntityPr
 
     @Override
     public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return BlockEntityRegistry.TRANSMITTER_BLOCK_ENTITY.instantiate(pos, state);
+        return BlockEntityRegistry.TRANSPORTER_BLOCK_ENTITY.instantiate(pos, state);
     }
 
     @Override
