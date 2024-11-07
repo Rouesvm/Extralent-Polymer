@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.entity;
 
+import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
@@ -13,15 +14,15 @@ import org.joml.Vector3f;
 public class InfoText extends ElementHolder {
     private int timer;
 
-    private final BasicPoweredEntity basicPoweredEntity;
+    private final BasicMachineBlockEntity machineBlockEntity;
     private final TextDisplayElement display;
     private boolean destroy;
 
-    private InfoText(BasicPoweredEntity basicPoweredEntity, Vec3d pos) {
+    private InfoText(BasicMachineBlockEntity machineBlockEntity, Vec3d pos) {
         this.timer = 200;
 
-        this.basicPoweredEntity = basicPoweredEntity;
-        this.display = new TextDisplayElement(basicPoweredEntity.infoOnClicked());
+        this.machineBlockEntity = machineBlockEntity;
+        this.display = new TextDisplayElement(machineBlockEntity.infoOnClicked());
         this.display.setViewRange(0.2f);
         this.display.setShadow(false);
         this.display.setBackground(0);
@@ -49,7 +50,7 @@ public class InfoText extends ElementHolder {
             this.display.startInterpolation();
         }
 
-        this.display.setText(basicPoweredEntity.infoOnClicked());
+        this.display.setText(machineBlockEntity.infoOnClicked());
     }
 
     @Override
@@ -57,7 +58,7 @@ public class InfoText extends ElementHolder {
         return super.startWatching(player);
     }
 
-    public static InfoText createText(Vec3d pos, BasicPoweredEntity basicPoweredEntity, ServerWorld world) {
+    public static InfoText createText(Vec3d pos, BasicMachineBlockEntity basicPoweredEntity, ServerWorld world) {
         var model = new InfoText(basicPoweredEntity, pos);
         ChunkAttachment.ofTicking(model, world, pos);
         return model;

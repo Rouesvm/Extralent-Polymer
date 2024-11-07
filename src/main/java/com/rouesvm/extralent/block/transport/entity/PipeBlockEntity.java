@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.block.transport.entity;
 
-import com.rouesvm.extralent.block.entity.BasicMachineBlock;
+import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PipeBlockEntity extends BasicMachineBlock {
+public class PipeBlockEntity extends BasicMachineBlockEntity {
     public final Set<BlockPos> blocks = new HashSet<>();
 
     public PipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

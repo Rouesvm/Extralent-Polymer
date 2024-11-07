@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.item.custom;
 
+import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.entity.InfoText;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import net.minecraft.entity.player.PlayerEntity;
@@ -40,7 +41,7 @@ public class InfoItem extends BasicPolymerItem {
             ServerWorld world = (ServerWorld) context.getWorld();
 
             var blockEntityResult = world.getBlockEntity(context.getBlockPos());
-            if (blockEntityResult instanceof BasicPoweredEntity basicPoweredEntity) {
+            if (blockEntityResult instanceof BasicMachineBlockEntity basicPoweredEntity) {
                 if (this.floatingText != null) this.floatingText.setDestroy(true);
                 Direction direction = context.getPlayer().getHorizontalFacing().getOpposite();
                 Vec3d displayPos = context.getBlockPos().toCenterPos().offset(direction, 1.25)

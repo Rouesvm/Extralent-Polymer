@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.block.entity;
 
 import com.rouesvm.extralent.interfaces.block.TickableBlockEntity;
+import com.rouesvm.extralent.utils.ProgressBarRenderer;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -11,17 +12,19 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class BasicMachineBlock extends BlockEntity implements TickableBlockEntity {
+public class BasicMachineBlockEntity extends BlockEntity implements TickableBlockEntity {
     public final SimpleInventory inventory;
     public final InventoryStorage inventoryStorage;
 
     public final SimpleEnergyStorage energyStorage;
 
-    public BasicMachineBlock(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public BasicMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
 
         this.energyStorage = createEnergyStorage();
@@ -106,5 +109,21 @@ public class BasicMachineBlock extends BlockEntity implements TickableBlockEntit
 
     public SimpleInventory getInventory() {
         return this.inventory;
+    }
+
+    public Text infoOnClicked() {
+        return this.getFormattedInfo();
+    }
+
+    private Text getFormattedInfo() {
+        Text text = ProgressBarRenderer.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity());
+        Text energyAmount = Text.literal(String.valueOf(this.energyStorage.getAmount()))
+                .append("/")
+                .append(String.valueOf(this.energyStorage.getCapacity()));
+
+        return text.copy().append(Text.literal("    ")
+                .append(energyAmount.copy())
+                .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID))
+        );
     }
 }

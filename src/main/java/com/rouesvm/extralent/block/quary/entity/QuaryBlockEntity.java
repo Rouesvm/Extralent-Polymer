@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.block.quary.entity;
 
-import com.rouesvm.extralent.block.entity.BasicMachineBlock;
+import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -23,7 +23,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuaryBlockEntity extends BasicMachineBlock {
+public class QuaryBlockEntity extends BasicMachineBlockEntity {
     private int progress;
     private BlockPos miningPos = this.pos.down();
 
