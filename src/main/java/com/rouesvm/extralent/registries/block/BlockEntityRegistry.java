@@ -3,7 +3,7 @@ package com.rouesvm.extralent.registries.block;
 import com.rouesvm.extralent.Main;
 import com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity;
 import com.rouesvm.extralent.block.quary.entity.QuaryBlockEntity;
-import com.rouesvm.extralent.block.transmitter.entity.TransmitterBlockEntity;
+import com.rouesvm.extralent.block.transport.entity.TransmitterBlockEntity;
 import eu.pb4.polymer.core.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.block.entity.BlockEntity;

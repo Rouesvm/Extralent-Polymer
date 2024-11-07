@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.item.custom;
 
-import com.rouesvm.extralent.block.transmitter.entity.TransmitterBlockEntity;
+import com.rouesvm.extralent.block.transport.entity.PipeState;
+import com.rouesvm.extralent.block.transport.entity.TransmitterBlockEntity;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
@@ -67,11 +68,11 @@ public class ConnectorItem extends BasicPolymerItem {
             }
         }
 
-        String output = this.currentBlockEntity.putBlock(pos);
+        PipeState output = this.currentBlockEntity.putBlock(pos);
         switch (output) {
-            case "SUCCESS" -> player.sendMessage(Text.literal("Bound"), true);
-            case "SAME" -> player.sendMessage(Text.literal("Already bound"), true);
-            case "FAR" -> player.sendMessage(Text.literal("Too far"), true);
+            case SUCCESS -> player.sendMessage(Text.literal("Bound"), true);
+            case IDENTICAL -> player.sendMessage(Text.literal("Already bound"), true);
+            case FAR -> player.sendMessage(Text.literal("Too far"), true);
         }
     }
 

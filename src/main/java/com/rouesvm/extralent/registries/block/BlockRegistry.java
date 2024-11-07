@@ -4,7 +4,7 @@ import com.rouesvm.extralent.Main;
 import com.rouesvm.extralent.block.BasicPolymerBlock;
 import com.rouesvm.extralent.block.generator.GeneratorBlock;
 import com.rouesvm.extralent.block.quary.QuaryBlock;
-import com.rouesvm.extralent.block.transmitter.TransmitterBlock;
+import com.rouesvm.extralent.block.transport.TransmitterBlock;
 import com.rouesvm.extralent.item.PolymerBlockItem;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.item.Item;

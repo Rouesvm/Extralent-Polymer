@@ -1,6 +1,5 @@
 package com.rouesvm.extralent.item.custom;
 
-import com.rouesvm.extralent.block.entity.BasicPoweredEntity;
 import com.rouesvm.extralent.entity.InfoText;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import net.minecraft.entity.player.PlayerEntity;

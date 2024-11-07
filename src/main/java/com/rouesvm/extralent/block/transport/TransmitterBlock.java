@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.transmitter;
+package com.rouesvm.extralent.block.transport;
 
 import com.rouesvm.extralent.block.BasicPolymerBlock;
 import com.rouesvm.extralent.interfaces.block.TickableBlockEntity;

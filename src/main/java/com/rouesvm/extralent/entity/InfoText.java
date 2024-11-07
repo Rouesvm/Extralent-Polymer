@@ -1,6 +1,5 @@
 package com.rouesvm.extralent.entity;
 
-import com.rouesvm.extralent.block.entity.BasicPoweredEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;

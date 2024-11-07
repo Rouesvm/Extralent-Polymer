@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.block.generator.entity;
 
-import com.rouesvm.extralent.block.entity.BasicPoweredEntity;
+import com.rouesvm.extralent.block.entity.BasicMachineBlock;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -20,7 +20,7 @@ import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class GeneratorBlockEntity extends BasicPoweredEntity {
+public class GeneratorBlockEntity extends BasicMachineBlock {
     private int progress;
     private int burnTime;
 
