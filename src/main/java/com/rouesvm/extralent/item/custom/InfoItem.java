@@ -43,8 +43,8 @@ public class InfoItem extends BasicPolymerItem {
             var blockEntityResult = world.getBlockEntity(context.getBlockPos());
             if (blockEntityResult instanceof BasicMachineBlockEntity basicPoweredEntity) {
                 if (this.floatingText != null) this.floatingText.setDestroy(true);
-                Direction direction = context.getPlayer().getHorizontalFacing().getOpposite();
-                Vec3d displayPos = context.getBlockPos().toCenterPos().offset(direction, 1.25)
+                Direction direction = context.getSide();
+                Vec3d displayPos = context.getBlockPos().toCenterPos().offset(direction, 1)
                         .add(new Vec3d(0, 0.275, 0));
 
                 if (basicPoweredEntity.infoOnClicked() == null)
