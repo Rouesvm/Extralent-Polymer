@@ -2,6 +2,7 @@ package com.rouesvm.extralent.item.custom;
 
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.PipeState;
+import com.rouesvm.extralent.entity.elements.BlockHighlight;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
@@ -13,9 +14,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.HashMap;
 import java.util.Set;
 
 public class ConnectorItem extends BasicPolymerItem {
+    private HashMap<BlockPos, BlockHighlight> blockHighlights = new HashMap<>();
     private PipeBlockEntity currentBlockEntity;
 
     public ConnectorItem(Settings settings) {
@@ -36,8 +39,10 @@ public class ConnectorItem extends BasicPolymerItem {
                     if (this.currentBlockEntity == pipeBlockEntity) {
                         context.getPlayer().sendMessage(Text.literal("Disconnected"), true);
                         this.currentBlockEntity = null;
+                        this.blockHighlights.forEach((pos, blockHighlight) -> blockHighlight.kill());
+                        this.blockHighlights = new HashMap<>();
                     } else {
-                        sendMessage(context.getPlayer(), context.getBlockPos());
+                        sendMessage(world, context.getPlayer(), context.getBlockPos());
                     }
                     return ActionResult.SUCCESS;
                 }
@@ -49,14 +54,13 @@ public class ConnectorItem extends BasicPolymerItem {
                 context.getPlayer().sendMessage(Text.literal("Connected"), true);
 
                 if (!this.currentBlockEntity.getBlocks().isEmpty()) {
-                    Text text = tableToText(this.currentBlockEntity.getBlocks());
-                    context.getPlayer().sendMessage(Text.literal("Connected to ").append(text));
+                    this.currentBlockEntity.getBlocks().forEach(pos -> this.blockHighlights.put(pos, BlockHighlight.createHighlight(world, pos)));
                 }
 
                 return ActionResult.SUCCESS;
             } else if (blockEntityResult != null) {
                 if (this.currentBlockEntity != null) {
-                    sendMessage(context.getPlayer(), context.getBlockPos());
+                    sendMessage(world, context.getPlayer(), context.getBlockPos());
                     return ActionResult.SUCCESS;
                 }
             }
@@ -64,18 +68,26 @@ public class ConnectorItem extends BasicPolymerItem {
         return ActionResult.PASS;
     }
 
-    private void sendMessage(PlayerEntity player, BlockPos pos) {
+    private void sendMessage(ServerWorld world, PlayerEntity player, BlockPos pos) {
         if (player.isSneaking()) {
             boolean removed = this.currentBlockEntity.removeBlock(pos);
             if (removed) {
                 player.sendMessage(Text.literal("Unbound"), true);
+                BlockHighlight blockHighlight = this.blockHighlights.get(pos);
+                if (blockHighlight != null) {
+                    this.blockHighlights.remove(pos);
+                    blockHighlight.kill();
+                }
                 return;
             }
         }
 
         PipeState output = this.currentBlockEntity.putBlock(pos);
         switch (output) {
-            case SUCCESS -> player.sendMessage(Text.literal("Bound"), true);
+            case SUCCESS -> {
+                player.sendMessage(Text.literal("Bound"), true);
+                this.blockHighlights.put(pos, BlockHighlight.createHighlight(world, pos));
+            }
             case IDENTICAL -> player.sendMessage(Text.literal("Already bound"), true);
             case FAR -> player.sendMessage(Text.literal("Too far"), true);
             case TYPE_ERROR -> player.sendMessage(Text.literal("Wrong type"), true);
