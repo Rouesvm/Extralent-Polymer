@@ -25,7 +25,6 @@ public class ProgressBarRenderer {
     private static final long maxPercentageSize = 20;
 
     public static Text getProgressBar(long energyAmount, long maxEnergy) {
-        System.out.print(energyAmount);
         long percentage = Math.round((float) energyAmount / maxEnergy * maxPercentageSize);
         return Text.literal(getEnergyUnicode(percentage)).setStyle(
                 Style.EMPTY.withFont(Identifier.of("extralent", "energybar"))
