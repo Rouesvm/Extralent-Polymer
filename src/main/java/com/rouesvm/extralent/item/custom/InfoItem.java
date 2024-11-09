@@ -1,7 +1,7 @@
 package com.rouesvm.extralent.item.custom;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
-import com.rouesvm.extralent.entity.InfoText;
+import com.rouesvm.extralent.entity.elements.InfoText;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;

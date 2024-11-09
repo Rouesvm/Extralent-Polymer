@@ -2,6 +2,7 @@ package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.InfestedBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
@@ -10,8 +11,7 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class PipeBlockEntity extends BasicMachineBlockEntity {
     public int ticks;
@@ -82,7 +82,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
-        nbt.putLongArray("blocks", blocks.stream().map(BlockPos::asLong).toList());
+        nbt.putLongArray("blocks", this.blocks.stream().map(BlockPos::asLong).toList());
     }
 
     private void readConnections(NbtCompound nbt) {

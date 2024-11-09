@@ -26,7 +26,7 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     public void tick() {
         if (this.ticks++ % 5 == 0) {
             if (this.energyStorage.getCapacity() <= 0) return;
-            onUpdate();
+            super.onUpdate();
         }
     }
 
