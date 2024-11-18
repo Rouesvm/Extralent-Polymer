@@ -1,8 +1,8 @@
 package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
+import com.rouesvm.extralent.utils.Connection;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.InfestedBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
@@ -15,7 +15,7 @@ import java.util.*;
 
 public class PipeBlockEntity extends BasicMachineBlockEntity {
     public int ticks;
-    public final Set<BlockPos> blocks = new HashSet<>();
+    public final HashSet<Connection> blocks = new HashSet<>();
 
     public PipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -23,32 +23,32 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
 
     public void onUpdate() {
         if (this.blocks.isEmpty()) return;
-        Set<BlockPos> posToRemove = new HashSet<>();
-        this.blocks.forEach(pos -> {
-            if (blockExists(pos))
-                extractBlock(pos);
-            else posToRemove.add(pos);
+        Set<Connection> posToRemove = new HashSet<>();
+        this.blocks.forEach(connection -> {
+            if (blockExists(connection.getPos()))
+                blockLogic(connection.getPos());
+            else posToRemove.add(connection);
         });
         if (!posToRemove.isEmpty()) posToRemove.forEach(this::removeBlock);
     }
 
-    public boolean removeBlock(BlockPos pos) {
-        if (this.blocks.contains(pos)) {
-            this.blocks.remove(pos);
+    public boolean removeBlock(Connection connection) {
+        if (this.blocks.contains(connection)) {
+            this.blocks.remove(connection);
             return true;
         }
         return false;
     }
 
-    public PipeState putBlock(BlockPos pos) {
-        if (this.blocks.contains(pos)) return PipeState.IDENTICAL;
+    public PipeState putBlock(Connection connection) {
+        if (this.blocks.contains(connection)) return PipeState.IDENTICAL;
         if (this.world == null) return PipeState.FAIL;
         if (this.world.isClient) return PipeState.FAIL;
 
         int maxDist = 5;
-        if (pos.isWithinDistance(this.pos, maxDist)) {
-            if (correctBlock(pos)) {
-                this.blocks.add(pos);
+        if (connection.getPos().isWithinDistance(this.pos, maxDist)) {
+            if (correctBlock(connection.getPos())) {
+                this.blocks.add(connection);
                 return PipeState.SUCCESS;
             } else return PipeState.TYPE_ERROR;
         } else return PipeState.FAR;
@@ -65,7 +65,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     }
 
     @ApiStatus.OverrideOnly
-    public void extractBlock(BlockPos blockPos) {
+    public void blockLogic(BlockPos blockPos) {
     }
 
     @ApiStatus.OverrideOnly
@@ -82,19 +82,19 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
-        nbt.putLongArray("blocks", this.blocks.stream().map(BlockPos::asLong).toList());
+        nbt.putLongArray("storedBlocks", this.blocks.stream().map(Connection::asLong).toList());
     }
 
     private void readConnections(NbtCompound nbt) {
-        if(nbt.contains("blocks", NbtElement.LONG_ARRAY_TYPE)) {
-            long[] positions = nbt.getLongArray("blocks");
-            for(long blockPos : positions) {
-                this.blocks.add(BlockPos.fromLong(blockPos));
+        if(nbt.contains("storedBlocks", NbtElement.LONG_ARRAY_TYPE)) {
+            long[] positions = nbt.getLongArray("storedBlocks");
+            for (long connection : positions) {
+                this.blocks.add(Connection.fromLong(connection));
             }
         }
     }
 
-    public Set<BlockPos> getBlocks() {
+    public Set<Connection> getBlocks() {
         return this.blocks;
     }
 }
