@@ -42,14 +42,12 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void extractBlock(BlockPos blockPos) {
+    public void blockLogic(BlockPos blockPos) {
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, blockPos, null);
         if (storage != null) {
             var blockState = this.world.getBlockState(blockPos);
-            if (blockState != null && blockState.getBlock() instanceof TransporterBlock) {
-                insertItem(storage);
-                return;
-            }
+            if (blockState != null && blockState.getBlock() instanceof TransporterBlock)
+                if (insertItem(storage)) return;
             if (storage.supportsInsertion())
                 if (insertItem(storage)) return;
             if (storage.supportsExtraction())

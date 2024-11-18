@@ -37,7 +37,7 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void extractBlock(BlockPos blockPos) {
+    public void blockLogic(BlockPos blockPos) {
         EnergyStorage storage = EnergyStorage.SIDED.find(this.world, blockPos, null);
         if (storage != null && storage.supportsInsertion()) {
             try (Transaction transaction = Transaction.openOuter()) {
