@@ -4,6 +4,7 @@ import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.PipeState;
 import com.rouesvm.extralent.entity.elements.BlockHighlight;
 import com.rouesvm.extralent.item.BasicPolymerItem;
+import com.rouesvm.extralent.utils.Connection;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.player.PlayerEntity;
@@ -48,13 +49,13 @@ public class ConnectorItem extends BasicPolymerItem {
                 }
 
                 pipeBlockEntity.onUpdate();
-
                 this.currentBlockEntity = pipeBlockEntity;
+
                 context.getStack().set(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT);
                 context.getPlayer().sendMessage(Text.literal("Connected"), true);
 
                 if (!this.currentBlockEntity.getBlocks().isEmpty()) {
-                    this.currentBlockEntity.getBlocks().forEach(pos -> this.blockHighlights.put(pos, BlockHighlight.createHighlight(world, pos)));
+                    this.currentBlockEntity.getBlocks().forEach(pos -> this.blockHighlights.put(pos.getPos(), BlockHighlight.createHighlight(world, pos.getPos())));
                 }
 
                 return ActionResult.SUCCESS;
@@ -70,7 +71,7 @@ public class ConnectorItem extends BasicPolymerItem {
 
     private void sendMessage(ServerWorld world, PlayerEntity player, BlockPos pos) {
         if (player.isSneaking()) {
-            boolean removed = this.currentBlockEntity.removeBlock(pos);
+            boolean removed = this.currentBlockEntity.removeBlock(Connection.of(pos, 0));
             if (removed) {
                 player.sendMessage(Text.literal("Unbound"), true);
                 BlockHighlight blockHighlight = this.blockHighlights.get(pos);
@@ -82,10 +83,12 @@ public class ConnectorItem extends BasicPolymerItem {
             }
         }
 
-        PipeState output = this.currentBlockEntity.putBlock(pos);
+        PipeState output = this.currentBlockEntity.putBlock(Connection.of(pos, 0));
         switch (output) {
             case SUCCESS -> {
                 player.sendMessage(Text.literal("Bound"), true);
+                if (this.blockHighlights.get(pos) != null)
+                    this.blockHighlights.get(pos).kill();
                 this.blockHighlights.put(pos, BlockHighlight.createHighlight(world, pos));
             }
             case IDENTICAL -> player.sendMessage(Text.literal("Already bound"), true);
