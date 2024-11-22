@@ -3,22 +3,23 @@ package com.rouesvm.extralent.item;
 import com.rouesvm.extralent.Main;
 import eu.pb4.polymer.core.api.item.PolymerItem;
 import eu.pb4.polymer.core.api.utils.PolymerKeepModel;
-import eu.pb4.polymer.resourcepack.api.PolymerModelData;
-import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Identifier;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 public class BasicPolymerItem extends Item implements PolymerItem, PolymerKeepModel {
     private final String name;
-    private final PolymerModelData model;
+    private final Item vanillaItem;
 
     public BasicPolymerItem(String name, Settings settings, Item vanillaItem) {
-        super(settings);
+        super(settings
+                .registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(Main.MOD_ID, name)))
+        );
         this.name = name;
-        this.model = PolymerResourcePackUtils.requestModel(vanillaItem,
-                Main.of("item/" + name));
+        this.vanillaItem = vanillaItem;
     }
 
     public String getItemName() {
@@ -26,12 +27,7 @@ public class BasicPolymerItem extends Item implements PolymerItem, PolymerKeepMo
     }
 
     @Override
-    public Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
-        return this.model.item();
-    }
-
-    @Override
-    public int getPolymerCustomModelData(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
-        return this.model.value();
+    public Item getPolymerItem(ItemStack itemStack, PacketContext context) {
+        return this.vanillaItem;
     }
 }

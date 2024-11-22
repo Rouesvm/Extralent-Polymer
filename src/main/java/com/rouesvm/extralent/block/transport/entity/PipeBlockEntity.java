@@ -64,6 +64,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         return false;
     }
 
+    // Override
     @ApiStatus.OverrideOnly
     public void blockLogic(BlockPos blockPos) {
     }

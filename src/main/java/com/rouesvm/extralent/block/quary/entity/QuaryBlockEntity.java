@@ -9,8 +9,8 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
@@ -54,7 +54,7 @@ public class QuaryBlockEntity extends BasicMachineBlockEntity {
             }
 
             List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(
-                    new LootContextParameterSet.Builder((ServerWorld) this.world)
+                    new LootWorldContext.Builder((ServerWorld) this.world)
                             .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
                             .add(LootContextParameters.ORIGIN, this.miningPos.toCenterPos())
                             .addOptional(LootContextParameters.BLOCK_ENTITY, this)));

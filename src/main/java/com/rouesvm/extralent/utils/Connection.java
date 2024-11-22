@@ -8,7 +8,7 @@ public class Connection {
     private final BlockPos pos;
     private final int weight;
 
-    private Connection(BlockPos pos, int weight) {
+    protected Connection(BlockPos pos, int weight) {
         this.pos = pos;
         this.weight = weight;
     }

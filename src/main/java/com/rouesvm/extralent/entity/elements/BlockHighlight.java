@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 public class BlockHighlight extends ElementHolder {
     private final InvisibleCube markerElement;
 
-    public BlockHighlight(BlockPos position) {
+    private BlockHighlight(BlockPos position) {
         this.markerElement = new InvisibleCube(position.toBottomCenterPos());
         this.markerElement.setGlowing(true);
         this.markerElement.setInvisible(true);

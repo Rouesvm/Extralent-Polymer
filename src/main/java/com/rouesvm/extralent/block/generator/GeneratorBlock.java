@@ -1,20 +1,13 @@
 package com.rouesvm.extralent.block.generator;
 
 import com.rouesvm.extralent.block.BasicPolymerBlock;
-import com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity;
-import com.rouesvm.extralent.interfaces.block.TickableBlockEntity;
+import com.rouesvm.extralent.block.TickableBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;

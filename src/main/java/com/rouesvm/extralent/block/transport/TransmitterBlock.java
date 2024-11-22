@@ -1,7 +1,7 @@
 package com.rouesvm.extralent.block.transport;
 
 import com.rouesvm.extralent.block.BasicPolymerBlock;
-import com.rouesvm.extralent.interfaces.block.TickableBlockEntity;
+import com.rouesvm.extralent.block.TickableBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;

@@ -2,17 +2,13 @@ package com.rouesvm.extralent.block.generator.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -73,8 +69,8 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         ItemStack fuelStack = this.inventory.getStack(0);
         if (this.progress == 0 && !fuelStack.isEmpty()) {
             Item fuelItem = fuelStack.getItem();
-            var burning = FuelRegistry.INSTANCE.get(fuelItem);
-            if (burning != null) {
+            var burning = 1;
+            if (burning != 0) {
                 fuelStack.decrement(1);
                 this.inventory.setStack(0, fuelStack);
                 this.burnTime = burning;

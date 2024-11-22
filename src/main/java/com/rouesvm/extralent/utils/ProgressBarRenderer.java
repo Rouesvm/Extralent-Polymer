@@ -80,7 +80,7 @@ public class ProgressBarRenderer {
         }
     }
 
-    public enum DRAW {
+    private enum DRAW {
         FILLED,
         HALF,
         EMPTY

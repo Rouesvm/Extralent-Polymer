@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.interfaces.block;
+package com.rouesvm.extralent.block;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;

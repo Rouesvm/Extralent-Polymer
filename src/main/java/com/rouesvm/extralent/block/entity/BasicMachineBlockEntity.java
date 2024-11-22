@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.block.entity;
 
-import com.rouesvm.extralent.interfaces.block.TickableBlockEntity;
+import com.rouesvm.extralent.block.TickableBlockEntity;
 import com.rouesvm.extralent.utils.ProgressBarRenderer;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
