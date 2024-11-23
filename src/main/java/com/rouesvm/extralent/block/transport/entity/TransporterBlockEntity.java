@@ -2,6 +2,7 @@ package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.block.transport.TransporterBlock;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
+import com.rouesvm.extralent.utils.Connection;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -10,6 +11,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.collection.Weight;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
@@ -42,14 +44,15 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void blockLogic(BlockPos blockPos) {
-        Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, blockPos, null);
+    public void blockLogic(Connection connection) {
+        Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, connection.getPos(), null);
         if (storage != null) {
-            var blockState = this.world.getBlockState(blockPos);
+            var blockState = this.world.getBlockState(connection.getPos());
             if (blockState != null && blockState.getBlock() instanceof TransporterBlock)
                 if (insertItem(storage)) return;
             if (storage.supportsInsertion())
-                if (insertItem(storage)) return;
+                if (connection.getWeight() > 0)
+                    if (insertItem(storage)) return;
             if (storage.supportsExtraction())
                 extractItem(storage);
         }

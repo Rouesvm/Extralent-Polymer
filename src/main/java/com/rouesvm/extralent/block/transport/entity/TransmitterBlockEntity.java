@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
+import com.rouesvm.extralent.utils.Connection;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -37,8 +38,8 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void blockLogic(BlockPos blockPos) {
-        EnergyStorage storage = EnergyStorage.SIDED.find(this.world, blockPos, null);
+    public void blockLogic(Connection connection) {
+        EnergyStorage storage = EnergyStorage.SIDED.find(this.world, connection.getPos(), null);
         if (storage != null && storage.supportsInsertion()) {
             try (Transaction transaction = Transaction.openOuter()) {
                 long extracted = this.energyStorage.extract(energyStorage.maxExtract, transaction);

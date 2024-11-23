@@ -3,6 +3,7 @@ package com.rouesvm.extralent.entity.elements;
 import com.rouesvm.extralent.entity.InvisibleCube;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
+import eu.pb4.polymer.virtualentity.api.tracker.EntityTrackedData;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;

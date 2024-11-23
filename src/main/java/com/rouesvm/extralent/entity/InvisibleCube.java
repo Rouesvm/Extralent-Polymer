@@ -7,6 +7,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.Vec3d;
 
 public class InvisibleCube extends GenericEntityElement {
+
     public InvisibleCube(Vec3d pos) {
         this.setOverridePos(pos);
         this.dataTracker.set(EntityTrackedData.SILENT, true);

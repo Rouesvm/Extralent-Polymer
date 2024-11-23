@@ -9,6 +9,7 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.util.collection.Weight;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -27,7 +28,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         Set<Connection> posToRemove = new HashSet<>();
         this.blocks.forEach(connection -> {
             if (blockExists(connection.getPos()))
-                blockLogic(connection.getPos());
+                blockLogic(connection);
             else posToRemove.add(connection);
         });
         if (!posToRemove.isEmpty()) posToRemove.forEach(this::removeBlock);
@@ -65,9 +66,8 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         return false;
     }
 
-    // Override
     @ApiStatus.OverrideOnly
-    public void blockLogic(BlockPos blockPos) {
+    public void blockLogic(Connection connection) {
     }
 
     @ApiStatus.OverrideOnly

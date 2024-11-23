@@ -1,4 +1,20 @@
 {
   "item.extralent.connector" : "Connector",
-  "item.extralent.extralent_group": "Extralent"
+  "item.extralent.viewer" : "Viewer",
+
+  "item.extralent.transporter" : "Transporter",
+  "item.extralent.transmitter" : "Transmitter",
+  "item.extralent.generator" : "Generator",
+  "item.extralent.quarry" : "Quarry",
+
+  "item.extralent.extralent_group": "Extralent",
+
+  "info.viewer.disconnected": "Disconnected",
+  "info.viewer.connected": "Connected",
+  "info.viewer.unbound": "Unbound",
+  "info.viewer.bound": "Bound",
+  "info.viewer.type_same_bound": "Already bound",
+  "info.viewer.far_away": "Too far",
+  "info.viewer.type_wrong": "Wrong type",
+  "info.viewer.weight_changed": "Priority is"
 }
