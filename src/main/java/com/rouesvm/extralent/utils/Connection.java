@@ -1,7 +1,11 @@
 package com.rouesvm.extralent.utils;
 
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.HashSet;
 import java.util.Objects;
 
 public class Connection {
@@ -25,33 +29,28 @@ public class Connection {
         return weight;
     }
 
-    public long asLong() {
-        int POS_BITS = 60;
-        int WEIGHT_BITS = 4;
+    public static void writeNbt(NbtCompound nbt, HashSet<Connection> connections, RegistryWrapper.WrapperLookup registries) {
+        NbtList nbtList = new NbtList();
 
-        long posMask = (1L << POS_BITS) - 1;
-        long weightMask = (1L << WEIGHT_BITS) - 1;
+        connections.forEach(connection -> {
+            NbtCompound nbtCompound = new NbtCompound();
+            nbtCompound.putInt("weight", connection.getWeight());
+            nbtCompound.putLong("pos", connection.getPos().asLong());
+            nbtList.add(nbtCompound);
+        });
 
-        if ((this.getPos().asLong() & ~posMask) != 0 || (this.getWeight() & ~weightMask) != 0) {
-            return 0;
+        if (!nbtList.isEmpty()) nbt.put("storedBlocks", nbtList);
+    }
+
+    public static void readNbt(NbtCompound nbt, HashSet<Connection> connections, RegistryWrapper.WrapperLookup registries) {
+        NbtList nbtList = nbt.getList("storedBlocks", 10);
+
+        for(int i = 0; i < nbtList.size(); ++i) {
+            NbtCompound nbtCompound = nbtList.getCompound(i);
+            long l = nbtCompound.getLong("pos");
+            int j = nbtCompound.getInt("weight");
+            connections.add(of(BlockPos.fromLong(l), j));
         }
-
-        return (this.getPos().asLong() << WEIGHT_BITS) | (this.getWeight() & weightMask);
-    }
-
-    public static Connection fromLong(long packed) {
-        return Connection.of(BlockPos.fromLong(extractPos(packed)), extractWeight(packed));
-    }
-
-    private static long extractPos(long combined) {
-        int WEIGHT_BITS = 4;
-        return combined >>> WEIGHT_BITS;
-    }
-
-    private static int extractWeight(long combined) {
-        int WEIGHT_BITS = 4;
-        long weightMask = (1L << WEIGHT_BITS) - 1;
-        return (int)(combined & weightMask);
     }
 
     @Override

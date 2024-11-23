@@ -15,7 +15,7 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 public class PolymerBlockItem extends BlockItem implements PolymerItem, PolymerKeepModel {
     public PolymerBlockItem(Settings settings, Block block, String name) {
-        super(block, settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(Main.MOD_ID, name))));
+        super(block, settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Main.of(name))));
     }
 
     @Override

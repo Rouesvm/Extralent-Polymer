@@ -5,6 +5,7 @@ import com.rouesvm.extralent.utils.Connection;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.inventory.Inventories;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
@@ -77,22 +78,13 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        readConnections(nbt);
+        Connection.readNbt(nbt, this.blocks, registryLookup);
     }
 
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
-        nbt.putLongArray("storedBlocks", this.blocks.stream().map(Connection::asLong).toList());
-    }
-
-    private void readConnections(NbtCompound nbt) {
-        if(nbt.contains("storedBlocks", NbtElement.LONG_ARRAY_TYPE)) {
-            long[] positions = nbt.getLongArray("storedBlocks");
-            for (long connection : positions) {
-                this.blocks.add(Connection.fromLong(connection));
-            }
-        }
+        Connection.writeNbt(nbt, this.blocks, registryLookup);
     }
 
     public Set<Connection> getBlocks() {

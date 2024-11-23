@@ -1,3 +1,4 @@
 {
-  "item.extralent.connector" : "Connector"
+  "item.extralent.connector" : "Connector",
+  "item.extralent.extralent_group": "Extralent"
 }
