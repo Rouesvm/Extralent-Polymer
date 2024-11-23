@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.quary.entity;
+package com.rouesvm.extralent.block.quarry.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
@@ -23,12 +23,12 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuaryBlockEntity extends BasicMachineBlockEntity {
+public class QuarryBlockEntity extends BasicMachineBlockEntity {
     private int progress;
     private BlockPos miningPos = this.pos.down();
 
-    public QuaryBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityRegistry.QUARY_BLOCK_ENTITY, pos, state);
+    public QuarryBlockEntity(BlockPos pos, BlockState state) {
+        super(BlockEntityRegistry.QUARRY_BLOCK_ENTITY, pos, state);
     }
 
     @Override

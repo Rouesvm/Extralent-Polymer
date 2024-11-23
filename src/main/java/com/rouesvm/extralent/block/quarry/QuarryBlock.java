@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.quary;
+package com.rouesvm.extralent.block.quarry;
 
 import com.rouesvm.extralent.block.BasicPolymerBlock;
 import com.rouesvm.extralent.block.TickableBlockEntity;
@@ -12,14 +12,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class QuaryBlock extends BasicPolymerBlock implements BlockEntityProvider {
-    public QuaryBlock(Settings settings) {
+public class QuarryBlock extends BasicPolymerBlock implements BlockEntityProvider {
+    public QuarryBlock(Settings settings) {
         super("quary", settings);
     }
 
     @Override
     public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return BlockEntityRegistry.QUARY_BLOCK_ENTITY.instantiate(pos, state);
+        return BlockEntityRegistry.QUARRY_BLOCK_ENTITY.instantiate(pos, state);
     }
 
     @Override

@@ -17,9 +17,7 @@ public class BasicPolymerBlock extends Block implements PolymerTexturedBlock {
     private final BlockState polymerBlockState;
 
     public BasicPolymerBlock(String name, Settings settings) {
-        super(settings
-                .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(Main.MOD_ID, name)))
-        );
+        super(settings.registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(Main.MOD_ID, name))));
         this.name = name;
         this.polymerBlockState = PolymerBlockResourceUtils.requestBlock(BlockModelType.FULL_BLOCK,
                 PolymerBlockModel.of(Main.of("block/" + name)));

@@ -15,9 +15,7 @@ public class BasicPolymerItem extends Item implements PolymerItem, PolymerKeepMo
     private final Item vanillaItem;
 
     public BasicPolymerItem(String name, Settings settings, Item vanillaItem) {
-        super(settings
-                .registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(Main.MOD_ID, name)))
-        );
+        super(settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(Main.MOD_ID, name))));
         this.name = name;
         this.vanillaItem = vanillaItem;
     }
