@@ -32,7 +32,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
 
     @Override
     public void tick() {
-        if (this.ticks++ % 5 == 0) {
+        if (this.ticks++ % 2 == 0) {
             super.onUpdate();
         }
     }
@@ -44,18 +44,22 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void blockLogic(Connection connection) {
+    public boolean blockLogic(Connection connection) {
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, connection.getPos(), null);
         if (storage != null) {
             var blockState = this.world.getBlockState(connection.getPos());
             if (blockState != null && blockState.getBlock() instanceof TransporterBlock)
-                if (insertItem(storage)) return;
+                if (insertItem(storage)) return true;
+
             if (storage.supportsInsertion())
-                if (connection.getWeight() > 0)
-                    if (insertItem(storage)) return;
+                if (insertItem(storage)) return true;
+            else if (connection.getWeight() == 1 && storage.supportsInsertion())
+                return insertItem(storage);
+
             if (storage.supportsExtraction())
-                extractItem(storage);
+                return extractItem(storage);
         }
+        return false;
     }
 
     public boolean insertItem(Storage<ItemVariant> storage) {

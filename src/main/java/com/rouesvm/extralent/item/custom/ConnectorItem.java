@@ -8,6 +8,7 @@ import com.rouesvm.extralent.utils.Connection;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -85,7 +86,7 @@ public class ConnectorItem extends BasicPolymerItem {
                         this.blockHighlights.forEach((pos, blockHighlight) -> blockHighlight.kill());
                         this.blockHighlights = new HashMap<>();
                     } else {
-                        sendMessage(world, context.getPlayer(), context.getBlockPos());
+                        sendMessage(world, context.getPlayer(), Connection.of(context.getBlockPos(), this.weight));
                     }
                     return ActionResult.SUCCESS;
                 }
@@ -97,13 +98,16 @@ public class ConnectorItem extends BasicPolymerItem {
                 context.getPlayer().sendMessage(Text.translatable("info.viewer.connected"), true);
 
                 if (!this.currentBlockEntity.getBlocks().isEmpty()) {
-                    this.currentBlockEntity.getBlocks().forEach(pos -> this.blockHighlights.put(pos.getPos(), BlockHighlight.createHighlight(world, pos.getPos())));
+                    this.currentBlockEntity.getBlocks().forEach(pos ->
+                            this.blockHighlights.put(pos.getPos(),
+                            BlockHighlight.createHighlight(world, pos.getPos()))
+                    );
                 }
 
                 return ActionResult.SUCCESS;
             } else if (blockEntityResult != null) {
                 if (this.currentBlockEntity != null) {
-                    sendMessage(world, context.getPlayer(), context.getBlockPos());
+                    sendMessage(world, context.getPlayer(), Connection.of(context.getBlockPos(), this.weight));
                     return ActionResult.SUCCESS;
                 }
             }
@@ -111,27 +115,30 @@ public class ConnectorItem extends BasicPolymerItem {
         return ActionResult.PASS;
     }
 
-    private void sendMessage(ServerWorld world, PlayerEntity player, BlockPos pos) {
+    private void sendMessage(ServerWorld world, PlayerEntity player, Connection connection) {
         if (player.isSneaking()) {
-            boolean removed = this.currentBlockEntity.removeBlock(Connection.of(pos, 0));
+            boolean removed = this.currentBlockEntity.removeBlock(connection);
             if (removed) {
                 player.sendMessage(Text.translatable("info.viewer.unbound"), true);
-                BlockHighlight blockHighlight = this.blockHighlights.get(pos);
+                BlockHighlight blockHighlight = this.blockHighlights.get(connection.getPos());
                 if (blockHighlight != null) {
-                    this.blockHighlights.remove(pos);
+                    this.blockHighlights.remove(connection.getPos());
                     blockHighlight.kill();
                 }
                 return;
             }
         }
 
-        PipeState output = this.currentBlockEntity.putBlock(Connection.of(pos, 0));
+        PipeState output = this.currentBlockEntity.putBlock(connection);
         switch (output) {
             case SUCCESS -> {
                 player.sendMessage(Text.translatable("info.viewer.bound"), true);
-                if (this.blockHighlights.get(pos) != null)
-                    this.blockHighlights.get(pos).kill();
-                this.blockHighlights.put(pos, BlockHighlight.createHighlight(world, pos));
+                if (this.blockHighlights.get(connection.getPos()) != null)
+                    this.blockHighlights.get(connection.getPos()).kill();
+                this.blockHighlights.put(
+                        connection.getPos(),
+                        BlockHighlight.createHighlight(world, connection.getPos())
+                );
             }
             case IDENTICAL -> player.sendMessage(Text.translatable("info.viewer.type_same_bound"), true);
             case FAR -> player.sendMessage(Text.translatable("info.viewer.far_away"), true);

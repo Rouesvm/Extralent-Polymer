@@ -5,11 +5,8 @@ import com.rouesvm.extralent.utils.Connection;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.collection.Weight;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -23,34 +20,55 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         super(type, pos, state);
     }
 
+    private LinkedHashSet<Connection> orderedConnections = new LinkedHashSet<>();
+
     public void onUpdate() {
-        if (this.blocks.isEmpty()) return;
+        if (blocks.isEmpty()) return;
+
+        if (!orderedConnections.equals(blocks)) {
+            orderedConnections = new LinkedHashSet<>(blocks);
+        }
+
         Set<Connection> posToRemove = new HashSet<>();
-        this.blocks.forEach(connection -> {
-            if (blockExists(connection.getPos()))
-                blockLogic(connection);
-            else posToRemove.add(connection);
-        });
-        if (!posToRemove.isEmpty()) posToRemove.forEach(this::removeBlock);
+        Iterator<Connection> iterator = orderedConnections.iterator();
+
+        while (iterator.hasNext()) {
+            Connection connection = iterator.next();
+
+            if (blockExists(connection.getPos())) {
+                if (blockLogic(connection)) {
+                    iterator.remove();
+                    orderedConnections.add(connection);
+                    break;
+                }
+            } else posToRemove.add(connection);
+        }
+
+        if (!posToRemove.isEmpty()) {
+            blocks.removeAll(posToRemove);
+            orderedConnections.removeAll(posToRemove);
+        }
     }
 
     public boolean removeBlock(Connection connection) {
-        if (this.blocks.contains(connection)) {
-            this.blocks.remove(connection);
+        if (blocks.contains(connection)) {
+            blocks.remove(connection);
+            orderedConnections = new LinkedHashSet<>(blocks);
             return true;
         }
         return false;
     }
 
     public PipeState putBlock(Connection connection) {
-        if (this.blocks.contains(connection)) return PipeState.IDENTICAL;
+        if (blocks.contains(connection)) return PipeState.IDENTICAL;
         if (this.world == null) return PipeState.FAIL;
         if (this.world.isClient) return PipeState.FAIL;
 
         int maxDist = 5;
         if (connection.getPos().isWithinDistance(this.pos, maxDist)) {
             if (correctBlock(connection.getPos())) {
-                this.blocks.add(connection);
+                blocks.add(connection);
+                orderedConnections = new LinkedHashSet<>(blocks);
                 return PipeState.SUCCESS;
             } else return PipeState.TYPE_ERROR;
         } else return PipeState.FAR;
@@ -67,7 +85,8 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     }
 
     @ApiStatus.OverrideOnly
-    public void blockLogic(Connection connection) {
+    public boolean blockLogic(Connection connection) {
+        return true;
     }
 
     @ApiStatus.OverrideOnly
@@ -88,6 +107,6 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     }
 
     public Set<Connection> getBlocks() {
-        return this.blocks;
+        return blocks;
     }
 }

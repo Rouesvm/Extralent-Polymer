@@ -25,8 +25,8 @@ public class InfoText extends ElementHolder {
         this.display = new TextDisplayElement(machineBlockEntity.infoOnClicked());
         this.display.setViewRange(0.2f);
         this.display.setShadow(false);
-        this.display.setBackground(0);
-        this.display.setBrightness(new Brightness(15, 15));
+        this.display.setBackground(5);
+        this.display.setBrightness(new Brightness(20, 20));
         this.display.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
         this.display.setScale(new Vector3f(0.5F));
         this.display.setOverridePos(pos);

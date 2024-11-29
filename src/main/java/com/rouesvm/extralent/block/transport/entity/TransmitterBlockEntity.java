@@ -25,7 +25,7 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
 
     @Override
     public void tick() {
-        if (this.ticks++ % 5 == 0) {
+        if (this.ticks++ % 2 == 0) {
             if (this.energyStorage.getCapacity() <= 0) return;
             super.onUpdate();
         }
@@ -38,7 +38,7 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void blockLogic(Connection connection) {
+    public boolean blockLogic(Connection connection) {
         EnergyStorage storage = EnergyStorage.SIDED.find(this.world, connection.getPos(), null);
         if (storage != null && storage.supportsInsertion()) {
             try (Transaction transaction = Transaction.openOuter()) {
@@ -47,7 +47,10 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
 
                 this.energyStorage.amount += extracted - inserted;
                 transaction.commit();
+
+                return true;
             }
         }
+        return false;
     }
 }
