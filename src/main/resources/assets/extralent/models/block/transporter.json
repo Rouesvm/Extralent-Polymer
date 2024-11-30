@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_column",
+  "textures": {
+    "end": "extralent:block/transporter_all",
+    "side": "extralent:block/transporter_all"
+  }
+}
