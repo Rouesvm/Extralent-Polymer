@@ -53,9 +53,7 @@ public class ConnectorItem extends BasicPolymerItem {
                     if (compound != null) this.weight = compound.getInt("weight");
                 }
 
-                if (this.weight == 1)
-                    this.weight = 0;
-                else this.weight = 1;
+                this.weight = this.weight == 1 ? 1 : 0;
 
                 user.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(this.weight)), true);
 

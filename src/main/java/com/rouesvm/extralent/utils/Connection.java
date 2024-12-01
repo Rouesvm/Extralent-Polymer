@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class Connection {
     private final BlockPos pos;
-    private final int weight;
+    private int weight;
 
     protected Connection(BlockPos pos, int weight) {
         this.pos = pos;
@@ -27,6 +27,10 @@ public class Connection {
 
     public int getWeight() {
         return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 
     public static void writeNbt(NbtCompound nbt, HashSet<Connection> connections, RegistryWrapper.WrapperLookup registries) {

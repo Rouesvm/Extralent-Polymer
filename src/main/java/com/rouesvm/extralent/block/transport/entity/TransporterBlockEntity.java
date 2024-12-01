@@ -47,15 +47,8 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     public boolean blockLogic(Connection connection) {
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, connection.getPos(), null);
         if (storage != null) {
-            var blockState = this.world.getBlockState(connection.getPos());
-            if (blockState != null && blockState.getBlock() instanceof TransporterBlock)
-                if (insertItem(storage)) return true;
-
-            if (storage.supportsInsertion())
-                if (insertItem(storage)) return true;
-            else if (connection.getWeight() == 1 && storage.supportsInsertion())
+            if (connection.getWeight() == 1 && storage.supportsInsertion())
                 return insertItem(storage);
-
             if (storage.supportsExtraction())
                 return extractItem(storage);
         }
