@@ -8,7 +8,6 @@ import com.rouesvm.extralent.utils.Connection;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -16,6 +15,8 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -28,7 +29,9 @@ import java.util.Objects;
 
 public class ConnectorItem extends BasicPolymerItem {
     private HashMap<BlockPos, BlockHighlight> blockHighlights = new HashMap<>();
+
     private PipeBlockEntity currentBlockEntity;
+    private BlockHighlight blockEntityHighlight;
 
     private int weight = 0;
 
@@ -53,7 +56,8 @@ public class ConnectorItem extends BasicPolymerItem {
                     if (compound != null) this.weight = compound.getInt("weight");
                 }
 
-                this.weight = this.weight == 1 ? 1 : 0;
+                this.weight = this.weight == 1 ? 0 : 1;
+                playSoundChanged(user, 2f);
 
                 user.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(this.weight)), true);
 
@@ -80,6 +84,9 @@ public class ConnectorItem extends BasicPolymerItem {
 
                     if (this.currentBlockEntity == pipeBlockEntity) {
                         context.getPlayer().sendMessage(Text.translatable("info.viewer.disconnected"), true);
+                        playSoundConnection(context.getPlayer(), 5f);
+                        blockEntityHighlight.kill();
+
                         this.currentBlockEntity = null;
                         this.blockHighlights.forEach((pos, blockHighlight) -> blockHighlight.kill());
                         this.blockHighlights = new HashMap<>();
@@ -95,10 +102,13 @@ public class ConnectorItem extends BasicPolymerItem {
                 context.getStack().set(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT);
                 context.getPlayer().sendMessage(Text.translatable("info.viewer.connected"), true);
 
+                playSoundConnection(context.getPlayer(), 3f);
+                blockEntityHighlight = BlockHighlight.createHighlight(world,
+                        Connection.of(currentBlockEntity.getPos(), 10));
+
                 if (!this.currentBlockEntity.getBlocks().isEmpty()) {
-                    this.currentBlockEntity.getBlocks().forEach(pos ->
-                            this.blockHighlights.put(pos.getPos(),
-                            BlockHighlight.createHighlight(world, pos.getPos()))
+                    this.currentBlockEntity.getBlocks().forEach(connection -> this.blockHighlights.put(connection.getPos(),
+                            BlockHighlight.createHighlight(world, connection))
                     );
                 }
 
@@ -118,6 +128,7 @@ public class ConnectorItem extends BasicPolymerItem {
             boolean removed = this.currentBlockEntity.removeBlock(connection);
             if (removed) {
                 player.sendMessage(Text.translatable("info.viewer.unbound"), true);
+                playSound(player, -2f);
                 BlockHighlight blockHighlight = this.blockHighlights.get(connection.getPos());
                 if (blockHighlight != null) {
                     this.blockHighlights.remove(connection.getPos());
@@ -131,16 +142,28 @@ public class ConnectorItem extends BasicPolymerItem {
         switch (output) {
             case SUCCESS -> {
                 player.sendMessage(Text.translatable("info.viewer.bound"), true);
+                playSound(player, 2f);
                 if (this.blockHighlights.get(connection.getPos()) != null)
                     this.blockHighlights.get(connection.getPos()).kill();
-                this.blockHighlights.put(
-                        connection.getPos(),
-                        BlockHighlight.createHighlight(world, connection.getPos())
+                this.blockHighlights.put(connection.getPos(),
+                        BlockHighlight.createHighlight(world, connection)
                 );
             }
             case IDENTICAL -> player.sendMessage(Text.translatable("info.viewer.type_same_bound"), true);
             case FAR -> player.sendMessage(Text.translatable("info.viewer.far_away"), true);
             case TYPE_ERROR -> player.sendMessage(Text.translatable("info.viewer.type_wrong"), true);
         }
+    }
+
+    private void playSound(PlayerEntity player, float pitch) {
+        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
+    }
+
+    private void playSoundConnection(PlayerEntity player, float pitch) {
+        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_SNARE.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
+    }
+
+    private void playSoundChanged(PlayerEntity player, float pitch) {
+        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_BANJO.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
     }
 }

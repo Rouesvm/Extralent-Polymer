@@ -1,9 +1,12 @@
 package com.rouesvm.extralent.entity.elements;
 
+import com.rouesvm.extralent.utils.Connection;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.MarkerElement;
+import net.minecraft.block.Block;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -15,12 +18,28 @@ public class BlockHighlight extends ElementHolder {
     private final BlockPos position;
     private final MarkerElement markerElement;
 
+    private final SimpleParticleType particleTypes;
+
     private int ticks = 40;
     private int randomInt = 0;
 
     private BlockHighlight(BlockPos position) {
+        this.particleTypes = ParticleTypes.SCRAPE;
         this.markerElement = new MarkerElement();
         this.position = position;
+        this.addElement(markerElement);
+    }
+
+    private BlockHighlight(Connection connection) {
+        this.markerElement = new MarkerElement();
+        this.position = connection.getPos();
+
+        if (connection.getWeight() == 0) {
+            this.particleTypes = ParticleTypes.SCRAPE;
+        } else if (connection.getWeight() == 10) {
+            this.particleTypes = ParticleTypes.ELECTRIC_SPARK;
+        } else this.particleTypes = ParticleTypes.WAX_ON;
+
         this.addElement(markerElement);
     }
 
@@ -56,7 +75,7 @@ public class BlockHighlight extends ElementHolder {
             double y = start.getY() + i * dy;
             double z = start.getZ() + i * dz;
 
-            world.spawnParticles(ParticleTypes.SCRAPE, x, y, z, 0, 0, 0, 0, 5);
+            world.spawnParticles(particleTypes, x, y, z, 0, 0, 0, 0, 5);
         }
     }
 
@@ -83,6 +102,13 @@ public class BlockHighlight extends ElementHolder {
         BlockHighlight model = new BlockHighlight(position);
 
         ChunkAttachment.ofTicking(model, world, position);
+        return model;
+    }
+
+    public static BlockHighlight createHighlight(ServerWorld world, Connection connection) {
+        BlockHighlight model = new BlockHighlight(connection);
+
+        ChunkAttachment.ofTicking(model, world, connection.getPos());
         return model;
     }
 }

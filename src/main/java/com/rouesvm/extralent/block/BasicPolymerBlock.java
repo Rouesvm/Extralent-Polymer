@@ -7,6 +7,7 @@ import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItem;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
@@ -24,7 +25,7 @@ public class BasicPolymerBlock extends Block implements PolymerTexturedBlock {
     }
 
     public String getBlockName() {
-        return this.name;
+        return name;
     }
 
     @Override
