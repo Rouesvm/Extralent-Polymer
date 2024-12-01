@@ -14,6 +14,9 @@
 
   "environment": "*",
   "entrypoints": {
+    "fabric-datagen": [
+      "com.rouesvm.extralent.datagen.ExtralentDataGenerator"
+    ],
     "main": [
       "com.rouesvm.extralent.Main"
     ]
