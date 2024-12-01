@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.item;
 
-import com.rouesvm.extralent.Main;
+import com.rouesvm.extralent.Extralent;
 import eu.pb4.polymer.core.api.item.PolymerItem;
 import eu.pb4.polymer.core.api.utils.PolymerKeepModel;
 import net.minecraft.block.Block;
@@ -14,7 +14,7 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 public class PolymerBlockItem extends BlockItem implements PolymerItem, PolymerKeepModel {
     public PolymerBlockItem(Settings settings, Block block, String name) {
-        super(block, settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Main.of(name))));
+        super(block, settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Extralent.of(name))));
     }
 
     @Override

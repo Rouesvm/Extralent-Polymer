@@ -18,7 +18,7 @@
       "com.rouesvm.extralent.datagen.ExtralentDataGenerator"
     ],
     "main": [
-      "com.rouesvm.extralent.Main"
+      "com.rouesvm.extralent.Extralent"
     ]
   },
   "mixins": [

@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class Main implements ModInitializer {
+public class Extralent implements ModInitializer {
 	public static final String MOD_ID = "extralent";
 
 	@Override

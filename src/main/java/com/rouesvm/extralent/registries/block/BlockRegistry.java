@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.registries.block;
 
-import com.rouesvm.extralent.Main;
+import com.rouesvm.extralent.Extralent;
 import com.rouesvm.extralent.block.BasicPolymerBlock;
 import com.rouesvm.extralent.block.generator.GeneratorBlock;
 import com.rouesvm.extralent.block.quarry.QuarryBlock;
@@ -21,7 +21,7 @@ public class BlockRegistry {
     public static final BasicPolymerBlock TRANSMITTER = registry(new TransmitterBlock(AbstractBlock.Settings.create()));
 
     private static <T extends BasicPolymerBlock> T registry(T block) {
-        Identifier id = Main.of(block.getBlockName());
+        Identifier id = Extralent.of(block.getBlockName());
         Registry.register(Registries.ITEM, id, new PolymerBlockItem(new Item.Settings(), block, id.getPath()));
         return Registry.register(Registries.BLOCK, id, block);
     }

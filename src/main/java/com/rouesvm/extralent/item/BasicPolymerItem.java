@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.item;
 
-import com.rouesvm.extralent.Main;
+import com.rouesvm.extralent.Extralent;
 import eu.pb4.polymer.core.api.item.PolymerItem;
 import eu.pb4.polymer.core.api.utils.PolymerKeepModel;
 import net.minecraft.item.Item;
@@ -14,7 +14,7 @@ public class BasicPolymerItem extends Item implements PolymerItem, PolymerKeepMo
     private final Item vanillaItem;
 
     public BasicPolymerItem(String name, Settings settings, Item vanillaItem) {
-        super(settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Main.of(name))));
+        super(settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Extralent.of(name))));
         this.name = name;
         this.vanillaItem = vanillaItem;
     }

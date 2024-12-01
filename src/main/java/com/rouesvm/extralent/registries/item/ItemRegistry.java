@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.registries.item;
 
-import com.rouesvm.extralent.Main;
+import com.rouesvm.extralent.Extralent;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import com.rouesvm.extralent.item.custom.ConnectorItem;
 import com.rouesvm.extralent.item.custom.InfoItem;
@@ -14,7 +14,7 @@ public class ItemRegistry {
     public static final InfoItem INFO = register(new InfoItem(new Item.Settings()));
 
     private static <T extends BasicPolymerItem> T register(T item) {
-        Identifier id = Main.of(item.getItemName());
+        Identifier id = Extralent.of(item.getItemName());
         return Registry.register(Registries.ITEM, id, item);
     }
 

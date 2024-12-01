@@ -1,6 +1,6 @@
 package com.rouesvm.extralent.registries.block;
 
-import com.rouesvm.extralent.Main;
+import com.rouesvm.extralent.Extralent;
 import com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity;
 import com.rouesvm.extralent.block.quarry.entity.QuarryBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.TransmitterBlockEntity;
@@ -41,7 +41,7 @@ public class BlockEntityRegistry {
 
     private static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> blockEntityType) {
         PolymerBlockUtils.registerBlockEntity(blockEntityType);
-        return Registry.register(Registries.BLOCK_ENTITY_TYPE, Main.of(name), blockEntityType);
+        return Registry.register(Registries.BLOCK_ENTITY_TYPE, Extralent.of(name), blockEntityType);
     }
 
     public static void initialize() {}
