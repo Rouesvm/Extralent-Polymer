@@ -1,11 +1,7 @@
 {
-  "parent": "block/cube",
+  "parent": "block/cube_column",
   "textures": {
-    "down": "extralent:block/machine_top",
-    "up": "extralent:block/machine_top",
-    "east": "extralent:block/machine_side",
-    "west": "extralent:block/machine_side",
-    "north": "extralent:block/fuel_generator_front",
-    "south": "extralent:block/machine_side"
+    "end": "extralent:block/machine_top",
+    "side": "extralent:block/fuel_generator_side"
   }
 }
