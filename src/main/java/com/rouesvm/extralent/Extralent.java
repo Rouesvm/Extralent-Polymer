@@ -30,6 +30,7 @@ public class Extralent implements ModInitializer {
 				.entries((displayContext, entries) -> {
 					entries.add(ItemRegistry.CONNECTOR);
 					entries.add(ItemRegistry.INFO);
+					entries.add(ItemRegistry.BASIC_CIRCUIT);
 					entries.add(BlockRegistry.GENERATOR);
 					entries.add(BlockRegistry.TRANSMITTER);
 					entries.add(BlockRegistry.TRANSPORTER);
