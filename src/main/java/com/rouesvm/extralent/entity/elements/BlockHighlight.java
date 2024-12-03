@@ -35,10 +35,10 @@ public class BlockHighlight extends ElementHolder {
         this.position = connection.getPos();
 
         if (connection.getWeight() == 0) {
-            this.particleTypes = ParticleTypes.SCRAPE;
+            this.particleTypes = ParticleTypes.WAX_ON;
         } else if (connection.getWeight() == 10) {
             this.particleTypes = ParticleTypes.ELECTRIC_SPARK;
-        } else this.particleTypes = ParticleTypes.WAX_ON;
+        } else this.particleTypes = ParticleTypes.SCRAPE;
 
         this.addElement(markerElement);
     }
