@@ -56,13 +56,13 @@ public class ConnectorItem extends BasicPolymerItem {
                     if (compound != null) this.weight = compound.getInt("weight");
                 }
 
-                this.weight = this.weight == 1 ? 0 : 1;
+                this.weight = weight == 1 ? 0 : 1;
                 playSoundChanged(user, 2f);
 
-                user.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(this.weight)), true);
+                user.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(weight)), true);
 
                 NbtCompound nbtCompound = new NbtCompound();
-                nbtCompound.putInt("weight", this.weight);
+                nbtCompound.putInt("weight", weight);
                 itemStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbtCompound));
 
                 return ActionResult.SUCCESS;
@@ -78,11 +78,11 @@ public class ConnectorItem extends BasicPolymerItem {
             var blockEntityResult = world.getBlockEntity(context.getBlockPos());
 
             if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
-                if (this.currentBlockEntity != null) {
-                    if (this.currentBlockEntity.isRemoved())
+                if (currentBlockEntity != null) {
+                    if (currentBlockEntity.isRemoved())
                         this.currentBlockEntity = null;
 
-                    if (this.currentBlockEntity == pipeBlockEntity) {
+                    if (currentBlockEntity == pipeBlockEntity) {
                         context.getPlayer().sendMessage(Text.translatable("info.viewer.disconnected"), true);
                         playSoundConnection(context.getPlayer(), 5f);
                         blockEntityHighlight.kill();
@@ -103,7 +103,7 @@ public class ConnectorItem extends BasicPolymerItem {
                 context.getPlayer().sendMessage(Text.translatable("info.viewer.connected"), true);
 
                 playSoundConnection(context.getPlayer(), 3f);
-                blockEntityHighlight = BlockHighlight.createHighlight(world,
+                this.blockEntityHighlight = BlockHighlight.createHighlight(world,
                         Connection.of(currentBlockEntity.getPos(), 10));
 
                 if (!this.currentBlockEntity.getBlocks().isEmpty()) {
