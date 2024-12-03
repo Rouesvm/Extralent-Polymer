@@ -1,20 +1,13 @@
 package com.rouesvm.extralent.block.generator.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
+import com.rouesvm.extralent.block.generator.GeneratorBlock;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
-import net.fabricmc.fabric.api.registry.FuelRegistryEvents;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.fabricmc.fabric.impl.content.registry.FuelRegistryEventsContextImpl;
-import net.fabricmc.fabric.mixin.content.registry.FuelRegistryMixin;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.FurnaceBlock;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.FuelRegistry;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -22,9 +15,13 @@ import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
+import static com.rouesvm.extralent.block.generator.GeneratorBlock.ACTIVATED;
+
 public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     private int progress;
     private int burnTime;
+
+    private boolean activated;
 
     public GeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.GENERATOR_BLOCK_ENTITY, pos, state);
@@ -45,16 +42,20 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         if (this.world == null || this.world.isClient) return;
         if (energyStorage.amount < energyStorage.capacity) {
             if (this.burnTime == 0) {
+                setState(true);
                 validFuel();
                 markDirty();
             }
+
             if (this.progress++ < this.burnTime) {
                 energyStorage.amount = MathHelper.clamp(energyStorage.amount + this.burnTime / 80, 0, energyStorage.getCapacity());
             } else {
+                setState(false);
                 this.progress = 0;
                 this.burnTime = 0;
             }
         }
+
         extractEnergy();
     }
 
@@ -96,5 +97,10 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         super.writeNbt(nbt, registryLookup);
         nbt.putInt("progress", this.progress);
         nbt.putInt("burnTime", this.burnTime);
+    }
+
+    private void setState(Boolean activated) {
+        BlockState state = world.getBlockState(pos);
+        if (state != null) world.setBlockState(pos, state.with(ACTIVATED, activated));
     }
 }
