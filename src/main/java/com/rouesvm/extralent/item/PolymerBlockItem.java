@@ -19,6 +19,6 @@ public class PolymerBlockItem extends BlockItem implements PolymerItem, PolymerK
 
     @Override
     public Item getPolymerItem(ItemStack itemStack, PacketContext context) {
-        return Items.POISONOUS_POTATO;
+        return Items.CHORUS_FRUIT;
     }
 }

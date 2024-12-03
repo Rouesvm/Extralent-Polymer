@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class QuarryBlock extends BasicPolymerBlock implements BlockEntityProvider {
     public QuarryBlock(Settings settings) {
-        super("quarry", settings);
+        super("quarry", settings.hardness(3f));
     }
 
     @Override

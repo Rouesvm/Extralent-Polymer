@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class TransporterBlock extends BasicPolymerBlock implements BlockEntityProvider {
     public TransporterBlock(AbstractBlock.Settings settings) {
-        super("transporter", settings);
+        super("transporter", settings.hardness(2f));
     }
 
     @Override

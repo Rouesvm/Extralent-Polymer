@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class TransmitterBlock extends BasicPolymerBlock implements BlockEntityProvider {
     public TransmitterBlock(Settings settings) {
-        super("transmitter", settings);
+        super("transmitter", settings.hardness(2f));
     }
 
     @Override

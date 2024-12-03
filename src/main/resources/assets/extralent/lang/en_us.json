@@ -16,5 +16,7 @@
   "info.viewer.type_same_bound": "Already bound",
   "info.viewer.far_away": "Too far",
   "info.viewer.type_wrong": "Wrong type",
-  "info.viewer.weight_changed": "Priority is"
+  "info.viewer.weight_changed": "Priority is",
+
+  "item.description.connector.info": "Click on a transport block."
 }

@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class GeneratorBlock extends ActivatedPolymerBlock implements BlockEntityProvider {
     public GeneratorBlock(Settings settings) {
-        super("generator", settings);
+        super("generator", settings.hardness(3f));
     }
 
     @Override

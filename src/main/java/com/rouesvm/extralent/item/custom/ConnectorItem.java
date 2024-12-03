@@ -13,6 +13,7 @@ import net.minecraft.item.BundleItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -28,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class ConnectorItem extends BasicPolymerItem {
@@ -48,6 +50,11 @@ public class ConnectorItem extends BasicPolymerItem {
     public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context) {
         if (connected) return Extralent.of("connector_on");
         return Extralent.of("connector");
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+        tooltip.add(Text.translatable("item.description.connector.info"));
     }
 
     @Override
