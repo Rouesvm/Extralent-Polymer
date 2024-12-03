@@ -1,6 +1,5 @@
 package com.rouesvm.extralent.block.transport.entity;
 
-import com.rouesvm.extralent.block.transport.TransporterBlock;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.utils.Connection;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -10,15 +9,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.Weight;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
     public TransporterBlockEntity(BlockPos pos, BlockState state) {

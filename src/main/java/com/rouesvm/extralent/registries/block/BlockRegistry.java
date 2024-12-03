@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.registries.block;
 
 import com.rouesvm.extralent.Extralent;
+import com.rouesvm.extralent.block.ActivatedPolymerBlock;
 import com.rouesvm.extralent.block.BasicPolymerBlock;
 import com.rouesvm.extralent.block.generator.GeneratorBlock;
 import com.rouesvm.extralent.block.quarry.QuarryBlock;

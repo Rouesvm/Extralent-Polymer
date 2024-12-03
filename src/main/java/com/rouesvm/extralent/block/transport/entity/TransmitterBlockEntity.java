@@ -8,11 +8,6 @@ import net.minecraft.util.math.BlockPos;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public class TransmitterBlockEntity extends PipeBlockEntity {
     public TransmitterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSMITTER_BLOCK_ENTITY, pos, state);
