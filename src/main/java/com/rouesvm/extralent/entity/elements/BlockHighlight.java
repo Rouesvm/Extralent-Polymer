@@ -5,11 +5,11 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.MarkerElement;
 import net.minecraft.block.Block;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.particle.*;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import org.joml.Vector3f;
 
 import java.util.Random;
 import java.util.random.RandomGenerator;

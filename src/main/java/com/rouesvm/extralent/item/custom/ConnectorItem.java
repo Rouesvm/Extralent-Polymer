@@ -1,13 +1,10 @@
 package com.rouesvm.extralent.item.custom;
 
-import com.rouesvm.extralent.Extralent;
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.PipeState;
 import com.rouesvm.extralent.entity.elements.BlockHighlight;
-import com.rouesvm.extralent.item.BasicPolymerItem;
+import com.rouesvm.extralent.item.DoubleTexturedItem;
 import com.rouesvm.extralent.utils.Connection;
-import eu.pb4.polymer.resourcepack.api.PolymerModelData;
-import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.component.type.NbtComponent;
@@ -23,39 +20,24 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.HashMap;
 import java.util.Objects;
 
-public class ConnectorItem extends BasicPolymerItem {
+public class ConnectorItem extends DoubleTexturedItem {
     private HashMap<BlockPos, BlockHighlight> blockHighlights = new HashMap<>();
 
     private PipeBlockEntity currentBlockEntity;
     private BlockHighlight blockEntityHighlight;
 
-    private PolymerModelData secondModel;
-
-    private boolean connected;
-
     private int weight = 0;
 
     public ConnectorItem(Settings settings) {
         super("connector", settings, Items.COAL);
-        this.secondModel = PolymerResourcePackUtils.requestModel(this.getVanillaItem(),
-                Identifier.of(Extralent.MOD_ID, "item/" + this.getItemName() + "_on"));
-    }
-
-    @Override
-    public int getPolymerCustomModelData(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
-        if (connected) return this.secondModel.value();
-        return super.getPolymerCustomModelData(itemStack, player);
     }
 
     @Override
@@ -69,6 +51,11 @@ public class ConnectorItem extends BasicPolymerItem {
                 return TypedActionResult.pass(stack);
 
             if (user.isSneaking()) {
+                if (currentBlockEntity != null && currentBlockEntity.isRemoved()) {
+                    onConnectedChanged(stack, (ServerWorld) world, user, false);
+                    return TypedActionResult.success(stack, true);
+                }
+
                 ItemStack itemStack = user.getStackInHand(hand);
 
                 if (itemStack.get(DataComponentTypes.CUSTOM_DATA) != null) {
@@ -93,56 +80,52 @@ public class ConnectorItem extends BasicPolymerItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        if (!context.getWorld().isClient && context.getPlayer() != null) {
-            ServerWorld world = (ServerWorld) context.getWorld();
-            var blockEntityResult = world.getBlockEntity(context.getBlockPos());
+        if (context.getWorld().isClient || context.getPlayer() == null) return ActionResult.PASS;
+        ServerWorld world = (ServerWorld) context.getWorld();
+        var blockEntityResult = world.getBlockEntity(context.getBlockPos());
 
-            if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
-                if (currentBlockEntity != null) {
-                    if (currentBlockEntity.isRemoved())
-                        this.currentBlockEntity = null;
+        if (currentBlockEntity != null && currentBlockEntity.isRemoved()) {
+            onConnectedChanged(context.getStack(), world, context.getPlayer(), false);
+        }
 
-                    if (currentBlockEntity == pipeBlockEntity)
-                        onConnectedChanged(context.getStack(), world, context.getPlayer(), false);
-                    else sendMessage(world, context.getPlayer(), Connection.of(context.getBlockPos(), this.weight));
-
-                    return ActionResult.SUCCESS;
-                }
-
-                pipeBlockEntity.onUpdate();
-                this.currentBlockEntity = pipeBlockEntity;
-
-                onConnectedChanged(context.getStack(), world, context.getPlayer(), true);
-
-                if (!this.currentBlockEntity.getBlocks().isEmpty()) {
-                    this.currentBlockEntity.getBlocks().forEach(connection -> this.blockHighlights.put(connection.getPos(),
-                            BlockHighlight.createHighlight(world, connection))
-                    );
-                }
+        if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
+            if (currentBlockEntity != null) {
+                if (currentBlockEntity.isRemoved()) this.currentBlockEntity = null;
+                if (currentBlockEntity == pipeBlockEntity)
+                    onConnectedChanged(context.getStack(), world, context.getPlayer(), false);
+                else sendMessage(world, context.getPlayer(), Connection.of(context.getBlockPos(), this.weight));
 
                 return ActionResult.SUCCESS;
-            } else if (blockEntityResult != null) {
-                if (this.currentBlockEntity != null) {
-                    sendMessage(world, context.getPlayer(), Connection.of(context.getBlockPos(), this.weight));
-                    return ActionResult.SUCCESS;
-                }
+            }
+
+            pipeBlockEntity.onUpdate();
+            this.currentBlockEntity = pipeBlockEntity;
+            onConnectedChanged(context.getStack(), world, context.getPlayer(), true);
+            highlightConnectedBlocks(world, pipeBlockEntity);
+
+            return ActionResult.SUCCESS;
+        } else if (blockEntityResult != null) {
+            if (currentBlockEntity != null && !currentBlockEntity.isRemoved()) {
+                sendMessage(world, context.getPlayer(), Connection.of(context.getBlockPos(), this.weight));
+                return ActionResult.SUCCESS;
             }
         }
         return ActionResult.PASS;
     }
 
     private void onConnectedChanged(ItemStack stack, ServerWorld world, PlayerEntity player, boolean connected) {
-        this.connected = connected;
+        setActivated(connected);
         int customModelData = getPolymerCustomModelData(stack, (ServerPlayerEntity) player);
         stack.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(customModelData));
+
         if (!connected) {
             player.sendMessage(Text.translatable("info.viewer.disconnected"), true);
             playSoundConnection(player, 5f);
             blockEntityHighlight.kill();
 
             this.currentBlockEntity = null;
-            this.blockHighlights.forEach((pos, blockHighlight) -> blockHighlight.kill());
-            this.blockHighlights = new HashMap<>();
+            blockHighlights.forEach((pos, blockHighlight) -> blockHighlight.kill());
+            blockHighlights = new HashMap<>();
         } else {
             player.sendMessage(Text.translatable("info.viewer.connected"), true);
             playSoundConnection(player, 3f);
@@ -180,6 +163,14 @@ public class ConnectorItem extends BasicPolymerItem {
             case IDENTICAL -> player.sendMessage(Text.translatable("info.viewer.type_same_bound"), true);
             case FAR -> player.sendMessage(Text.translatable("info.viewer.far_away"), true);
             case TYPE_ERROR -> player.sendMessage(Text.translatable("info.viewer.type_wrong"), true);
+        }
+    }
+
+    private void highlightConnectedBlocks(ServerWorld world, PipeBlockEntity pipeBlockEntity) {
+        if (!pipeBlockEntity.getBlocks().isEmpty()) {
+            pipeBlockEntity.getBlocks().forEach(connection ->
+                    blockHighlights.put(connection.getPos(), BlockHighlight.createHighlight(world, connection))
+            );
         }
     }
 
