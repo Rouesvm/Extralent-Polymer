@@ -17,18 +17,18 @@ import team.reborn.energy.api.EnergyStorage;
 public class BlockEntityRegistry {
     public static final BlockEntityType<GeneratorBlockEntity> GENERATOR_BLOCK_ENTITY = register(
             "generator_block_entity",
-            FabricBlockEntityTypeBuilder.create(GeneratorBlockEntity::new, BlockRegistry.GENERATOR).build());
+            BlockEntityType.Builder.create(GeneratorBlockEntity::new, BlockRegistry.GENERATOR).build());
 
     public static final BlockEntityType<QuarryBlockEntity> QUARRY_BLOCK_ENTITY = register(
             "quarry_block_entity",
-            FabricBlockEntityTypeBuilder.create(QuarryBlockEntity::new, BlockRegistry.QUARRY).build());
+            BlockEntityType.Builder.create(QuarryBlockEntity::new, BlockRegistry.QUARRY).build());
 
     public static final BlockEntityType<TransporterBlockEntity> TRANSPORTER_BLOCK_ENTITY = register(
             "transporter_block_entity",
-            FabricBlockEntityTypeBuilder.create(TransporterBlockEntity::new, BlockRegistry.TRANSPORTER).build());
+            BlockEntityType.Builder.create(TransporterBlockEntity::new, BlockRegistry.TRANSPORTER).build());
     public static final BlockEntityType<TransmitterBlockEntity> TRANSMITTER_BLOCK_ENTITY = register(
             "transmitter_block_entity",
-            FabricBlockEntityTypeBuilder.create(TransmitterBlockEntity::new, BlockRegistry.TRANSMITTER).build());
+            BlockEntityType.Builder.create(TransmitterBlockEntity::new, BlockRegistry.TRANSMITTER).build());
 
     static {
         EnergyStorage.SIDED.registerForBlockEntity(QuarryBlockEntity::getEnergyProvider, QUARRY_BLOCK_ENTITY);
