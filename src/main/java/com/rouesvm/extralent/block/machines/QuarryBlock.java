@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.quarry;
+package com.rouesvm.extralent.block.machines;
 
 import com.rouesvm.extralent.block.BasicPolymerBlock;
 import com.rouesvm.extralent.block.TickableBlockEntity;

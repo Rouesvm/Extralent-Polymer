@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.quarry.entity;
+package com.rouesvm.extralent.block.machines.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
