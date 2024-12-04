@@ -82,7 +82,7 @@ public class BlockHighlight extends ElementHolder {
     @Override
     public void tick() {
         if (this.getAttachment() != null && this.getAttachment().getWorld() != null) {
-            if (ticks++ < 10)
+            if (this.ticks++ % 10 == 0)
                 ticks = 0;
             spawnEdgeParticles(this.getAttachment().getWorld(), position);
         }
