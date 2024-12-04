@@ -6,7 +6,6 @@ import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import net.minecraft.entity.decoration.Brightness;
 import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
@@ -51,11 +50,6 @@ public class InfoText extends ElementHolder {
         }
 
         this.display.setText(machineBlockEntity.infoOnClicked());
-    }
-
-    @Override
-    public boolean startWatching(ServerPlayNetworkHandler player) {
-        return super.startWatching(player);
     }
 
     public static InfoText createText(Vec3d pos, BasicMachineBlockEntity basicPoweredEntity, ServerWorld world) {
