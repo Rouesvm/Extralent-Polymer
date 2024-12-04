@@ -2,10 +2,10 @@
   "item.extralent.connector" : "Connector",
   "item.extralent.viewer" : "Viewer",
 
-  "item.extralent.transporter" : "Transporter",
-  "item.extralent.transmitter" : "Transmitter",
-  "item.extralent.generator" : "Generator",
-  "item.extralent.quarry" : "Quarry",
+  "block.extralent.transporter" : "Transporter",
+  "block.extralent.transmitter" : "Transmitter",
+  "block.extralent.generator" : "Generator",
+  "block.extralent.quarry" : "Quarry",
 
   "item.extralent.extralent_group": "Extralent",
 
