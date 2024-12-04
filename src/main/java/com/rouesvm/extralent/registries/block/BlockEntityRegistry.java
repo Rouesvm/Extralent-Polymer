@@ -2,11 +2,11 @@ package com.rouesvm.extralent.registries.block;
 
 import com.rouesvm.extralent.Extralent;
 import com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity;
-import com.rouesvm.extralent.block.quarry.entity.QuarryBlockEntity;
+import com.rouesvm.extralent.block.machines.entity.HarvesterBlockEntity;
+import com.rouesvm.extralent.block.machines.entity.QuarryBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.TransmitterBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.TransporterBlockEntity;
 import eu.pb4.polymer.core.api.block.PolymerBlockUtils;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -30,18 +30,25 @@ public class BlockEntityRegistry {
             "transmitter_block_entity",
             BlockEntityType.Builder.create(TransmitterBlockEntity::new, BlockRegistry.TRANSMITTER).build());
 
+    public static final BlockEntityType<HarvesterBlockEntity> HARVESTER_BLOCK_ENTITY = register(
+            "harvester_block_entity",
+            BlockEntityType.Builder.create(HarvesterBlockEntity::new, BlockRegistry.HARVESTER).build());
+
     static {
         EnergyStorage.SIDED.registerForBlockEntity(QuarryBlockEntity::getEnergyProvider, QUARRY_BLOCK_ENTITY);
+        EnergyStorage.SIDED.registerForBlockEntity(HarvesterBlockEntity::getEnergyProvider, HARVESTER_BLOCK_ENTITY);
         EnergyStorage.SIDED.registerForBlockEntity(GeneratorBlockEntity::getEnergyProvider, GENERATOR_BLOCK_ENTITY);
         EnergyStorage.SIDED.registerForBlockEntity(TransmitterBlockEntity::getEnergyProvider, TRANSMITTER_BLOCK_ENTITY);
 
+        ItemStorage.SIDED.registerForBlockEntity(HarvesterBlockEntity::getInventoryProvider, HARVESTER_BLOCK_ENTITY);
         ItemStorage.SIDED.registerForBlockEntity(GeneratorBlockEntity::getInventoryProvider, GENERATOR_BLOCK_ENTITY);
         ItemStorage.SIDED.registerForBlockEntity(TransporterBlockEntity::getInventoryProvider, TRANSPORTER_BLOCK_ENTITY);
     }
 
     private static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> blockEntityType) {
-        PolymerBlockUtils.registerBlockEntity(blockEntityType);
-        return Registry.register(Registries.BLOCK_ENTITY_TYPE, Extralent.of(name), blockEntityType);
+        var entity = Registry.register(Registries.BLOCK_ENTITY_TYPE, Extralent.of(name), blockEntityType);
+        PolymerBlockUtils.registerBlockEntity(entity);
+        return entity;
     }
 
     public static void initialize() {}

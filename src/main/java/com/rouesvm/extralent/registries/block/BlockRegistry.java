@@ -1,10 +1,10 @@
 package com.rouesvm.extralent.registries.block;
 
 import com.rouesvm.extralent.Extralent;
-import com.rouesvm.extralent.block.ActivatedPolymerBlock;
 import com.rouesvm.extralent.block.BasicPolymerBlock;
 import com.rouesvm.extralent.block.generator.GeneratorBlock;
-import com.rouesvm.extralent.block.quarry.QuarryBlock;
+import com.rouesvm.extralent.block.machines.HarvesterBlock;
+import com.rouesvm.extralent.block.machines.QuarryBlock;
 import com.rouesvm.extralent.block.transport.TransmitterBlock;
 import com.rouesvm.extralent.block.transport.TransporterBlock;
 import com.rouesvm.extralent.item.PolymerBlockItem;
@@ -20,6 +20,8 @@ public class BlockRegistry {
 
     public static final BasicPolymerBlock TRANSPORTER = registry(new TransporterBlock(AbstractBlock.Settings.create()));
     public static final BasicPolymerBlock TRANSMITTER = registry(new TransmitterBlock(AbstractBlock.Settings.create()));
+
+    public static final BasicPolymerBlock HARVESTER = registry(new HarvesterBlock(AbstractBlock.Settings.create()));
 
     private static <T extends BasicPolymerBlock> T registry(T block) {
         Identifier id = Extralent.of(block.getBlockName());

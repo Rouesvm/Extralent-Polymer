@@ -118,13 +118,13 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
 
     private Text getFormattedInfo() {
         Text text = null;
-        if (this.inventory != null) {
+        if (getInventory() != null) {
             text = Text.empty();
             for (ItemStack stack : this.inventory.getHeldStacks()) {
                 text = text.copy().append("\n").append(stack.getCount() + " ").append(stack.getName());
             }
         }
-        if (this.energyStorage != null) {
+        if (getEnergyStorage() != null) {
             if (text == null) text = Text.empty();
 
             text = text.copy().append("\n\n").append(ProgressBarRenderer.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity()));
