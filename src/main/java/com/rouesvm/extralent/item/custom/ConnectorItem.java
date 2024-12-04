@@ -114,7 +114,7 @@ public class ConnectorItem extends DoubleTexturedItem {
     }
 
     private void onConnectedChanged(ItemStack stack, ServerWorld world, PlayerEntity player, boolean connected) {
-        setActivated(connected);
+        this.setActivated(connected);
         int customModelData = getPolymerCustomModelData(stack, (ServerPlayerEntity) player);
         stack.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(customModelData));
 
