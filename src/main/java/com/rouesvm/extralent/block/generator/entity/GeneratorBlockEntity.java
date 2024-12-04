@@ -3,6 +3,7 @@ package com.rouesvm.extralent.block.generator.entity;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.block.generator.GeneratorBlock;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.SimpleInventory;
@@ -76,7 +77,7 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     public void validFuel() {
         ItemStack fuelStack = this.inventory.getStack(0);
         if (this.progress == 0 && !fuelStack.isEmpty()) {
-            var burning = world.getFuelRegistry().getFuelTicks(fuelStack);
+            var burning = FuelRegistry.INSTANCE.get(fuelStack.getItem());
             if (burning != 0) {
                 fuelStack.decrement(1);
                 this.inventory.setStack(0, fuelStack);

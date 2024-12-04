@@ -7,11 +7,8 @@ import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import xyz.nucleoid.packettweaker.PacketContext;
 
 public class ActivatedPolymerBlock extends BasicPolymerBlock {
     private final BlockState activatedState;
@@ -19,7 +16,7 @@ public class ActivatedPolymerBlock extends BasicPolymerBlock {
     public static final BooleanProperty ACTIVATED = BooleanProperty.of("activated");
 
     public ActivatedPolymerBlock(String name, AbstractBlock.Settings settings) {
-        super(name, settings.registryKey(RegistryKey.of(RegistryKeys.BLOCK, Extralent.of(name))));
+        super(name, settings);
         setDefaultState(getDefaultState().with(ACTIVATED, false));
 
         this.activatedState = PolymerBlockResourceUtils.requestBlock(BlockModelType.FULL_BLOCK,
@@ -32,9 +29,9 @@ public class ActivatedPolymerBlock extends BasicPolymerBlock {
     }
 
     @Override
-    public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
+    public BlockState getPolymerBlockState(BlockState state) {
         if (state.get(ACTIVATED))
             return this.activatedState;
-        return super.getPolymerBlockState(state, context);
+        return super.getPolymerBlockState(state);
     }
 }

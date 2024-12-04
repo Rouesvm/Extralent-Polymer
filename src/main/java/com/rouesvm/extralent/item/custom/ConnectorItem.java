@@ -6,14 +6,17 @@ import com.rouesvm.extralent.block.transport.entity.PipeState;
 import com.rouesvm.extralent.entity.elements.BlockHighlight;
 import com.rouesvm.extralent.item.BasicPolymerItem;
 import com.rouesvm.extralent.utils.Connection;
+import eu.pb4.polymer.resourcepack.api.PolymerModelData;
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BundleItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -21,6 +24,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -36,28 +40,33 @@ public class ConnectorItem extends BasicPolymerItem {
     private PipeBlockEntity currentBlockEntity;
     private BlockHighlight blockEntityHighlight;
 
+    private PolymerModelData secondModel;
+
     private boolean connected;
 
     private int weight = 0;
 
     public ConnectorItem(Settings settings) {
         super("connector", settings, Items.COAL);
+        this.secondModel = PolymerResourcePackUtils.requestModel(this.getVanillaItem(),
+                Identifier.of(Extralent.MOD_ID, "item/" + this.getItemName() + "_on"));
     }
 
     @Override
-    public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context) {
-        if (connected) return Extralent.of("connector_on");
-        return Extralent.of("connector");
+    public int getPolymerCustomModelData(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
+        if (connected) return this.secondModel.value();
+        return super.getPolymerCustomModelData(itemStack, player);
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
         if (world != null && !world.isClient) {
             var cast = user.raycast(5, 0, false);
             if (cast.getType() == HitResult.Type.ENTITY)
-                return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
+                return TypedActionResult.pass(stack);
             if (cast.getType() == HitResult.Type.BLOCK)
-                return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
+                return TypedActionResult.pass(stack);
 
             if (user.isSneaking()) {
                 ItemStack itemStack = user.getStackInHand(hand);
@@ -76,10 +85,10 @@ public class ConnectorItem extends BasicPolymerItem {
                 nbtCompound.putInt("weight", weight);
                 itemStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbtCompound));
 
-                return ActionResult.SUCCESS;
+                return TypedActionResult.success(stack, true);
             }
         }
-        return super.use(world, user, hand);
+        return TypedActionResult.pass(stack);
     }
 
     @Override
@@ -124,7 +133,8 @@ public class ConnectorItem extends BasicPolymerItem {
 
     private void onConnectedChanged(ItemStack stack, ServerWorld world, PlayerEntity player, boolean connected) {
         this.connected = connected;
-        stack.set(DataComponentTypes.ITEM_MODEL, getPolymerItemModel(stack, PacketContext.create()));
+        int customModelData = getPolymerCustomModelData(stack, (ServerPlayerEntity) player);
+        stack.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(customModelData));
         if (!connected) {
             player.sendMessage(Text.translatable("info.viewer.disconnected"), true);
             playSoundConnection(player, 5f);
