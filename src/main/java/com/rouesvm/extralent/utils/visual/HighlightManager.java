@@ -58,6 +58,7 @@ public class HighlightManager {
         multipleHighlights.remove(stack);
     }
 
+    // Tick
     public void tickHighlights(ItemStack stack) {
         getMultipleHighlights(stack).forEach((pos, blockHighlight) -> blockHighlight.tick());
 

@@ -6,13 +6,11 @@ import com.rouesvm.extralent.entity.elements.BlockHighlight;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
 import com.rouesvm.extralent.item.custom.data.ConnecterData;
 import com.rouesvm.extralent.utils.Connection;
-import com.rouesvm.extralent.utils.visual.LineDrawer;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -34,22 +32,14 @@ public class ConnectorItem extends DoubleTexturedItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (world == null || world.isClient) return;
-        ConnecterData connecterData = new ConnecterData(stack);
 
+        ConnecterData connecterData = new ConnecterData(stack);
         if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(stack);
 
         if (selected) {
             PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
-
             if (currentBlockEntity == null) return;
             if (!connecterData.showVisual()) connecterData.setVisual(true);
-            if (world.getTime() % 5 == 0) {
-                LineDrawer.drawLine(ParticleTypes.ELECTRIC_SPARK,
-                        entity.getBlockPos(),
-                        currentBlockEntity.getPos(),
-                        (ServerWorld) world
-                );
-            }
         } else if (connecterData.showVisual()) connecterData.setVisual(false);
     }
 
