@@ -6,10 +6,13 @@ import com.rouesvm.extralent.entity.elements.BlockHighlight;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
 import com.rouesvm.extralent.item.custom.data.ConnecterData;
 import com.rouesvm.extralent.utils.Connection;
+import com.rouesvm.extralent.utils.visual.LineDrawer;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -26,6 +29,24 @@ import static com.rouesvm.extralent.Extralent.HIGHLIGHT_MANAGER;
 public class ConnectorItem extends DoubleTexturedItem {
     public ConnectorItem(Settings settings) {
         super("connector", settings, Items.COAL);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (world == null || world.isClient) return;
+        if (selected) {
+            ConnecterData connecterData = new ConnecterData(stack);
+            PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
+
+            if (currentBlockEntity == null) return;
+            if (world.getTime() % 5 == 0) {
+                LineDrawer.drawLine(ParticleTypes.ELECTRIC_SPARK,
+                        entity.getBlockPos(),
+                        currentBlockEntity.getPos(),
+                        (ServerWorld) world
+                );
+            }
+        }
     }
 
     @Override
@@ -82,6 +103,11 @@ public class ConnectorItem extends DoubleTexturedItem {
                 return ActionResult.SUCCESS;
             }
 
+            if (pipeBlockEntity.isConnected()) {
+                context.getPlayer().sendMessage(Text.translatable("info.viewer.already_connected"), true);
+                return ActionResult.PASS;
+            }
+
             connecterData.setCurrentEntity(pipeBlockEntity.getPos());
 
             pipeBlockEntity.onUpdate();
@@ -108,11 +134,13 @@ public class ConnectorItem extends DoubleTexturedItem {
 
         if (!connected) {
             player.sendMessage(Text.translatable("info.viewer.disconnected"), true);
+            currentBlockEntity.setConnected(false);
             connecterData.setCurrentEntity(null);
             playSoundConnection(player, 5f);
             HIGHLIGHT_MANAGER.clearAllHighlights(stack);
         } else {
             player.sendMessage(Text.translatable("info.viewer.connected"), true);
+            currentBlockEntity.setConnected(true);
             playSoundConnection(player, 3f);
             HIGHLIGHT_MANAGER.createSingularHighlight(stack, world, Connection.of(currentBlockEntity.getPos(), 10));
         }
