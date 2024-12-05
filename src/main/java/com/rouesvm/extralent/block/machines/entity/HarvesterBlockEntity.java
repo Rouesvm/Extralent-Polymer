@@ -2,6 +2,7 @@ package com.rouesvm.extralent.block.machines.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
+import com.rouesvm.extralent.utils.visual.LineDrawer;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.inventory.SimpleInventory;
@@ -136,19 +137,19 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         for (int i = 0; i < 4; i++) {
             BlockPos topCorner = getCorner(start, end, i, true);
             BlockPos bottomCorner = getCorner(start, end, i, false);
-            drawLine(topCorner, bottomCorner, world);
+            LineDrawer.drawLine(ParticleTypes.WAX_ON, topCorner, bottomCorner, world);
         }
 
         for (int i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, true);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, true);
-            drawLine(startCorner, endCorner, world);
+            LineDrawer.drawLine(ParticleTypes.WAX_ON, startCorner, endCorner, world);
         }
 
         for (int i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, false);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, false);
-            drawLine(startCorner, endCorner, world);
+            LineDrawer.drawLine(ParticleTypes.WAX_ON, startCorner, endCorner, world);
         }
     }
 
@@ -157,25 +158,6 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         int z = (cornerIndex == 0 || cornerIndex == 1) ? start.getZ() : end.getZ();
         int y = isTop ? end.getY() : start.getY();
         return new BlockPos(x, y, z);
-    }
-
-    private void drawLine(BlockPos start, BlockPos end, ServerWorld world) {
-        double x1 = start.getX() + 0.5;
-        double y1 = start.getY() + 0.5;
-        double z1 = start.getZ() + 0.5;
-        double x2 = end.getX() + 0.5;
-        double y2 = end.getY() + 0.5;
-        double z2 = end.getZ() + 0.5;
-
-        int steps = (int) Math.ceil(start.getSquaredDistance(end)) / 2;
-        for (int i = 0; i <= steps; i++) {
-            double t = i / (double) steps;
-            double x = x1 + t * (x2 - x1);
-            double y = y1 + t * (y2 - y1);
-            double z = z1 + t * (z2 - z1);
-
-            world.spawnParticles(ParticleTypes.WAX_ON, x, y, z, 1, 0, 0, 0, 0);
-        }
     }
 
     @Override
