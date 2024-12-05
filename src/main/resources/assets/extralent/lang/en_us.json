@@ -9,12 +9,13 @@
 
   "item.extralent.extralent_group": "Extralent",
 
-  "info.viewer.disconnected": "Disconnected",
-  "info.viewer.connected": "Connected",
-  "info.viewer.unbound": "Unbound",
-  "info.viewer.bound": "Bound",
-  "info.viewer.type_same_bound": "Already bound",
-  "info.viewer.far_away": "Too far",
-  "info.viewer.type_wrong": "Wrong type",
-  "info.viewer.weight_changed": "Priority is"
+  "info.viewer.already_connected": "Already connected to another connector.",
+  "info.viewer.disconnected": "Disconnected.",
+  "info.viewer.connected": "Connected.",
+  "info.viewer.unbound": "Unbound.",
+  "info.viewer.bound": "Bound.",
+  "info.viewer.type_same_bound": "Already bound.",
+  "info.viewer.far_away": "Out of range.",
+  "info.viewer.type_wrong": "Invalid type.",
+  "info.viewer.weight_changed": "Priority updated to:"
 }
