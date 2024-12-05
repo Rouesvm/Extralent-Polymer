@@ -17,21 +17,15 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 public class BasicPolymerItem extends Item implements PolymerItem, PolymerKeepModel {
     private final String name;
-    private final Item vanillaItem;
 
     private final PolymerModelData model;
 
     public BasicPolymerItem(String name, Settings settings, Item vanillaItem) {
         super(settings);
         this.name = name;
-        this.vanillaItem = vanillaItem;
 
         this.model = PolymerResourcePackUtils.requestModel(vanillaItem,
                 Identifier.of(Extralent.MOD_ID, "item/" + name));
-    }
-
-    public Item getVanillaItem() {
-        return vanillaItem;
     }
 
     public String getItemName() {
