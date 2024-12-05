@@ -34,11 +34,15 @@ public class ConnectorItem extends DoubleTexturedItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (world == null || world.isClient) return;
+        ConnecterData connecterData = new ConnecterData(stack);
+
+        if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(stack);
+
         if (selected) {
-            ConnecterData connecterData = new ConnecterData(stack);
             PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
 
             if (currentBlockEntity == null) return;
+            if (!connecterData.showVisual()) connecterData.setVisual(true);
             if (world.getTime() % 5 == 0) {
                 LineDrawer.drawLine(ParticleTypes.ELECTRIC_SPARK,
                         entity.getBlockPos(),
@@ -46,7 +50,7 @@ public class ConnectorItem extends DoubleTexturedItem {
                         (ServerWorld) world
                 );
             }
-        }
+        } else if (connecterData.showVisual()) connecterData.setVisual(false);
     }
 
     @Override

@@ -12,6 +12,8 @@ import net.minecraft.util.math.BlockPos;
 public class ConnecterData {
     private NbtCompound nbtCompound;
 
+    private boolean visual = false;
+
     private int weight = 0;
     private BlockPos currentEntity;
 
@@ -35,6 +37,12 @@ public class ConnecterData {
         return stack;
     }
 
+    public boolean showVisual() {
+        if (nbtCompound.contains("visual"))
+            visual = nbtCompound.getBoolean("visual");
+        return visual;
+    }
+
     public int getWeight() {
         if (nbtCompound.contains("weight"))
             weight = nbtCompound.getInt("weight");
@@ -47,6 +55,12 @@ public class ConnecterData {
             currentEntity = BlockPos.fromLong(data);
         } else currentEntity = null;
         return currentEntity;
+    }
+
+    public void setVisual(boolean visual) {
+        nbtCompound.putBoolean("visual", visual);
+        saveToStack();
+        this.visual = visual;
     }
 
     public void setCurrentEntity(BlockPos currentEntity) {
