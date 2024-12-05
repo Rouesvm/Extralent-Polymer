@@ -3,6 +3,7 @@ package com.rouesvm.extralent;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.registries.block.BlockRegistry;
 import com.rouesvm.extralent.registries.item.ItemRegistry;
+import com.rouesvm.extralent.utils.visual.HighlightManager;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.api.ModInitializer;
@@ -12,6 +13,8 @@ import net.minecraft.util.Identifier;
 
 public class Extralent implements ModInitializer {
 	public static final String MOD_ID = "extralent";
+
+	public static final HighlightManager HIGHLIGHT_MANAGER = new HighlightManager();
 
 	@Override
 	public void onInitialize() {
