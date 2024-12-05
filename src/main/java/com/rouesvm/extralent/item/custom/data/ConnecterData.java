@@ -9,6 +9,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.UUID;
+
 public class ConnecterData {
     private NbtCompound nbtCompound;
 
@@ -31,6 +33,17 @@ public class ConnecterData {
         if (state == null) return null;
         else if (state instanceof PipeBlockEntity blockEntity) return blockEntity;
         else return null;
+    }
+
+    public UUID getUuid() {
+        UUID uuid = UUID.randomUUID();
+        if (nbtCompound.contains("uuid"))
+            uuid = nbtCompound.getUuid("uuid");
+        else {
+            nbtCompound.putUuid("uuid", uuid);
+            saveToStack();
+        }
+        return uuid;
     }
 
     public ItemStack getStack() {

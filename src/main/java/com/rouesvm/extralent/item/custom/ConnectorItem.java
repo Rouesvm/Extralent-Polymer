@@ -9,6 +9,8 @@ import com.rouesvm.extralent.utils.Connection;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,6 +24,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
 
+import java.util.UUID;
+
 import static com.rouesvm.extralent.Extralent.HIGHLIGHT_MANAGER;
 
 public class ConnectorItem extends DoubleTexturedItem {
@@ -30,14 +34,24 @@ public class ConnectorItem extends DoubleTexturedItem {
     }
 
     @Override
+    public void onItemEntityDestroyed(ItemEntity entity) {
+        ConnecterData connecterData = new ConnecterData(entity.getStack());
+        PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) entity.getWorld());
+
+        currentBlockEntity.setConnected(false);
+        HIGHLIGHT_MANAGER.clearAllHighlights(connecterData.getUuid());
+    }
+
+    @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (world == null || world.isClient) return;
 
         ConnecterData connecterData = new ConnecterData(stack);
-        if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(stack);
+        PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
+
+        if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getUuid());
 
         if (selected) {
-            PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
             if (currentBlockEntity == null) return;
             if (!connecterData.showVisual()) connecterData.setVisual(true);
         } else if (connecterData.showVisual()) connecterData.setVisual(false);
@@ -58,7 +72,7 @@ public class ConnectorItem extends DoubleTexturedItem {
 
             if (user.isSneaking()) {
                 if (connecterData.getCurrentEntity((ServerWorld) world) != null && currentBlockEntity.isRemoved()) {
-                    onConnectedChanged(stack, (ServerWorld) world, user, false);
+                    onConnectedChanged(connecterData, (ServerWorld) world, user, false);
                     return TypedActionResult.success(stack, true);
                 }
 
@@ -84,14 +98,14 @@ public class ConnectorItem extends DoubleTexturedItem {
         PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity(world);
 
         if (currentBlockEntity != null && currentBlockEntity.isRemoved()) {
-            onConnectedChanged(context.getStack(), world, context.getPlayer(), false);
+            onConnectedChanged(connecterData, world, context.getPlayer(), false);
         }
 
         if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
             if (currentBlockEntity != null) {
                 if (currentBlockEntity.isRemoved()) connecterData.setCurrentEntity(null);
                 if (currentBlockEntity == pipeBlockEntity)
-                    onConnectedChanged(context.getStack(), world, context.getPlayer(), false);
+                    onConnectedChanged(connecterData, world, context.getPlayer(), false);
                 else sendMessage(connecterData, world, context.getPlayer(), Connection.of(context.getBlockPos(), connecterData.getWeight()));
 
                 return ActionResult.SUCCESS;
@@ -105,8 +119,8 @@ public class ConnectorItem extends DoubleTexturedItem {
             connecterData.setCurrentEntity(pipeBlockEntity.getPos());
 
             pipeBlockEntity.onUpdate();
-            onConnectedChanged(context.getStack(), world, context.getPlayer(), true);
-            highlightConnectedBlocks(connecterData.getStack(), world, pipeBlockEntity);
+            onConnectedChanged(connecterData, world, context.getPlayer(), true);
+            highlightConnectedBlocks(connecterData.getUuid(), world, pipeBlockEntity);
 
             return ActionResult.SUCCESS;
         } else if (blockEntityResult != null) {
@@ -118,25 +132,24 @@ public class ConnectorItem extends DoubleTexturedItem {
         return ActionResult.PASS;
     }
 
-    private void onConnectedChanged(ItemStack stack, ServerWorld world, PlayerEntity player, boolean connected) {
+    private void onConnectedChanged(ConnecterData data, ServerWorld world, PlayerEntity player, boolean connected) {
         this.setActivated(connected);
-        int customModelData = getPolymerCustomModelData(stack, (ServerPlayerEntity) player);
-        stack.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(customModelData));
+        int customModelData = getPolymerCustomModelData(data.getStack(), (ServerPlayerEntity) player);
+        data.getStack().set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(customModelData));
 
-        ConnecterData connecterData = new ConnecterData(stack);
-        PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity(world);
+        PipeBlockEntity currentBlockEntity = data.getCurrentEntity(world);
 
         if (!connected) {
             player.sendMessage(Text.translatable("info.viewer.disconnected"), true);
             currentBlockEntity.setConnected(false);
-            connecterData.setCurrentEntity(null);
+            data.setCurrentEntity(null);
             playSoundConnection(player, 5f);
-            HIGHLIGHT_MANAGER.clearAllHighlights(stack);
+            HIGHLIGHT_MANAGER.clearAllHighlights(data.getUuid());
         } else {
             player.sendMessage(Text.translatable("info.viewer.connected"), true);
             currentBlockEntity.setConnected(true);
             playSoundConnection(player, 3f);
-            HIGHLIGHT_MANAGER.createSingularHighlight(stack, world, Connection.of(currentBlockEntity.getPos(), 10));
+            HIGHLIGHT_MANAGER.createSingularHighlight(data.getUuid(), world, Connection.of(currentBlockEntity.getPos(), 10));
         }
     }
 
@@ -148,7 +161,7 @@ public class ConnectorItem extends DoubleTexturedItem {
             if (removed) {
                 player.sendMessage(Text.translatable("info.viewer.unbound"), true);
                 playSound(player, -2f);
-                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getStack());
+                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getUuid());
                 return;
             }
         }
@@ -158,11 +171,11 @@ public class ConnectorItem extends DoubleTexturedItem {
             case SUCCESS -> {
                 player.sendMessage(Text.translatable("info.viewer.bound"), true);
                 playSound(player, 2f);
-                if (HIGHLIGHT_MANAGER.getHighlightFromMultiple(connection.getPos(), data.getStack()) != null)
-                    HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getStack());
+                if (HIGHLIGHT_MANAGER.getHighlightFromMultiple(connection.getPos(), data.getUuid()) != null)
+                    HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getUuid());
                 HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
                         BlockHighlight.createHighlight(world, connection),
-                        data.getStack()
+                        data.getUuid()
                 );
             }
             case IDENTICAL -> player.sendMessage(Text.translatable("info.viewer.type_same_bound"), true);
@@ -171,12 +184,12 @@ public class ConnectorItem extends DoubleTexturedItem {
         }
     }
 
-    private void highlightConnectedBlocks(ItemStack stack, ServerWorld world, PipeBlockEntity pipeBlockEntity) {
+    private void highlightConnectedBlocks(UUID uuid, ServerWorld world, PipeBlockEntity pipeBlockEntity) {
         if (!pipeBlockEntity.getBlocks().isEmpty()) {
             pipeBlockEntity.getBlocks().forEach(connection ->
                     HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
                             BlockHighlight.createHighlight(world, connection),
-                            stack)
+                            uuid)
             );
         }
     }
