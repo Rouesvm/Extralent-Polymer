@@ -13,6 +13,8 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.*;
 
 public class PipeBlockEntity extends BasicMachineBlockEntity {
+    private boolean connected;
+
     public int ticks;
     public final HashSet<Connection> blocks = new HashSet<>();
 
@@ -108,5 +110,13 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
 
     public Set<Connection> getBlocks() {
         return blocks;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 }
