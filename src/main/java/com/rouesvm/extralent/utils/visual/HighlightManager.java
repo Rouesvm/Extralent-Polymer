@@ -29,7 +29,6 @@ public class HighlightManager {
     public void removeSingularHighlight(ItemStack stack) {
         BlockHighlight highlight = getSingularHighlight(stack);
         if (highlight != null) {
-            highlight.kill();
             singularHighlight.remove(stack);
         }
     }
@@ -51,15 +50,19 @@ public class HighlightManager {
         HashMap<BlockPos, BlockHighlight> highlights = getMultipleHighlights(stack);
         BlockHighlight highlight = highlights.get(pos);
         if (highlight != null) {
-            highlight.kill();
             highlights.remove(pos);
         }
     }
 
     public void removeAllHighlightsFromMultiple(ItemStack stack) {
-        HashMap<BlockPos, BlockHighlight> highlights = getMultipleHighlights(stack);
-        highlights.forEach((pos, highlight) -> highlight.kill());
         multipleHighlights.remove(stack);
+    }
+
+    public void tickHighlights(ItemStack stack) {
+        getMultipleHighlights(stack).forEach((pos, blockHighlight) -> blockHighlight.tick());
+
+        if (getSingularHighlight(stack) != null)
+            getSingularHighlight(stack).tick();
     }
 
     // Clear

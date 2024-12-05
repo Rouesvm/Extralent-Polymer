@@ -4,6 +4,7 @@ import com.rouesvm.extralent.utils.Connection;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.MarkerElement;
+import eu.pb4.polymer.virtualentity.api.elements.VirtualElement;
 import net.minecraft.block.Block;
 import net.minecraft.particle.*;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -14,24 +15,23 @@ import org.joml.Vector3f;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
-public class BlockHighlight extends ElementHolder {
+public class BlockHighlight {
     private final BlockPos position;
-    private final MarkerElement markerElement;
-
     private final SimpleParticleType particleTypes;
+
+    private final ServerWorld world;
 
     private int ticks = 40;
     private int randomInt = 0;
 
-    private BlockHighlight(BlockPos position) {
+    private BlockHighlight(ServerWorld world, BlockPos position) {
+        this.world = world;
         this.particleTypes = ParticleTypes.SCRAPE;
-        this.markerElement = new MarkerElement();
         this.position = position;
-        this.addElement(markerElement);
     }
 
-    private BlockHighlight(Connection connection) {
-        this.markerElement = new MarkerElement();
+    private BlockHighlight(ServerWorld world, Connection connection) {
+        this.world = world;
         this.position = connection.getPos();
 
         if (connection.getWeight() == 0) {
@@ -39,8 +39,6 @@ public class BlockHighlight extends ElementHolder {
         } else if (connection.getWeight() == 10) {
             this.particleTypes = ParticleTypes.ELECTRIC_SPARK;
         } else this.particleTypes = ParticleTypes.SCRAPE;
-
-        this.addElement(markerElement);
     }
 
     public void spawnEdgeParticles(ServerWorld world, BlockPos pos) {
@@ -79,36 +77,19 @@ public class BlockHighlight extends ElementHolder {
         }
     }
 
-    @Override
     public void tick() {
-        if (this.getAttachment() != null && this.getAttachment().getWorld() != null) {
+        if (this.world != null) {
             if (this.ticks++ % 10 == 0)
                 ticks = 0;
-            spawnEdgeParticles(this.getAttachment().getWorld(), position);
+            spawnEdgeParticles(this.world, position);
         }
-        super.tick();
-    }
-
-    @Override
-    public boolean startWatching(ServerPlayNetworkHandler player) {
-        return super.startWatching(player);
-    }
-
-    public void kill() {
-        this.destroy();
     }
 
     public static BlockHighlight createHighlight(ServerWorld world, BlockPos position) {
-        BlockHighlight model = new BlockHighlight(position);
-
-        ChunkAttachment.ofTicking(model, world, position);
-        return model;
+        return new BlockHighlight(world, position);
     }
 
     public static BlockHighlight createHighlight(ServerWorld world, Connection connection) {
-        BlockHighlight model = new BlockHighlight(connection);
-
-        ChunkAttachment.ofTicking(model, world, connection.getPos());
-        return model;
+        return new BlockHighlight(world, connection);
     }
 }
