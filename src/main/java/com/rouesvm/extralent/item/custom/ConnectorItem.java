@@ -10,7 +10,6 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -47,11 +46,10 @@ public class ConnectorItem extends DoubleTexturedItem {
         if (world == null || world.isClient) return;
 
         ConnecterData connecterData = new ConnecterData(stack);
-        PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
-
         if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getUuid());
 
         if (selected) {
+            PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
             if (currentBlockEntity == null) return;
             if (!connecterData.showVisual()) connecterData.setVisual(true);
         } else if (connecterData.showVisual()) connecterData.setVisual(false);
@@ -67,23 +65,8 @@ public class ConnectorItem extends DoubleTexturedItem {
             if (cast.getType() == HitResult.Type.BLOCK)
                 return TypedActionResult.pass(stack);
 
-            ConnecterData connecterData = new ConnecterData(stack);
-            PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
-
-            if (user.isSneaking()) {
-                if (connecterData.getCurrentEntity((ServerWorld) world) != null && currentBlockEntity.isRemoved()) {
-                    onConnectedChanged(connecterData, (ServerWorld) world, user, false);
-                    return TypedActionResult.success(stack, true);
-                }
-
-                int weight = connecterData.getWeight() == 1 ? 0 : 1;
-                connecterData.setWeight(weight);
-
-                playSoundChanged(user, 2f);
-                user.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(weight)), true);
-
-                return TypedActionResult.success(stack, true);
-            }
+            if (user.isSneaking() && changeWeight(user, (ServerWorld) world, stack))
+                return TypedActionResult.success(stack);
         }
         return TypedActionResult.pass(stack);
     }
@@ -123,13 +106,33 @@ public class ConnectorItem extends DoubleTexturedItem {
             highlightConnectedBlocks(connecterData.getUuid(), world, pipeBlockEntity);
 
             return ActionResult.SUCCESS;
-        } else if (blockEntityResult != null) {
-            if (currentBlockEntity != null && !currentBlockEntity.isRemoved()) {
-                sendMessage(connecterData, world, context.getPlayer(), Connection.of(context.getBlockPos(), connecterData.getWeight()));
+        } else if (blockEntityResult != null
+                && currentBlockEntity != null
+                && !currentBlockEntity.isRemoved()
+        ) {
+            sendMessage(connecterData, world, context.getPlayer(), Connection.of(context.getBlockPos(), connecterData.getWeight()));
+            return ActionResult.SUCCESS;
+        } else if (changeWeight(context.getPlayer(), world, context.getStack()))
                 return ActionResult.SUCCESS;
-            }
-        }
-        return ActionResult.PASS;
+        else return ActionResult.PASS;
+    }
+
+    private boolean changeWeight(PlayerEntity player, ServerWorld world, ItemStack stack) {
+        ConnecterData connecterData = new ConnecterData(stack);
+        PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity(world);
+
+        if (connecterData.getCurrentEntity(world) != null && currentBlockEntity.isRemoved()) {
+            onConnectedChanged(connecterData, world, player, false);
+            return false;
+        } else if (currentBlockEntity == null) return false;
+
+        int weight = connecterData.getWeight() == 1 ? 0 : 1;
+        connecterData.setWeight(weight);
+
+        playSoundChanged(player, 2f);
+        player.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(weight)), true);
+
+        return true;
     }
 
     private void onConnectedChanged(ConnecterData data, ServerWorld world, PlayerEntity player, boolean connected) {
@@ -158,10 +161,17 @@ public class ConnectorItem extends DoubleTexturedItem {
 
         if (player.isSneaking()) {
             boolean removed = currentBlockEntity.removeBlock(connection);
-            if (removed) {
-                player.sendMessage(Text.translatable("info.viewer.unbound"), true);
-                playSound(player, -2f);
+            if (removed && changeWeight(player, world, data.getStack())) {
+                data = new ConnecterData(data.getStack());
+                connection.setWeight(data.getWeight());
+                currentBlockEntity.putBlock(connection);
+
+                playSoundChanged(player, 3f);
                 HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getUuid());
+                HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
+                        BlockHighlight.createHighlight(world, connection),
+                        data.getUuid()
+                );
                 return;
             }
         }
@@ -178,7 +188,14 @@ public class ConnectorItem extends DoubleTexturedItem {
                         data.getUuid()
                 );
             }
-            case IDENTICAL -> player.sendMessage(Text.translatable("info.viewer.type_same_bound"), true);
+            case IDENTICAL -> {
+                boolean removed = currentBlockEntity.removeBlock(connection);
+                if (removed) {
+                    player.sendMessage(Text.translatable("info.viewer.unbound"), true);
+                    playSound(player, -2f);
+                    HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getUuid());
+                }
+            }
             case FAR -> player.sendMessage(Text.translatable("info.viewer.far_away"), true);
             case TYPE_ERROR -> player.sendMessage(Text.translatable("info.viewer.type_wrong"), true);
         }
