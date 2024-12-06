@@ -41,7 +41,7 @@ public class BlockHighlight {
         } else this.particleTypes = ParticleTypes.SCRAPE;
     }
 
-    public void spawnEdgeParticles(ServerWorld world, BlockPos pos) {
+    public void spawnEdgeParticles(BlockPos pos) {
         BlockPos[] corners = {
                 pos.add(0, 0, 0), pos.add(1, 0, 0), pos.add(0, 0, 1), pos.add(1, 0, 1),
                 pos.add(0, 1, 0), pos.add(1, 1, 0), pos.add(0, 1, 1), pos.add(1, 1, 1)
@@ -58,11 +58,11 @@ public class BlockHighlight {
             BlockPos start = corners[assignedPos[0]];
             BlockPos end = corners[assignedPos[1]];
 
-            spawnParticlesAlongEdge(world, start, end);
+            spawnParticlesAlongEdge(start, end);
         } else randomInt = 0;
     }
 
-    public void spawnParticlesAlongEdge(ServerWorld world, BlockPos start, BlockPos end) {
+    public void spawnParticlesAlongEdge(BlockPos start, BlockPos end) {
         double steps = 5;
         double dx = (end.getX() - start.getX()) / steps;
         double dy = (end.getY() - start.getY()) / steps;
@@ -81,7 +81,7 @@ public class BlockHighlight {
         if (this.world != null) {
             if (this.ticks++ % 10 == 0)
                 ticks = 0;
-            spawnEdgeParticles(this.world, position);
+            spawnEdgeParticles(position);
         }
     }
 
