@@ -9,18 +9,29 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class ActivatedPolymerBlock extends BasicPolymerBlock {
     private final BlockState activatedState;
-
     public static final BooleanProperty ACTIVATED = BooleanProperty.of("activated");
 
-    public ActivatedPolymerBlock(String name, AbstractBlock.Settings settings) {
-        super(name, settings);
-        setDefaultState(getDefaultState().with(ACTIVATED, false));
+    boolean hasCustomStates;
 
-        this.activatedState = PolymerBlockResourceUtils.requestBlock(BlockModelType.FULL_BLOCK,
-                PolymerBlockModel.of(Extralent.of("block/" + name + "_on")));
+    public ActivatedPolymerBlock(String name, AbstractBlock.Settings settings, boolean hasCustomStates) {
+        super(name, settings);
+
+        this.hasCustomStates = hasCustomStates;
+        if (hasCustomStates) {
+            setDefaultState(this.getStateManager().getDefaultState().with(ACTIVATED, false));
+            this.activatedState = PolymerBlockResourceUtils.requestBlock(BlockModelType.FULL_BLOCK,
+                    PolymerBlockModel.of(Extralent.of("block/" + name + "_on")));
+        } else this.activatedState = null;
+    }
+
+    public void setState(boolean activated, World world, BlockPos pos) {
+        if (!hasCustomStates) return;
+        world.setBlockState(pos, world.getBlockState(pos).with(ACTIVATED, activated));
     }
 
     @Override
@@ -30,8 +41,8 @@ public class ActivatedPolymerBlock extends BasicPolymerBlock {
 
     @Override
     public BlockState getPolymerBlockState(BlockState state) {
-        if (state.get(ACTIVATED))
-            return this.activatedState;
+        if (state.get(ACTIVATED) && activatedState != null)
+            return activatedState;
         return super.getPolymerBlockState(state);
     }
 }
