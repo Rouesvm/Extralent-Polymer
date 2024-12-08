@@ -7,6 +7,10 @@ import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.context.LootContextParameterSet;
+
+import java.util.List;
 
 public class BasicPolymerBlock extends Block implements PolymerTexturedBlock {
     private final String name;
@@ -25,6 +29,6 @@ public class BasicPolymerBlock extends Block implements PolymerTexturedBlock {
 
     @Override
     public BlockState getPolymerBlockState(BlockState state) {
-        return this.polymerBlockState;
+        return polymerBlockState;
     }
 }
