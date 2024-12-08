@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.registries.block;
 
 import com.rouesvm.extralent.Extralent;
+import com.rouesvm.extralent.block.machines.entity.ElectricFurnaceBlockEntity;
 import com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity;
 import com.rouesvm.extralent.block.machines.entity.HarvesterBlockEntity;
 import com.rouesvm.extralent.block.machines.entity.QuarryBlockEntity;
@@ -34,15 +35,21 @@ public class BlockEntityRegistry {
             "harvester_block_entity",
             BlockEntityType.Builder.create(HarvesterBlockEntity::new, BlockRegistry.HARVESTER).build());
 
+    public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE_BLOCK_ENTITY = register(
+            "electric_furnace_block_entity",
+            BlockEntityType.Builder.create(ElectricFurnaceBlockEntity::new, BlockRegistry.ELECTRIC_FURNACE).build());
+
     static {
         EnergyStorage.SIDED.registerForBlockEntity(QuarryBlockEntity::getEnergyProvider, QUARRY_BLOCK_ENTITY);
         EnergyStorage.SIDED.registerForBlockEntity(HarvesterBlockEntity::getEnergyProvider, HARVESTER_BLOCK_ENTITY);
         EnergyStorage.SIDED.registerForBlockEntity(GeneratorBlockEntity::getEnergyProvider, GENERATOR_BLOCK_ENTITY);
         EnergyStorage.SIDED.registerForBlockEntity(TransmitterBlockEntity::getEnergyProvider, TRANSMITTER_BLOCK_ENTITY);
+        EnergyStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getEnergyProvider, ELECTRIC_FURNACE_BLOCK_ENTITY);
 
         ItemStorage.SIDED.registerForBlockEntity(HarvesterBlockEntity::getInventoryProvider, HARVESTER_BLOCK_ENTITY);
         ItemStorage.SIDED.registerForBlockEntity(GeneratorBlockEntity::getInventoryProvider, GENERATOR_BLOCK_ENTITY);
         ItemStorage.SIDED.registerForBlockEntity(TransporterBlockEntity::getInventoryProvider, TRANSPORTER_BLOCK_ENTITY);
+        ItemStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getInventoryProvider, ELECTRIC_FURNACE_BLOCK_ENTITY);
     }
 
     private static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> blockEntityType) {
