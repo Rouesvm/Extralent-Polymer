@@ -34,6 +34,13 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
                 .criterion("get_redstone", InventoryChangedCriterion.Conditions.items(Items.REDSTONE))
                 .offerTo(exporter);
 
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, BlockRegistry.HARVESTER, 1)
+                .pattern("rir").pattern("iei").pattern("rir")
+                .input('r', Items.COPPER_INGOT).input('e', BlockRegistry.TRANSPORTER)
+                .input('i', Items.REDSTONE)
+                .criterion("get_generator", InventoryChangedCriterion.Conditions.items(BlockRegistry.GENERATOR))
+                .offerTo(exporter);
+
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, BlockRegistry.TRANSMITTER, 4)
                 .pattern("rir").pattern("grg").pattern("rir")
                 .input('r', Items.REDSTONE).input('g', Items.GOLD_BLOCK)
@@ -54,6 +61,18 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
                 .pattern(" i ").pattern("bbb").pattern("bcb")
                 .input('c', BlockRegistry.TRANSMITTER).input('b', Items.COPPER_INGOT)
                 .input('i', Items.LIGHTNING_ROD)
+                .criterion("get_transmitter", InventoryChangedCriterion.Conditions.items(BlockRegistry.TRANSMITTER))
+                .offerTo(exporter);
+
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemRegistry.VACUUM, 1)
+                .pattern("i  ").pattern("cii").pattern("i  ")
+                .input('c', BlockRegistry.TRANSPORTER).input('i', Items.IRON_INGOT)
+                .criterion("get_transporter", InventoryChangedCriterion.Conditions.items(BlockRegistry.TRANSPORTER))
+                .offerTo(exporter);
+
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemRegistry.INFO, 1)
+                .pattern(" i ").pattern("ici").pattern(" i ")
+                .input('c', ItemRegistry.CONNECTOR).input('i', Items.IRON_INGOT)
                 .criterion("get_pearl", InventoryChangedCriterion.Conditions.items(Items.ENDER_PEARL))
                 .offerTo(exporter);
     }
