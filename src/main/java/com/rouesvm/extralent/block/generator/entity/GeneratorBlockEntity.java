@@ -1,12 +1,13 @@
 package com.rouesvm.extralent.block.generator.entity;
 
+import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
-import com.rouesvm.extralent.block.generator.GeneratorBlock;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
+import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
@@ -16,34 +17,33 @@ import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-import static com.rouesvm.extralent.block.generator.GeneratorBlock.ACTIVATED;
-
 public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     private int progress;
     private int burnTime;
-
-    private boolean activated;
 
     public GeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.GENERATOR_BLOCK_ENTITY, pos, state);
     }
 
     @Override
-    public SimpleInventory createInventory() {
+    public ExtralentInventory createInventory() {
         return super.createInventory(1);
     }
 
     @Override
     public SimpleEnergyStorage createEnergyStorage() {
-        return super.createEnergyStorage(500000, 0, 1000);
+        return super.createEnergyStorage(250000, 0, 1000);
     }
 
     @Override
     public void tick() {
         if (this.world == null || this.world.isClient) return;
         if (energyStorage.amount < energyStorage.capacity) {
+            Block machineBlock = getCachedState().getBlock();
+            if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
+
             if (this.burnTime == 0) {
-                setState(true);
+                machineBaseBlock.setState(true, world, pos);
                 validFuel();
                 markDirty();
             }
@@ -51,7 +51,7 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
             if (this.progress++ < this.burnTime) {
                 energyStorage.amount = MathHelper.clamp(energyStorage.amount + this.burnTime / 80, 0, energyStorage.getCapacity());
             } else {
-                setState(false);
+                machineBaseBlock.setState(false, world, pos);
                 this.progress = 0;
                 this.burnTime = 0;
             }
@@ -98,10 +98,5 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         super.writeNbt(nbt, registryLookup);
         nbt.putInt("progress", this.progress);
         nbt.putInt("burnTime", this.burnTime);
-    }
-
-    private void setState(Boolean activated) {
-        BlockState state = world.getBlockState(pos);
-        if (state != null) world.setBlockState(pos, state.with(ACTIVATED, activated));
     }
 }

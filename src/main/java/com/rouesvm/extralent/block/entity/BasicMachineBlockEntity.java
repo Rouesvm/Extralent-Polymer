@@ -1,14 +1,14 @@
 package com.rouesvm.extralent.block.entity;
 
 import com.rouesvm.extralent.block.TickableBlockEntity;
-import com.rouesvm.extralent.utils.ProgressBarRenderer;
+import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
+import com.rouesvm.extralent.block.entity.text.ProgressBarRenderer;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -20,8 +20,8 @@ import net.minecraft.util.math.Direction;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class BasicMachineBlockEntity extends BlockEntity implements TickableBlockEntity {
-    public final SimpleInventory inventory;
-    public final InventoryStorage inventoryStorage;
+    public final ExtralentInventory inventory;
+    public InventoryStorage inventoryStorage;
 
     public final SimpleEnergyStorage energyStorage;
 
@@ -36,12 +36,12 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         else this.inventoryStorage = null;
     }
 
-    public SimpleInventory createInventory() {
+    public ExtralentInventory createInventory() {
         return null;
     }
 
-    public SimpleInventory createInventory(int size) {
-        return new SimpleInventory(size) {
+    public ExtralentInventory createInventory(int size) {
+        return new ExtralentInventory(size) {
             @Override
             public void markDirty() {
                 super.markDirty();
@@ -72,7 +72,7 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         super.readNbt(nbt, registryLookup);
 
         if (this.inventory != null)
-            Inventories.readNbt(nbt, this.inventory.getHeldStacks(), registryLookup);
+            Inventories.readNbt(nbt, this.inventory.getStacks(), registryLookup);
         if (this.energyStorage != null) {
             if (nbt.contains("energy", NbtElement.LONG_TYPE)) {
                 this.energyStorage.amount = nbt.getLong("energy");
@@ -85,12 +85,12 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         super.writeNbt(nbt, registryLookup);
 
         if (this.inventory != null)
-            Inventories.writeNbt(nbt, this.inventory.getHeldStacks(), registryLookup);
+            Inventories.writeNbt(nbt, this.inventory.getStacks(), registryLookup);
         if (this.energyStorage != null)
             nbt.putLong("energy", this.energyStorage.amount);
     }
 
-    private void update() {
+    public void update() {
         markDirty();
         if (world != null)
             world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_ALL);
@@ -108,7 +108,7 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         return this.inventoryStorage;
     }
 
-    public SimpleInventory getInventory() {
+    public ExtralentInventory getInventory() {
         return this.inventory;
     }
 
@@ -120,7 +120,7 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         Text text = null;
         if (getInventory() != null) {
             text = Text.empty();
-            for (ItemStack stack : this.inventory.getHeldStacks()) {
+            for (ItemStack stack : this.inventory.getStacks()) {
                 text = text.copy().append("\n").append(stack.getCount() + " ").append(stack.getName());
             }
         }

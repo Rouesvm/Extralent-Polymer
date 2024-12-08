@@ -2,19 +2,24 @@ package com.rouesvm.extralent.block.machines.entity;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
-import com.rouesvm.extralent.utils.visual.LineDrawer;
+import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
+import com.rouesvm.extralent.visual.LineDrawer;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
@@ -24,9 +29,9 @@ import java.util.List;
 import java.util.Queue;
 
 public class HarvesterBlockEntity extends BasicMachineBlockEntity {
-    private final int width = 8;
-    private final int height = 8;
-    private final int depth = 8;
+    private static final int width = 8;
+    private static final int height = 8;
+    private static final int depth = 8;
 
     private int ticks;
 
@@ -36,20 +41,24 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public SimpleEnergyStorage createEnergyStorage() {
-        return super.createEnergyStorage(100000, 1500, 0);
+        return super.createEnergyStorage(100000, 800, 0);
     }
 
     @Override
-    public SimpleInventory createInventory() {
+    public ExtralentInventory createInventory() {
         return super.createInventory(9);
     }
 
     @Override
     public void tick() {
         if (world == null || world.isClient) return;
+        if (energyStorage.amount <= 0) return;
+
         if (ticks++ % 20 == 0) {
             ticks = 0;
             scanArea(pos, world);
+
+            energyStorage.amount = MathHelper.clamp(energyStorage.amount - 500, 0, energyStorage.getCapacity());
         }
     }
 
@@ -82,14 +91,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             BlockPos current = toCheck.poll();
             BlockState state = world.getBlockState(current);
             if (isLog(state)) {
-                List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(
-                        new LootContextParameterSet.Builder((ServerWorld) this.world)
-                                .add(LootContextParameters.TOOL, Items.DIAMOND_AXE.getDefaultStack())
-                                .add(LootContextParameters.ORIGIN, current.toCenterPos())
-                                .addOptional(LootContextParameters.BLOCK_ENTITY, this)));
-
-                insertDrops(drops);
-
+                insertDrops(getDrops(state, current));
                 world.breakBlock(current, false);
                 for (Direction direction : Direction.values()) {
                     BlockPos neighbor = current.offset(direction);
@@ -101,6 +103,14 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         }
     }
 
+    private List<ItemStack> getDrops(BlockState state, BlockPos current) {
+        return new ArrayList<>(state.getDroppedStacks(
+                new LootContextParameterSet.Builder((ServerWorld) this.world)
+                        .add(LootContextParameters.TOOL, Items.DIAMOND_AXE.getDefaultStack())
+                        .add(LootContextParameters.ORIGIN, current.toCenterPos())
+                        .addOptional(LootContextParameters.BLOCK_ENTITY, this)));
+    }
+
     private void insertDrops(List<ItemStack> drops) {
         drops.forEach(itemStack -> {
             ItemStack stack = getInventory().addStack(itemStack);
@@ -110,7 +120,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     }
 
     private boolean isLog(BlockState state) {
-        return state.isOf(Blocks.OAK_LOG) || state.isOf(Blocks.OAK_LEAVES);
+        return state.isIn(BlockTags.LOGS) || state.isIn(BlockTags.LEAVES);
     }
 
     private boolean isAirAbove(World world, BlockPos pos) {
@@ -120,8 +130,16 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private void plantSapling(World world, BlockPos pos) {
         if (world.isAir(pos.up())) {
             if (inventory.isEmpty()) return;
-            if (!inventory.removeItem(Items.OAK_SAPLING, 1).isEmpty()) {
-                world.setBlockState(pos.up(), Blocks.OAK_SAPLING.getDefaultState());
+            Item selectedSapling = null;
+            for (ItemStack stack : inventory.getHeldStacks()) {
+                if (stack.isIn(ItemTags.SAPLINGS)) selectedSapling = stack.getItem();
+            }
+
+            if (selectedSapling != null
+                    && !inventory.removeItem(selectedSapling, 1).isEmpty()
+            ) {
+                Block saplingBlock = Block.getBlockFromItem(selectedSapling);
+                world.setBlockState(pos.up(), saplingBlock.getDefaultState());
             }
         }
     }

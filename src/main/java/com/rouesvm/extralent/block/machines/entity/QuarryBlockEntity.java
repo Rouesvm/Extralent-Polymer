@@ -1,11 +1,13 @@
 package com.rouesvm.extralent.block.machines.entity;
 
+import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -33,16 +35,26 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public SimpleEnergyStorage createEnergyStorage() {
-        return super.createEnergyStorage(100000, 1000, 0);
+        return super.createEnergyStorage(100000, 800, 0);
     }
 
     @Override
     public void tick() {
         if (this.world == null || this.world.isClient) return;
-        if (energyStorage.amount == 0) return;
+
+        Block machineBlock = getCachedState().getBlock();
+        if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
+
+        if (energyStorage.amount <= 0) {
+            machineBaseBlock.setState(false, world, pos);
+            return;
+        }
+
         energyStorage.amount = MathHelper.clamp(energyStorage.amount - 100, 0, energyStorage.getCapacity());
 
         if (this.progress++ % 10 == 0) {
+            machineBaseBlock.setState(true, world, pos);
+
             if (this.miningPos.getY() <= this.world.getBottomY()) {
                 this.miningPos = this.pos.down();
             }
@@ -73,7 +85,6 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     private Storage<ItemVariant> findItemStorage(ServerWorld world, BlockPos up) {
         return ItemStorage.SIDED.find(world, up, Direction.DOWN);
     }
-
 
     private void insertDrops(List<ItemStack> drops, Storage<ItemVariant> aboveStorage) {
         drops.forEach(itemStack -> {
