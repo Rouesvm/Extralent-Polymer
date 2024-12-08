@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_column",
+  "textures": {
+    "end": "extralent:block/machine_top",
+    "side": "extralent:block/quarry_machine_side_on"
+  }
+}

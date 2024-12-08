@@ -1,4 +1,6 @@
 {
+  "item.extralent.mob_vacuum" : "Mob Vacuum",
+  "item.extralent.filter" : "Filter",
   "item.extralent.connector" : "Connector",
   "item.extralent.viewer" : "Viewer",
 
@@ -6,6 +8,8 @@
   "block.extralent.transmitter" : "Transmitter",
   "block.extralent.generator" : "Generator",
   "block.extralent.quarry" : "Quarry",
+  "block.extralent.electric_furnace" : "Electric Furnace",
+  "block.extralent.tree_harvester" : "Tree Harvester",
 
   "item.extralent.extralent_group": "Extralent",
 

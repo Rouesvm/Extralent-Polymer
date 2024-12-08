@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_column",
+  "textures": {
+    "end": "extralent:block/machine_top",
+    "side": "extralent:block/electric_furnace_side_on"
+  }
+}
