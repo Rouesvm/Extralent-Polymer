@@ -1,8 +1,7 @@
-package com.rouesvm.extralent.utils.visual;
+package com.rouesvm.extralent.visual;
 
-import com.rouesvm.extralent.entity.elements.BlockHighlight;
-import com.rouesvm.extralent.utils.Connection;
-import net.minecraft.item.ItemStack;
+import com.rouesvm.extralent.visual.elements.BlockHighlight;
+import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 

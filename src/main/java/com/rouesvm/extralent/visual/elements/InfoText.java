@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.entity.elements;
+package com.rouesvm.extralent.visual.elements;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;

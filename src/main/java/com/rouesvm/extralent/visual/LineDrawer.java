@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.utils.visual;
+package com.rouesvm.extralent.visual;
 
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
