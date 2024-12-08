@@ -2,17 +2,14 @@ package com.rouesvm.extralent.item.custom;
 
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.PipeState;
-import com.rouesvm.extralent.entity.elements.BlockHighlight;
+import com.rouesvm.extralent.visual.elements.BlockHighlight;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
 import com.rouesvm.extralent.item.custom.data.ConnecterData;
-import com.rouesvm.extralent.utils.Connection;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.CustomModelDataComponent;
+import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -84,12 +81,14 @@ public class ConnectorItem extends DoubleTexturedItem {
             onConnectedChanged(connecterData, world, context.getPlayer(), false);
         }
 
+        Connection connection = Connection.of(context.getBlockPos(), connecterData.getWeight(), context.getSide());
+
         if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
             if (currentBlockEntity != null) {
                 if (currentBlockEntity.isRemoved()) connecterData.setCurrentEntity(null);
                 if (currentBlockEntity == pipeBlockEntity)
                     onConnectedChanged(connecterData, world, context.getPlayer(), false);
-                else sendMessage(connecterData, world, context.getPlayer(), Connection.of(context.getBlockPos(), connecterData.getWeight()));
+                else sendMessage(connecterData, world, context.getPlayer(), connection);
 
                 return ActionResult.SUCCESS;
             }
@@ -110,9 +109,9 @@ public class ConnectorItem extends DoubleTexturedItem {
                 && currentBlockEntity != null
                 && !currentBlockEntity.isRemoved()
         ) {
-            sendMessage(connecterData, world, context.getPlayer(), Connection.of(context.getBlockPos(), connecterData.getWeight()));
+            sendMessage(connecterData, world, context.getPlayer(), connection);
             return ActionResult.SUCCESS;
-        } else if (changeWeight(context.getPlayer(), world, context.getStack()))
+        } else if (context.getPlayer().isSneaking() && changeWeight(context.getPlayer(), world, context.getStack()))
                 return ActionResult.SUCCESS;
         else return ActionResult.PASS;
     }
@@ -136,10 +135,7 @@ public class ConnectorItem extends DoubleTexturedItem {
     }
 
     private void onConnectedChanged(ConnecterData data, ServerWorld world, PlayerEntity player, boolean connected) {
-        this.setActivated(connected);
-        int customModelData = getPolymerCustomModelData(data.getStack(), (ServerPlayerEntity) player);
-        data.getStack().set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(customModelData));
-
+        this.setTexture(data.getStack(), connected);
         PipeBlockEntity currentBlockEntity = data.getCurrentEntity(world);
 
         if (!connected) {
@@ -161,17 +157,10 @@ public class ConnectorItem extends DoubleTexturedItem {
 
         if (player.isSneaking()) {
             boolean removed = currentBlockEntity.removeBlock(connection);
-            if (removed && changeWeight(player, world, data.getStack())) {
-                data = new ConnecterData(data.getStack());
-                connection.setWeight(data.getWeight());
-                currentBlockEntity.putBlock(connection);
-
-                playSoundChanged(player, 3f);
+            if (removed) {
+                player.sendMessage(Text.translatable("info.viewer.unbound"), true);
+                playSound(player, -2f);
                 HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getUuid());
-                HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
-                        BlockHighlight.createHighlight(world, connection),
-                        data.getUuid()
-                );
                 return;
             }
         }
@@ -190,10 +179,17 @@ public class ConnectorItem extends DoubleTexturedItem {
             }
             case IDENTICAL -> {
                 boolean removed = currentBlockEntity.removeBlock(connection);
-                if (removed) {
-                    player.sendMessage(Text.translatable("info.viewer.unbound"), true);
-                    playSound(player, -2f);
+                if (removed && changeWeight(player, world, data.getStack())) {
+                    data = new ConnecterData(data.getStack());
+                    connection.setWeight(data.getWeight());
+                    currentBlockEntity.putBlock(connection);
+
+                    playSoundChanged(player, 3f);
                     HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getUuid());
+                    HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
+                            BlockHighlight.createHighlight(world, connection),
+                            data.getUuid()
+                    );
                 }
             }
             case FAR -> player.sendMessage(Text.translatable("info.viewer.far_away"), true);

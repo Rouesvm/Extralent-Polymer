@@ -33,12 +33,14 @@ public class VacuumItem extends DoubleTexturedItem {
 
             if (!entity.isAlive()) return ActionResult.PASS;
             if (this.hasStoredEntity(newStack)) return ActionResult.PASS;
-            this.setActivated(true);
+
+            setTexture(newStack, true);
 
             NbtCompound compound = saveEntity(entity);
             newStack.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(compound));
             entity.stopRiding();
             entity.discard();
+
             return ActionResult.SUCCESS;
         }
 
@@ -62,8 +64,6 @@ public class VacuumItem extends DoubleTexturedItem {
                     releasePos = blockPos;
                 else releasePos = blockPos.offset(direction);
 
-                this.setActivated(false);
-
                 NbtCompound tag = itemInHand.getOrDefault(DataComponentTypes.ENTITY_DATA, NbtComponent.DEFAULT).copyNbt();
                 if (EntityType.getEntityFromNbt(tag, world).map((entity) -> {
                     entity.setPos((double) releasePos.getX() + 0.5D, releasePos.getY(), (double) releasePos.getZ() + 0.5D);
@@ -74,8 +74,8 @@ public class VacuumItem extends DoubleTexturedItem {
                 }).isPresent()) {
                     world.emitGameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, releasePos);
                     itemInHand.remove(DataComponentTypes.ENTITY_DATA);
+                    setTexture(context.getStack(), false);
                 }
-
                 return ActionResult.SUCCESS;
             }
         } else {
