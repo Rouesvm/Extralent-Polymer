@@ -2,8 +2,9 @@ package com.rouesvm.extralent;
 
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.registries.block.BlockRegistry;
+import com.rouesvm.extralent.registries.data.DataComponentRegistry;
 import com.rouesvm.extralent.registries.item.ItemRegistry;
-import com.rouesvm.extralent.utils.visual.HighlightManager;
+import com.rouesvm.extralent.visual.HighlightManager;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.api.ModInitializer;
@@ -21,6 +22,8 @@ public class Extralent implements ModInitializer {
 		PolymerResourcePackUtils.addModAssets(MOD_ID);
 		PolymerResourcePackUtils.markAsRequired();
 
+		DataComponentRegistry.initialize();
+
 		ItemRegistry.initialize();
 		ItemRegistry.initialize();
 
@@ -31,11 +34,15 @@ public class Extralent implements ModInitializer {
 				.icon(() -> new ItemStack(ItemRegistry.CONNECTOR))
 				.displayName(Text.translatable("item.extralent.extralent_group"))
 				.entries((displayContext, entries) -> {
-					entries.add(ItemRegistry.CONNECTOR);
 					entries.add(ItemRegistry.INFO);
+					entries.add(ItemRegistry.CONNECTOR);
+					entries.add(ItemRegistry.VACUUM);
+					entries.add(ItemRegistry.FILTER_ITEM);
+					entries.add(BlockRegistry.ELECTRIC_FURNACE);
 					entries.add(BlockRegistry.GENERATOR);
 					entries.add(BlockRegistry.TRANSMITTER);
 					entries.add(BlockRegistry.TRANSPORTER);
+					entries.add(BlockRegistry.HARVESTER);
 					entries.add(BlockRegistry.QUARRY);
 				}).build());
 	}
