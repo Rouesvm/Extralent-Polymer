@@ -1,15 +1,18 @@
 package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
-import com.rouesvm.extralent.utils.Connection;
+import com.rouesvm.extralent.block.transport.entity.connection.Connection;
+import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
-import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
+
+import java.util.HashSet;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
     public TransporterBlockEntity(BlockPos pos, BlockState state) {
@@ -17,7 +20,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public SimpleInventory createInventory() {
+    public ExtralentInventory createInventory() {
         return super.createInventory(1);
     }
 
@@ -36,7 +39,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
 
     @Override
     public boolean blockLogic(Connection connection) {
-        Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, connection.getPos(), null);
+        Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, connection.getPos(), connection.getSide());
         if (storage != null) {
             if (connection.getWeight() == 1 && storage.supportsInsertion())
                 return insertItem(storage);

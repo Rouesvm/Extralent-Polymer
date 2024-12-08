@@ -1,7 +1,7 @@
 package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
-import com.rouesvm.extralent.utils.Connection;
+import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
