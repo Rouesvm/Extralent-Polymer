@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'fabric-loom' version '1.8-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -37,10 +37,10 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation include("eu.pb4:polymer-core:${project.polymer}")
-    modImplementation include("eu.pb4:polymer-blocks:${project.polymer}")
-    modImplementation include("eu.pb4:polymer-resource-pack:${project.polymer}")
-    modImplementation include("eu.pb4:polymer-virtual-entity:${project.polymer}")
+    modImplementation ("eu.pb4:polymer-core:${project.polymer}")
+    modImplementation ("eu.pb4:polymer-blocks:${project.polymer}")
+    modImplementation ("eu.pb4:polymer-resource-pack:${project.polymer}")
+    modImplementation ("eu.pb4:polymer-virtual-entity:${project.polymer}")
 
     modImplementation include("eu.pb4:sgui:${project.sgui}")
 }
