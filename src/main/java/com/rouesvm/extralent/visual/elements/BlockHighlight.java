@@ -1,23 +1,13 @@
-package com.rouesvm.extralent.entity.elements;
+package com.rouesvm.extralent.visual.elements;
 
-import com.rouesvm.extralent.utils.Connection;
-import eu.pb4.polymer.virtualentity.api.ElementHolder;
-import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
-import eu.pb4.polymer.virtualentity.api.elements.MarkerElement;
-import eu.pb4.polymer.virtualentity.api.elements.VirtualElement;
-import net.minecraft.block.Block;
+import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.particle.*;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import org.joml.Vector3f;
-
-import java.util.Random;
-import java.util.random.RandomGenerator;
 
 public class BlockHighlight {
     private final BlockPos position;
-    private final SimpleParticleType particleTypes;
+    private final ParticleEffect particleTypes;
 
     private final ServerWorld world;
 
@@ -37,7 +27,7 @@ public class BlockHighlight {
         if (connection.getWeight() == 0) {
             this.particleTypes = ParticleTypes.WAX_ON;
         } else if (connection.getWeight() == 10) {
-            this.particleTypes = ParticleTypes.ELECTRIC_SPARK;
+            this.particleTypes = ParticleTypes.WAX_OFF;
         } else this.particleTypes = ParticleTypes.SCRAPE;
     }
 
@@ -73,15 +63,16 @@ public class BlockHighlight {
             double y = start.getY() + i * dy;
             double z = start.getZ() + i * dz;
 
-            world.spawnParticles(particleTypes, x, y, z, 0, 0, 0, 0, 5);
+            world.spawnParticles(particleTypes, x, y, z, 0, 0, 0, 0, 0);
         }
     }
 
     public void tick() {
         if (this.world != null) {
-            if (this.ticks++ % 10 == 0)
+            if (this.ticks++ % 20 == 0) {
                 ticks = 0;
-            spawnEdgeParticles(position);
+                spawnEdgeParticles(position);
+            }
         }
     }
 

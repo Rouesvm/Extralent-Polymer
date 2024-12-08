@@ -1,7 +1,5 @@
-package com.rouesvm.extralent.utils;
+package com.rouesvm.extralent.block.entity.text;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
