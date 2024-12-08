@@ -37,7 +37,7 @@ public class ConnecterData {
 
     public UUID getUuid() {
         UUID uuid = UUID.randomUUID();
-        if (nbtCompound.contains("uuid"))
+        if (getStackNbt().contains("uuid"))
             uuid = nbtCompound.getUuid("uuid");
         else {
             nbtCompound.putUuid("uuid", uuid);
@@ -51,19 +51,19 @@ public class ConnecterData {
     }
 
     public boolean showVisual() {
-        if (nbtCompound.contains("visual"))
+        if (getStackNbt().contains("visual"))
             visual = nbtCompound.getBoolean("visual");
         return visual;
     }
 
     public int getWeight() {
-        if (nbtCompound.contains("weight"))
+        if (getStackNbt().contains("weight"))
             weight = nbtCompound.getInt("weight");
         return weight;
     }
 
     public BlockPos getBlockPos() {
-        if (nbtCompound.contains("blockPos")) {
+        if (getStackNbt().contains("blockPos")) {
             long data = nbtCompound.getLong("blockPos");
             currentEntity = BlockPos.fromLong(data);
         } else currentEntity = null;
