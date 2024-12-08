@@ -1,0 +1,92 @@
+{
+    "providers": [
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/left.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE001"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/leftfull.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE002"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/middle.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE003"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/middlefull.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE004"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/right.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE005"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/rightfull.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE006"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/lefthalf.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE007"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/middlehalf.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE008"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "extralent:gui/righthalf.png",
+            "ascent": 16,
+            "height": 16,
+            "chars":  [
+                "\uE009"
+            ]
+        },
+        {
+           "type": "space",
+            "advances": {
+                "\uF801": -2,
+                "\uF802": 1
+            }
+        }
+    ]
+}
