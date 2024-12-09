@@ -13,6 +13,8 @@
 
   "item.extralent.extralent_group": "Extralent",
 
+  "info.viewer.display_changed": "Changed display type:",
+
   "info.viewer.already_connected": "Already connected to another connector.",
   "info.viewer.disconnected": "Disconnected.",
   "info.viewer.connected": "Connected.",
@@ -21,5 +23,7 @@
   "info.viewer.type_same_bound": "Already bound.",
   "info.viewer.far_away": "Out of range.",
   "info.viewer.type_wrong": "Invalid type.",
-  "info.viewer.weight_changed": "Priority updated to:"
+  "info.viewer.weight_changed": "Priority updated to:",
+
+  "info.machine.inventory_empty": "Empty."
 }

@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.block.entity;
 
 import com.rouesvm.extralent.block.TickableBlockEntity;
+import com.rouesvm.extralent.item.custom.data.InfoData;
 import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
 import com.rouesvm.extralent.block.entity.text.ProgressBarRenderer;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -18,6 +19,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BasicMachineBlockEntity extends BlockEntity implements TickableBlockEntity {
     public final ExtralentInventory inventory;
@@ -116,26 +120,62 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         return this.getFormattedInfo();
     }
 
-    private Text getFormattedInfo() {
-        Text text = null;
-        if (getInventory() != null) {
-            text = Text.empty();
-            for (ItemStack stack : this.inventory.getStacks()) {
-                text = text.copy().append("\n").append(stack.getCount() + " ").append(stack.getName());
-            }
-        }
-        if (getEnergyStorage() != null) {
-            if (text == null) text = Text.empty();
+    public Text infoOnClicked(InfoData.CONTENT content) {
+        return content == InfoData.CONTENT.ENERGY ? getEnergyInfo(null, true) : getInventoryInfo(null, true);
+    }
 
-            text = text.copy().append("\n\n").append(ProgressBarRenderer.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity()));
+    private Text getInventoryInfo(Text text, boolean isUI) {
+        if (text == null) text = Text.empty();
+        if (getInventory() != null) {
+            int empty = 0;
+
+            Map<String, Integer> itemCounts = new HashMap<>();
+            for (ItemStack stack : this.inventory.getStacks()) {
+                if (stack.isEmpty()) {
+                    empty++;
+                    continue;
+                }
+
+                String itemName = stack.getName().getString(); // Get the item's name
+                itemCounts.put(itemName, itemCounts.getOrDefault(itemName, 0) + stack.getCount());
+            }
+
+            if (empty == this.inventory.size()) {
+                text = Text.translatable("info.machine.inventory_empty");
+                return text;
+            }
+
+            String toAppend = isUI ? " " : "\n";
+            for (Map.Entry<String, Integer> entry : itemCounts.entrySet())
+                text = text.copy().append(toAppend).append(String.valueOf(entry.getValue())).append(" ").append(entry.getKey());
+        }
+        return text;
+    }
+
+    private Text getEnergyInfo(Text text, boolean isUI) {
+        if (text == null) text = Text.empty();
+        if (getEnergyStorage() != null) {
             Text energyAmount = Text.literal(String.valueOf(this.energyStorage.getAmount()))
                     .append("/")
                     .append(String.valueOf(this.energyStorage.getCapacity()));
 
-            text = text.copy().append(Text.literal("\n")
-                    .append(energyAmount.copy())
-                    .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID)));
+            if (!isUI) {
+                text = text.copy().append("\n\n").append(ProgressBarRenderer.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity()));
+                text = text.copy().append(Text.literal("\n")
+                        .append(energyAmount.copy())
+                        .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID)));
+                return text;
+            }
+
+            text = text.copy().append(energyAmount.copy());
         }
+        return text;
+    }
+
+    private Text getFormattedInfo() {
+        Text text = null;
+        text = getInventoryInfo(text, false);
+        text = getEnergyInfo(text, false);
         return text;
     }
 }

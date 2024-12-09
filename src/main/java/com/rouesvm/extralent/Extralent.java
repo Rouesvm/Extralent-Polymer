@@ -4,6 +4,7 @@ import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.registries.block.BlockRegistry;
 import com.rouesvm.extralent.registries.data.DataComponentRegistry;
 import com.rouesvm.extralent.registries.item.ItemRegistry;
+import com.rouesvm.extralent.visual.ElementManager;
 import com.rouesvm.extralent.visual.HighlightManager;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
@@ -16,6 +17,7 @@ public class Extralent implements ModInitializer {
 	public static final String MOD_ID = "extralent";
 
 	public static final HighlightManager HIGHLIGHT_MANAGER = new HighlightManager();
+	public static final ElementManager ELEMENT_MANAGER = new ElementManager();
 
 	@Override
 	public void onInitialize() {
@@ -37,7 +39,6 @@ public class Extralent implements ModInitializer {
 					entries.add(ItemRegistry.INFO);
 					entries.add(ItemRegistry.CONNECTOR);
 					entries.add(ItemRegistry.VACUUM);
-					entries.add(ItemRegistry.FILTER_ITEM);
 					entries.add(BlockRegistry.ELECTRIC_FURNACE);
 					entries.add(BlockRegistry.GENERATOR);
 					entries.add(BlockRegistry.TRANSMITTER);

@@ -11,19 +11,14 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.UUID;
 
-public class ConnecterData {
-    private NbtCompound nbtCompound;
-
+public class ConnecterData extends BasicData {
     private boolean visual = false;
 
     private int weight = 0;
     private BlockPos currentEntity;
 
-    private final ItemStack stack;
-
     public ConnecterData(ItemStack stack) {
-        this.stack = stack;
-        this.nbtCompound = getStackNbt();
+        super(stack);
     }
 
     public PipeBlockEntity getCurrentEntity(ServerWorld world) {
@@ -33,21 +28,6 @@ public class ConnecterData {
         if (state == null) return null;
         else if (state instanceof PipeBlockEntity blockEntity) return blockEntity;
         else return null;
-    }
-
-    public UUID getUuid() {
-        UUID uuid = UUID.randomUUID();
-        if (getStackNbt().contains("uuid"))
-            uuid = nbtCompound.getUuid("uuid");
-        else {
-            nbtCompound.putUuid("uuid", uuid);
-            saveToStack();
-        }
-        return uuid;
-    }
-
-    public ItemStack getStack() {
-        return stack;
     }
 
     public boolean showVisual() {
@@ -90,20 +70,5 @@ public class ConnecterData {
         nbtCompound.putInt("weight", weight);
         saveToStack();
         this.weight = weight;
-    }
-
-    public void removeFromNbt(String name) {
-        nbtCompound.remove(name);
-        saveToStack();
-    }
-
-    private void saveToStack() {
-        stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbtCompound));
-    }
-
-    private NbtCompound getStackNbt() {
-        NbtComponent stackCompound = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
-        this.nbtCompound = stackCompound.copyNbt();
-        return nbtCompound;
     }
 }
