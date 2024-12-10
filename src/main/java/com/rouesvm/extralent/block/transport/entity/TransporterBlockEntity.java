@@ -21,12 +21,12 @@ public class TransporterBlockEntity extends PipeBlockEntity {
 
     @Override
     public ExtralentInventory createInventory() {
-        return super.createInventory(1);
+        return super.createInventory(2);
     }
 
     @Override
     public void tick() {
-        if (this.ticks++ % 2 == 0) {
+        if (this.ticks++ % 5 == 0) {
             super.onUpdate();
         }
     }
