@@ -64,7 +64,7 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
     }
 
     private void itemRecipes(RecipeExporter exporter) {
-        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemRegistry.COPPER_ROD, 1)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemRegistry.COPPER_ROD, 6)
                 .pattern("i  ").pattern(" i ").pattern("  i")
                 .input('i', Items.COPPER_INGOT)
                 .criterion("get_copper", InventoryChangedCriterion.Conditions.items(Items.COPPER_INGOT))
@@ -77,7 +77,7 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
                 .offerTo(exporter);
 
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemRegistry.CONNECTOR, 1)
-                .pattern(" i ").pattern("rbr").pattern("rbr")
+                .pattern("i i").pattern("rbr").pattern("rbr")
                 .input('b', Items.IRON_INGOT).input('i', ItemRegistry.ANTENNA)
                 .input('r', Items.REDSTONE)
                 .criterion("get_transmitter", InventoryChangedCriterion.Conditions.items(BlockRegistry.TRANSMITTER))
