@@ -6,6 +6,7 @@ import com.rouesvm.extralent.item.custom.ConnectorItem;
 import com.rouesvm.extralent.item.custom.InfoItem;
 import com.rouesvm.extralent.item.custom.VacuumItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -15,6 +16,9 @@ public class ItemRegistry {
     public static final InfoItem INFO = register(new InfoItem(new Item.Settings().maxCount(1)));
 
     public static final VacuumItem VACUUM = register(new VacuumItem(new Item.Settings().maxCount(1)));
+
+    // Materials
+    public static final BasicPolymerItem MACHINE_BASE = register(new BasicPolymerItem("machine_base", new Item.Settings(), Items.CHORUS_FRUIT));
 
     private static <T extends BasicPolymerItem> T register(T item) {
         Identifier id = Extralent.of(item.getItemName());
