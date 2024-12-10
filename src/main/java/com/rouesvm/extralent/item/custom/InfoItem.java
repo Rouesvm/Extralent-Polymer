@@ -6,7 +6,6 @@ import com.rouesvm.extralent.item.custom.data.Activated;
 import com.rouesvm.extralent.item.custom.data.BasicData;
 import com.rouesvm.extralent.item.custom.data.InfoData;
 import com.rouesvm.extralent.visual.elements.InfoText;
-import com.rouesvm.extralent.item.BasicPolymerItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -71,14 +70,12 @@ public class InfoItem extends DoubleTexturedItem {
                     data.setVisual(false);
                     Activated.setVisual(stack, false);
                 }
-
                 if (ELEMENT_MANAGER.getElement(uuid) != null) {
                     ELEMENT_MANAGER.removeElement(uuid);
                     return TypedActionResult.pass(stack);
                 }
 
                 data.setDisplay(data.getDisplay() == InfoData.DISPLAY.FLOATING ? InfoData.DISPLAY.UI : InfoData.DISPLAY.FLOATING);
-
                 player.sendMessage(Text.translatable("info.viewer.display_changed").copy().append(" ").append(data.getDisplay().toString()), true);
             } else if (data.getDisplay() == InfoData.DISPLAY.UI) {
                 if (!setContent(data, (ServerWorld) world)) return TypedActionResult.pass(stack);
