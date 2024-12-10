@@ -17,14 +17,14 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 public class BlockRegistry {
-    public static final MachineBlock QUARRY = registry(new QuarryBlock(AbstractBlock.Settings.create()));
-    public static final MachineBlock GENERATOR = registry(new GeneratorBlock(AbstractBlock.Settings.create()));
+    public static final MachineBlock QUARRY = registry(new QuarryBlock(AbstractBlock.Settings.create().hardness(2f)));
+    public static final MachineBlock GENERATOR = registry(new GeneratorBlock(AbstractBlock.Settings.create().hardness(2f)));
 
-    public static final MachineBlock TRANSPORTER = registry(new TransporterBlock(AbstractBlock.Settings.create()));
-    public static final MachineBlock TRANSMITTER = registry(new TransmitterBlock(AbstractBlock.Settings.create()));
+    public static final MachineBlock TRANSPORTER = registry(new TransporterBlock(AbstractBlock.Settings.create().hardness(1.5f)));
+    public static final MachineBlock TRANSMITTER = registry(new TransmitterBlock(AbstractBlock.Settings.create().hardness(1.5f)));
 
-    public static final MachineBlock HARVESTER = registry(new HarvesterBlock(AbstractBlock.Settings.create()));
-    public static final MachineBlock ELECTRIC_FURNACE = registry(new ElectricFurnaceBlock(AbstractBlock.Settings.create()));
+    public static final MachineBlock HARVESTER = registry(new HarvesterBlock(AbstractBlock.Settings.create().hardness(2f)));
+    public static final MachineBlock ELECTRIC_FURNACE = registry(new ElectricFurnaceBlock(AbstractBlock.Settings.create().hardness(2f)));
 
     private static <T extends BasicPolymerBlock> T registry(T block) {
         Identifier id = Extralent.of(block.getBlockName());

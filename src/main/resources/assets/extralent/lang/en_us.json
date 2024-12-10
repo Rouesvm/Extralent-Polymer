@@ -1,8 +1,15 @@
 {
+  "item.extralent.extralent_group": "Extralent",
+
+  "item.extralent.antenna" : "Antenna",
+  "item.extralent.copper_rod" : "Copper Rod",
+  "item.extralent.machine_base" : "Machine Base",
+
   "item.extralent.mob_vacuum" : "Mob Vacuum",
   "item.extralent.filter" : "Filter",
   "item.extralent.connector" : "Connector",
   "item.extralent.viewer" : "Viewer",
+
 
   "block.extralent.transporter" : "Transporter",
   "block.extralent.transmitter" : "Transmitter",
@@ -11,7 +18,6 @@
   "block.extralent.electric_furnace" : "Electric Furnace",
   "block.extralent.tree_harvester" : "Tree Harvester",
 
-  "item.extralent.extralent_group": "Extralent",
 
   "info.viewer.display_changed": "Changed display type:",
 

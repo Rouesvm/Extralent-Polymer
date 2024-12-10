@@ -23,7 +23,7 @@ public class PolymerBlockItem extends BlockItem implements PolymerItem, PolymerK
     public PolymerBlockItem(Settings settings, Block block, String name) {
         super(block, settings);
         this.model = PolymerResourcePackUtils.requestModel(Items.POISONOUS_POTATO,
-                Identifier.of(Extralent.MOD_ID, "item/" + name));
+                Identifier.of(Extralent.MOD_ID, "item/block/" + name));
     }
 
     @Override

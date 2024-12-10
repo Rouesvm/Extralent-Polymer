@@ -18,7 +18,10 @@ public class ItemRegistry {
     public static final VacuumItem VACUUM = register(new VacuumItem(new Item.Settings().maxCount(1)));
 
     // Materials
-    public static final BasicPolymerItem MACHINE_BASE = register(new BasicPolymerItem("machine_base", new Item.Settings(), Items.CHORUS_FRUIT));
+    public static final BasicPolymerItem MACHINE_BASE = register(new BasicPolymerItem("machine_base", new Item.Settings(), Items.POPPED_CHORUS_FRUIT));
+
+    public static final BasicPolymerItem COPPER_ROD = register(new BasicPolymerItem("copper_rod", new Item.Settings(), Items.CHORUS_FRUIT));
+    public static final BasicPolymerItem ANTENNA = register(new BasicPolymerItem("antenna", new Item.Settings().maxCount(16), Items.CHORUS_FRUIT));
 
     private static <T extends BasicPolymerItem> T register(T item) {
         Identifier id = Extralent.of(item.getItemName());
