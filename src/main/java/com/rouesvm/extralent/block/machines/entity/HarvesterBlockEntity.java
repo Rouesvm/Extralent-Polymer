@@ -1,9 +1,11 @@
 package com.rouesvm.extralent.block.machines.entity;
 
+import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
 import com.rouesvm.extralent.visual.LineDrawer;
+import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -23,10 +25,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private static final int width = 8;
@@ -35,8 +34,15 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
     private int ticks;
 
+    private static final int[] INPUT_SLOTS_ARRAY = {0, 1, 2};
+    private static final int[] OUTPUT_SLOTS_ARRAY = {3, 4, 5, 6, 7, 8};
+
+    private final InventoryStorage outputInventory;
+
     public HarvesterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.HARVESTER_BLOCK_ENTITY, pos, state);
+        this.outputInventory = InventoryStorage.of(inventory, Direction.UP);
+        this.inventoryStorage = InventoryStorage.of(inventory, Direction.DOWN);
     }
 
     @Override
@@ -46,19 +52,51 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public ExtralentInventory createInventory() {
-        return super.createInventory(9);
+        return new ExtralentInventory(9) {
+            @Override
+            public void markDirty() {
+                super.markDirty();
+                update();
+            }
+
+            @Override
+            public int[] getAvailableSlots(Direction side) {
+                if (side == Direction.UP)
+                    return INPUT_SLOTS_ARRAY;
+                return OUTPUT_SLOTS_ARRAY;
+            }
+
+            @Override
+            public boolean canInsert(int slot, ItemStack stack, Direction dir) {
+                return Arrays.stream(INPUT_SLOTS_ARRAY).anyMatch(input -> slot == input);
+            }
+
+            @Override
+            public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+                if (dir == Direction.UP && slot == INPUT_SLOTS_ARRAY[slot])
+                    return true;
+                else return Arrays.stream(INPUT_SLOTS_ARRAY).anyMatch(input -> slot != input);
+            }
+        };
     }
 
     @Override
     public void tick() {
         if (world == null || world.isClient) return;
-        if (energyStorage.amount <= 0) return;
+        Block machineBlock = getCachedState().getBlock();
+        if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
+
+        if (energyStorage.amount <= 0) {
+            machineBaseBlock.setState(false, world, pos);
+            return;
+        }
 
         if (ticks++ % 20 == 0) {
             ticks = 0;
             scanArea(pos, world);
 
             energyStorage.amount = MathHelper.clamp(energyStorage.amount - 500, 0, energyStorage.getCapacity());
+            machineBaseBlock.setState(true, world, pos);
         }
     }
 
@@ -113,8 +151,26 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
     private void insertDrops(List<ItemStack> drops) {
         drops.forEach(itemStack -> {
-            ItemStack stack = getInventory().addStack(itemStack);
-            itemStack.decrement(stack.getCount());
+            ItemStack stack = itemStack.copy();
+
+            for (int slot : OUTPUT_SLOTS_ARRAY) {
+                ItemStack slotStack = inventory.getStack(slot);
+                if (slotStack.isEmpty() || ItemStack.areItemsEqual(slotStack, stack)) {
+                    int availableSpace = 64 - slotStack.getCount();
+                    int toInsert = Math.min(stack.getCount(), availableSpace);
+
+                    if (slotStack.isEmpty()) {
+                        ItemStack newStack = stack.copy();
+                        newStack.setCount(toInsert);
+                        inventory.setStack(slot, newStack);
+                    } else slotStack.increment(toInsert);
+
+                    stack.decrement(toInsert);
+                    itemStack.decrement(toInsert);
+
+                    if (stack.isEmpty()) break;
+                }
+            }
         });
         drops.removeIf(ItemStack::isEmpty);
     }
@@ -182,5 +238,12 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     public Text infoOnClicked() {
         visualizeScanArea(pos, (ServerWorld) world);
         return super.infoOnClicked();
+    }
+
+    @Override
+    public InventoryStorage getInventoryProvider(Direction direction) {
+        if (direction == Direction.UP)
+            return outputInventory;
+        return inventoryStorage;
     }
 }

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class HarvesterBlock extends MachineBlock {
     public HarvesterBlock(Settings settings) {
-        super("tree_harvester", settings, false);
+        super("tree_harvester", settings, true);
     }
 
     @Override
