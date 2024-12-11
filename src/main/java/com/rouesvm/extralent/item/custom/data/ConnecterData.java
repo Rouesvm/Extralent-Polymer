@@ -2,14 +2,9 @@ package com.rouesvm.extralent.item.custom.data;
 
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.UUID;
 
 public class ConnecterData extends BasicData {
     private boolean visual = false;
