@@ -31,5 +31,10 @@
   "info.viewer.type_wrong": "Invalid type.",
   "info.viewer.weight_changed": "Priority updated to:",
 
-  "info.machine.inventory_empty": "Empty."
+
+  "info.machine.inventory_empty": "Empty.",
+
+
+  "general.info.out_of_energy": "Out of energy",
+  "general.info.stored_energy": "Stored Energy:"
 }
