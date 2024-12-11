@@ -14,6 +14,11 @@ public class DataComponentRegistry {
             "state"
     );
 
+
+    public static final ComponentType<Long> LAST_UPDATE_TYPE = register(
+            ComponentType.<Long>builder().codec(Codec.LONG).packetCodec(PacketCodecs.VAR_LONG).build(),
+            "last_update_time"
+    );
     private static <T> ComponentType<T> register(ComponentType<T> type, String name) {
         var registry = Registry.register(Registries.DATA_COMPONENT_TYPE, Extralent.of(name), type);
         PolymerComponent.registerDataComponent(registry);

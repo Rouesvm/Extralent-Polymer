@@ -12,6 +12,7 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -24,6 +25,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.base.SimpleEnergyItem;
 
 import java.util.List;
@@ -52,7 +54,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void modifyClientTooltip(List<Text> tooltip, ItemStack stack, @Nullable ServerPlayerEntity player) {
         tooltip.add(Text.translatable("general.info.stored_energy")
                 .append(" ")
                 .append(String.valueOf(getStoredEnergy(stack)))
@@ -70,20 +72,21 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (world == null || world.isClient) return;
-        if (!(entity instanceof PlayerEntity player)) return;
+        if (world != null && !world.isClient) {
+            if (!(entity instanceof PlayerEntity player)) return;
 
-        if (!Activated.showVisual(stack)) return;
-        if (shouldPass(stack, player, false)) return;
+            if (!Activated.showVisual(stack)) return;
+            if (shouldPass(stack, player, false)) return;
 
-        ConnecterData connecterData = new ConnecterData(stack);
-        if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getUuid());
+            ConnecterData connecterData = new ConnecterData(stack);
+            if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getUuid());
 
-        if (selected) {
-            PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
-            if (currentBlockEntity == null) return;
-            if (!connecterData.showVisual()) connecterData.setVisual(true);
-        } else if (connecterData.showVisual()) connecterData.setVisual(false);
+            if (selected) {
+                PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
+                if (currentBlockEntity == null) return;
+                if (!connecterData.showVisual()) connecterData.setVisual(true);
+            } else if (connecterData.showVisual()) connecterData.setVisual(false);
+        }
     }
 
     @Override
@@ -169,6 +172,8 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         playSoundChanged(player, 2f);
         player.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(weight)), true);
 
+        decreaseEnergy(stack);
+
         return true;
     }
 
@@ -184,6 +189,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
             playSoundConnection(player, 5f);
             HIGHLIGHT_MANAGER.clearAllHighlights(data.getUuid());
         } else {
+            decreaseEnergy(data.getStack());
             player.sendMessage(Text.translatable("info.viewer.connected"), true);
             currentBlockEntity.setConnected(true);
             playSoundConnection(player, 3f);
@@ -207,6 +213,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         PipeState output = currentBlockEntity.putBlock(connection);
         switch (output) {
             case SUCCESS -> {
+                decreaseEnergy(data.getStack());
                 player.sendMessage(Text.translatable("info.viewer.bound"), true);
                 playSound(player, 2f);
                 if (HIGHLIGHT_MANAGER.getHighlightFromMultiple(connection.getPos(), data.getUuid()) != null)
@@ -245,6 +252,11 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         }
 
         return false;
+    }
+
+    private void decreaseEnergy(ItemStack stack) {
+        if (getStoredEnergy(stack) < 15) return;
+        setStoredEnergy(stack, getStoredEnergy(stack) - 15);
     }
 
     private void highlightConnectedBlocks(UUID uuid, ServerWorld world, @NotNull PipeBlockEntity pipeBlockEntity) {
