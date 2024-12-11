@@ -9,6 +9,7 @@ public class Activated {
     }
 
     public static void setVisual(ItemStack stack, boolean visual) {
+        if (showVisual(stack) == visual) return;
         stack.set(DataComponentRegistry.BOOLEAN_TYPE, visual);
     }
 }
