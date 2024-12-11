@@ -2,6 +2,7 @@ package com.rouesvm.extralent.item.custom;
 
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.PipeState;
+import com.rouesvm.extralent.item.custom.data.Activated;
 import com.rouesvm.extralent.visual.elements.BlockHighlight;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
 import com.rouesvm.extralent.item.custom.data.ConnecterData;
@@ -10,23 +11,52 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
+import team.reborn.energy.api.base.SimpleEnergyItem;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.rouesvm.extralent.Extralent.HIGHLIGHT_MANAGER;
 
-public class ConnectorItem extends DoubleTexturedItem {
+public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyItem {
     public ConnectorItem(Settings settings) {
         super("connector", settings, Items.COAL);
+    }
+
+    @Override
+    public long getEnergyCapacity(ItemStack stack) {
+        return 100_000;
+    }
+
+    @Override
+    public long getEnergyMaxInput(ItemStack stack) {
+        return 1_000;
+    }
+
+    @Override
+    public long getEnergyMaxOutput(ItemStack stack) {
+        return 0;
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+        tooltip.add(Text.translatable("general.info.stored_energy")
+                .append(" ")
+                .append(String.valueOf(getStoredEnergy(stack)))
+                .setStyle(Style.EMPTY.withColor(Formatting.BLUE)));
     }
 
     @Override
@@ -41,6 +71,10 @@ public class ConnectorItem extends DoubleTexturedItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (world == null || world.isClient) return;
+        if (!(entity instanceof PlayerEntity player)) return;
+
+        if (!Activated.showVisual(stack)) return;
+        if (shouldPass(stack, player, false)) return;
 
         ConnecterData connecterData = new ConnecterData(stack);
         if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getUuid());
@@ -56,6 +90,8 @@ public class ConnectorItem extends DoubleTexturedItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
         if (world != null && !world.isClient) {
+            if (shouldPass(stack, user, true)) return TypedActionResult.pass(stack);
+
             var cast = user.raycast(5, 0, false);
             if (cast.getType() == HitResult.Type.ENTITY)
                 return TypedActionResult.pass(stack);
@@ -69,7 +105,7 @@ public class ConnectorItem extends DoubleTexturedItem {
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
+    public ActionResult useOnBlock(@NotNull ItemUsageContext context) {
         if (context.getWorld().isClient || context.getPlayer() == null) return ActionResult.PASS;
         ServerWorld world = (ServerWorld) context.getWorld();
         var blockEntityResult = world.getBlockEntity(context.getBlockPos());
@@ -82,6 +118,8 @@ public class ConnectorItem extends DoubleTexturedItem {
         }
 
         Connection connection = Connection.of(context.getBlockPos(), connecterData.getWeight(), context.getSide());
+
+        if (shouldPass(connecterData.getStack(), context.getPlayer(), true)) return ActionResult.PASS;
 
         if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
             if (currentBlockEntity != null) {
@@ -134,9 +172,10 @@ public class ConnectorItem extends DoubleTexturedItem {
         return true;
     }
 
-    private void onConnectedChanged(ConnecterData data, ServerWorld world, PlayerEntity player, boolean connected) {
+    private void onConnectedChanged(@NotNull ConnecterData data, ServerWorld world, PlayerEntity player, boolean connected) {
         this.setTexture(data.getStack(), connected);
         PipeBlockEntity currentBlockEntity = data.getCurrentEntity(world);
+        data.setVisual(connected);
 
         if (!connected) {
             player.sendMessage(Text.translatable("info.viewer.disconnected"), true);
@@ -152,7 +191,7 @@ public class ConnectorItem extends DoubleTexturedItem {
         }
     }
 
-    private void sendMessage(ConnecterData data, ServerWorld world, PlayerEntity player, Connection connection) {
+    private void sendMessage(@NotNull ConnecterData data, ServerWorld world, @NotNull PlayerEntity player, Connection connection) {
         PipeBlockEntity currentBlockEntity = data.getCurrentEntity(world);
 
         if (player.isSneaking()) {
@@ -197,7 +236,18 @@ public class ConnectorItem extends DoubleTexturedItem {
         }
     }
 
-    private void highlightConnectedBlocks(UUID uuid, ServerWorld world, PipeBlockEntity pipeBlockEntity) {
+    private boolean shouldPass(@NotNull ItemStack stack, PlayerEntity player, boolean showMessage) {
+        if (getStoredEnergy(stack) <= 0) {
+            if (showMessage) player.sendMessage(Text.translatable("general.info.out_of_energy")
+                    .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
+            this.setTexture(stack, false);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void highlightConnectedBlocks(UUID uuid, ServerWorld world, @NotNull PipeBlockEntity pipeBlockEntity) {
         if (!pipeBlockEntity.getBlocks().isEmpty()) {
             pipeBlockEntity.getBlocks().forEach(connection ->
                     HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
@@ -207,15 +257,15 @@ public class ConnectorItem extends DoubleTexturedItem {
         }
     }
 
-    private void playSound(PlayerEntity player, float pitch) {
+    private void playSound(@NotNull PlayerEntity player, float pitch) {
         player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
     }
 
-    private void playSoundConnection(PlayerEntity player, float pitch) {
+    private void playSoundConnection(@NotNull PlayerEntity player, float pitch) {
         player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_SNARE.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
     }
 
-    private void playSoundChanged(PlayerEntity player, float pitch) {
+    private void playSoundChanged(@NotNull PlayerEntity player, float pitch) {
         player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_BANJO.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
     }
 }
