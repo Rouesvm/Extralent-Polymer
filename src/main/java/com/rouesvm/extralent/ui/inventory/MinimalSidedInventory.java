@@ -18,7 +18,7 @@ public interface MinimalSidedInventory extends SidedInventory {
 
     @Override
     default boolean isEmpty() {
-        Iterator var1 = this.getStacks().iterator();
+        Iterator<ItemStack> var1 = this.getStacks().iterator();
 
         ItemStack itemStack;
         do {
@@ -26,7 +26,7 @@ public interface MinimalSidedInventory extends SidedInventory {
                 return true;
             }
 
-            itemStack = (ItemStack)var1.next();
+            itemStack = var1.next();
         } while(itemStack.isEmpty());
 
         return false;

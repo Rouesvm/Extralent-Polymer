@@ -7,6 +7,7 @@ import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.RecipeEntry;
@@ -33,6 +34,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
     private SmeltingRecipe currentRecipe;
 
+    private static final long ENERGY_USED_PER_SECOND = 10; // ENERGY_USED * (SECONDS * 20)
     private static final double TIME_TO_BURN_IN_SECONDS = 0.5;
 
     private final InventoryStorage outputInventory;
@@ -65,7 +67,21 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
             }
 
             @Override
+            public boolean isValid(int slot, ItemStack stack) {
+                return canSmelt(stack);
+            }
+
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                if (super.canInsert(stack))
+                    return canInsert(INPUT_SLOT_INDEX, stack, null);
+                return false;
+            }
+
+            @Override
             public boolean canInsert(int slot, ItemStack stack, Direction dir) {
+                if (!isValid(slot, stack))
+                    return false;
                 return slot == INPUT_SLOT_INDEX;
             }
 
@@ -91,7 +107,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     @Override
     public void tick() {
         if (world == null || world.isClient) return;
-        if (energyStorage.amount <= 0) return;
+        if (energyStorage.amount <= ENERGY_USED_PER_SECOND) return;
 
         Block machineBlock = getCachedState().getBlock();
         if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
@@ -103,19 +119,30 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         }
 
         if (!shouldBurn) return;
-        if (progress++ < TIME_TO_BURN_IN_SECONDS * 20) {
-            energyStorage.amount = MathHelper.clamp(energyStorage.amount - 100, 0, energyStorage.getCapacity());
-        } else {
+        if (progress++ >= TIME_TO_BURN_IN_SECONDS * 20) {
+            long energy_used = calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS);
+            if (energyStorage.amount <= energy_used) return;
+
+            energyStorage.amount = MathHelper.clamp(energyStorage.amount - energy_used, 0, energyStorage.getCapacity());
+
             machineBaseBlock.setState(false, world, pos);
             outputItem();
             markDirty();
         }
     }
 
+    private boolean canSmelt(ItemStack input) {
+        Optional<SmeltingRecipe> stackRecipe = world.getRecipeManager().getFirstMatch(RecipeType.SMELTING,
+                new SingleStackRecipeInput(input), world).map(RecipeEntry::value);
+        return stackRecipe.isPresent() && !stackRecipe.get().getResult(world.getRegistryManager()).isEmpty();
+    }
+
     private boolean validItem() {
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
         if (!inputStack.isEmpty()) {
-            Optional<SmeltingRecipe> stackRecipe = world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SingleStackRecipeInput(inputStack), world).map(RecipeEntry::value);
+            Optional<SmeltingRecipe> stackRecipe = world.getRecipeManager().getFirstMatch(RecipeType.SMELTING,
+                    new SingleStackRecipeInput(inputStack), world).map(RecipeEntry::value);
+
             if (stackRecipe.isPresent() && canAcceptOutput(stackRecipe.get())) {
                 currentRecipe = stackRecipe.get();
                 shouldBurn = true;

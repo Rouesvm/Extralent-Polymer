@@ -22,8 +22,13 @@ public class ExtralentInventory extends SimpleInventory implements MinimalSidedI
     }
 
     @Override
+    public boolean canInsert(ItemStack stack) {
+        return super.canInsert(stack);
+    }
+
+    @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return false;
+        return isValid(slot, stack);
     }
 
     @Override

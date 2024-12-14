@@ -116,6 +116,10 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         return this.inventory;
     }
 
+    public long calculateEnergyUsed(long energy_used, double seconds) {
+        return (long) (energy_used * (seconds * 20));
+    }
+
     public Text infoOnClicked() {
         return this.getFormattedInfo();
     }

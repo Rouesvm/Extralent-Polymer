@@ -12,6 +12,9 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.impl.transfer.context.SingleSlotContainerItemContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HopperBlock;
+import net.minecraft.block.entity.HopperBlockEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
@@ -52,7 +55,21 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
             }
 
             @Override
+            public boolean isValid(int slot, ItemStack stack) {
+                return isFuel(stack.getItem());
+            }
+
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                if (super.canInsert(stack))
+                    return canInsert(0, stack, null);
+                return false;
+            }
+
+            @Override
             public boolean canInsert(int slot, ItemStack stack, Direction dir) {
+                if (!isValid(slot, stack))
+                    return false;
                 return slot == 0;
             }
 
@@ -115,6 +132,11 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
                 }
             }
         }
+    }
+
+    public boolean isFuel(Item item) {
+        var burning = FuelRegistry.INSTANCE.get(item);
+        return burning != null && burning != 0;
     }
 
     public void validFuel() {
