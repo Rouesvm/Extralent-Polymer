@@ -68,19 +68,12 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
             @Override
             public boolean isValid(int slot, ItemStack stack) {
-                return canSmelt(stack);
-            }
-
-            @Override
-            public boolean canInsert(ItemStack stack) {
-                if (super.canInsert(stack))
-                    return canInsert(INPUT_SLOT_INDEX, stack, null);
-                return false;
+                return canInsert(slot, stack, null);
             }
 
             @Override
             public boolean canInsert(int slot, ItemStack stack, Direction dir) {
-                if (!isValid(slot, stack))
+                if (!canSmelt(stack))
                     return false;
                 return slot == INPUT_SLOT_INDEX;
             }

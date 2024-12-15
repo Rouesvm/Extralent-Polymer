@@ -69,9 +69,10 @@ public class BlockHighlight {
 
     public void tick() {
         if (this.world != null) {
+            spawnEdgeParticles(position);
+
             if (this.ticks++ % 20 == 0) {
                 ticks = 0;
-                spawnEdgeParticles(position);
             }
         }
     }

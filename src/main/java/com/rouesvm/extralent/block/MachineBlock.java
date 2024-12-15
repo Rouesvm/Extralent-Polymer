@@ -22,6 +22,7 @@ public class MachineBlock extends ActivatedPolymerBlock implements BlockEntityPr
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof BasicMachineBlockEntity basicMachineBlock) {
+                if (basicMachineBlock.getInventory() == null) return;
                 ItemScatterer.spawn(world, pos, basicMachineBlock.getInventory());
             }
         }

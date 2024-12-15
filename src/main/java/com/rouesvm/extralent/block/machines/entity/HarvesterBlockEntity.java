@@ -187,7 +187,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         if (world.isAir(pos.up())) {
             if (inventory.isEmpty()) return;
             Item selectedSapling = null;
-            for (ItemStack stack : inventory.getHeldStacks()) {
+            for (ItemStack stack : inventory.getStacks()) {
                 if (stack.isIn(ItemTags.SAPLINGS)) selectedSapling = stack.getItem();
             }
 
