@@ -109,7 +109,7 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
             EnergyStorageUtil.move(
                     getEnergyProvider(null),
                     ContainerItemContext.ofSingleSlot(getInventoryProvider(null).getSlot(CHARGING_SLOT_INDEX)).find(EnergyStorage.ITEM),
-                    Long.MAX_VALUE,
+                    getEnergyStorage().maxExtract,
                     null
             );
         }
