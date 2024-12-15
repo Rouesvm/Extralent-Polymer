@@ -1,10 +1,10 @@
 package com.rouesvm.extralent.registries.block;
 
 import com.rouesvm.extralent.Extralent;
-import com.rouesvm.extralent.block.machines.entity.ElectricFurnaceBlockEntity;
+import com.rouesvm.extralent.block.machine.entity.ElectricFurnaceBlockEntity;
 import com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity;
-import com.rouesvm.extralent.block.machines.entity.HarvesterBlockEntity;
-import com.rouesvm.extralent.block.machines.entity.QuarryBlockEntity;
+import com.rouesvm.extralent.block.machine.entity.HarvesterBlockEntity;
+import com.rouesvm.extralent.block.machine.entity.QuarryBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.TransmitterBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.TransporterBlockEntity;
 import eu.pb4.polymer.core.api.block.PolymerBlockUtils;

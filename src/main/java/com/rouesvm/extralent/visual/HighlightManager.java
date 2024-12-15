@@ -2,6 +2,7 @@ package com.rouesvm.extralent.visual;
 
 import com.rouesvm.extralent.visual.elements.BlockHighlight;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
@@ -22,8 +23,8 @@ public class HighlightManager {
         return singularHighlight.get(uuid);
     }
 
-    public void createSingularHighlight(UUID uuid, ServerWorld world, Connection connection) {
-        singularHighlight.put(uuid, BlockHighlight.createHighlight(world, connection));
+    public void createSingularHighlight(UUID uuid, ServerWorld world, ServerPlayerEntity player, Connection connection) {
+        singularHighlight.put(uuid, BlockHighlight.createHighlight(world, player, connection));
     }
 
     public void removeSingularHighlight(UUID uuid) {

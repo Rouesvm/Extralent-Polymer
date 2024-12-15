@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.machines.entity;
+package com.rouesvm.extralent.block.machine.entity;
 
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
@@ -29,6 +29,8 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     private int progress;
     private BlockPos miningPos = this.pos.down();
 
+    public static final long ENERGY_USED = 100;
+
     public QuarryBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.QUARRY_BLOCK_ENTITY, pos, state);
     }
@@ -45,12 +47,12 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
         Block machineBlock = getCachedState().getBlock();
         if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
 
-        if (energyStorage.amount <= 0) {
+        if (energyStorage.amount <= ENERGY_USED) {
             machineBaseBlock.setState(false, world, pos);
             return;
         }
 
-        energyStorage.amount = MathHelper.clamp(energyStorage.amount - 100, 0, energyStorage.getCapacity());
+        energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
 
         if (this.progress++ % 10 == 0) {
             machineBaseBlock.setState(true, world, pos);
@@ -87,7 +89,7 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     }
 
     private void insertDrops(List<ItemStack> drops, Storage<ItemVariant> aboveStorage) {
-        drops.forEach(itemStack -> {
+        drops.parallelStream().forEach(itemStack -> {
             try(Transaction transaction = Transaction.openOuter()) {
                 long inserted = aboveStorage.insert(ItemVariant.of(itemStack), itemStack.getCount(),transaction);
                 if (inserted > 0) {
@@ -117,9 +119,5 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
         super.writeNbt(nbt, registryLookup);
         nbt.putInt("progress", this.progress);
         nbt.putLong("mining_pos", this.miningPos.asLong());
-    }
-
-    public int getProgress() {
-        return this.progress;
     }
 }

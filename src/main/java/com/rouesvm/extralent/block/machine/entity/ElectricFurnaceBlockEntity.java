@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.machines.entity;
+package com.rouesvm.extralent.block.machine.entity;
 
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
@@ -7,7 +7,6 @@ import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.RecipeEntry;
@@ -100,7 +99,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     @Override
     public void tick() {
         if (world == null || world.isClient) return;
-        if (energyStorage.amount <= ENERGY_USED_PER_SECOND) return;
+        if (energyStorage.amount <= calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS)) return;
 
         Block machineBlock = getCachedState().getBlock();
         if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;

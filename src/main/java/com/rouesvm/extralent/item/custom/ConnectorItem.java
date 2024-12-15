@@ -11,7 +11,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -143,7 +142,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
 
             pipeBlockEntity.onUpdate();
             onConnectedChanged(connecterData, world, context.getPlayer(), true);
-            highlightConnectedBlocks(connecterData.getUuid(), world, pipeBlockEntity);
+            highlightConnectedBlocks(connecterData.getUuid(), world, (ServerPlayerEntity) context.getPlayer(), pipeBlockEntity);
 
             return ActionResult.SUCCESS;
         } else if (blockEntityResult != null
@@ -193,7 +192,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
             player.sendMessage(Text.translatable("info.viewer.connected"), true);
             currentBlockEntity.setConnected(true);
             playSoundConnection(player, 3f);
-            HIGHLIGHT_MANAGER.createSingularHighlight(data.getUuid(), world, Connection.of(currentBlockEntity.getPos(), 10));
+            HIGHLIGHT_MANAGER.createSingularHighlight(data.getUuid(), world, (ServerPlayerEntity) player, Connection.of(currentBlockEntity.getPos(), 10));
         }
     }
 
@@ -219,7 +218,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
                 if (HIGHLIGHT_MANAGER.getHighlightFromMultiple(connection.getPos(), data.getUuid()) != null)
                     HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getUuid());
                 HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
-                        BlockHighlight.createHighlight(world, connection),
+                        BlockHighlight.createHighlight(world, (ServerPlayerEntity) player, connection),
                         data.getUuid()
                 );
             }
@@ -233,7 +232,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
                     playSoundChanged(player, 3f);
                     HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection.getPos(), data.getUuid());
                     HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
-                            BlockHighlight.createHighlight(world, connection),
+                            BlockHighlight.createHighlight(world, (ServerPlayerEntity) player, connection),
                             data.getUuid()
                     );
                 }
@@ -259,11 +258,11 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         setStoredEnergy(stack, getStoredEnergy(stack) - 15);
     }
 
-    private void highlightConnectedBlocks(UUID uuid, ServerWorld world, @NotNull PipeBlockEntity pipeBlockEntity) {
+    private void highlightConnectedBlocks(UUID uuid, ServerWorld world, ServerPlayerEntity player, @NotNull PipeBlockEntity pipeBlockEntity) {
         if (!pipeBlockEntity.getBlocks().isEmpty()) {
             pipeBlockEntity.getBlocks().forEach(connection ->
                     HIGHLIGHT_MANAGER.addHighlightToMultiple(connection.getPos(),
-                            BlockHighlight.createHighlight(world, connection),
+                            BlockHighlight.createHighlight(world, player, connection),
                             uuid)
             );
         }

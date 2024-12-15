@@ -2,33 +2,38 @@ package com.rouesvm.extralent.visual.elements;
 
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.particle.*;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import org.joml.Vector3f;
 
 public class BlockHighlight {
     private final BlockPos position;
-    private final ParticleEffect particleTypes;
+    private final Vector3f color;
 
     private final ServerWorld world;
+    private final ServerPlayerEntity player;
 
     private int ticks = 40;
     private int randomInt = 0;
 
-    private BlockHighlight(ServerWorld world, BlockPos position) {
+    private BlockHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position) {
         this.world = world;
-        this.particleTypes = ParticleTypes.SCRAPE;
+        this.player = player;
+        this.color = new Vector3f(0.5F, 0.5F, 0.5F);
         this.position = position;
     }
 
-    private BlockHighlight(ServerWorld world, Connection connection) {
+    private BlockHighlight(ServerWorld world, ServerPlayerEntity player, Connection connection) {
         this.world = world;
         this.position = connection.getPos();
+        this.player = player;
 
         if (connection.getWeight() == 0) {
-            this.particleTypes = ParticleTypes.WAX_ON;
+            this.color = new Vector3f(1F, 0.5F, 0F);
         } else if (connection.getWeight() == 10) {
-            this.particleTypes = ParticleTypes.WAX_OFF;
-        } else this.particleTypes = ParticleTypes.SCRAPE;
+            this.color = new Vector3f(0.25F, 1F, 0.25F);
+        } else this.color = new Vector3f(0F, 0.75F, 1F);
     }
 
     public void spawnEdgeParticles(BlockPos pos) {
@@ -63,25 +68,25 @@ public class BlockHighlight {
             double y = start.getY() + i * dy;
             double z = start.getZ() + i * dz;
 
-            world.spawnParticles(particleTypes, x, y, z, 0, 0, 0, 0, 0);
+            world.spawnParticles(player, new DustParticleEffect(color, 0.75F), true,
+                    x, y, z, 0, 0, 0, 0, 0);
         }
     }
 
     public void tick() {
         if (this.world != null) {
-            spawnEdgeParticles(position);
-
             if (this.ticks++ % 20 == 0) {
                 ticks = 0;
+                spawnEdgeParticles(position);
             }
         }
     }
 
-    public static BlockHighlight createHighlight(ServerWorld world, BlockPos position) {
-        return new BlockHighlight(world, position);
+    public static BlockHighlight createHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position) {
+        return new BlockHighlight(world, player, position);
     }
 
-    public static BlockHighlight createHighlight(ServerWorld world, Connection connection) {
-        return new BlockHighlight(world, connection);
+    public static BlockHighlight createHighlight(ServerWorld world, ServerPlayerEntity player, Connection connection) {
+        return new BlockHighlight(world, player, connection);
     }
 }

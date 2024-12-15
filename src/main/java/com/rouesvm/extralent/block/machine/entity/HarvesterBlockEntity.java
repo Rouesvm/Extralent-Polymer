@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.machines.entity;
+package com.rouesvm.extralent.block.machine.entity;
 
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
@@ -14,7 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.world.ServerWorld;
@@ -23,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.joml.Vector3f;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.*;
@@ -33,6 +34,8 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private static final int depth = 8;
 
     private int ticks;
+
+    public static final long ENERGY_USED = 500;
 
     private static final int[] INPUT_SLOTS_ARRAY = {0, 1, 2};
     private static final int[] OUTPUT_SLOTS_ARRAY = {3, 4, 5, 6, 7, 8};
@@ -86,7 +89,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         Block machineBlock = getCachedState().getBlock();
         if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
 
-        if (energyStorage.amount <= 0) {
+        if (energyStorage.amount <= ENERGY_USED) {
             machineBaseBlock.setState(false, world, pos);
             return;
         }
@@ -95,7 +98,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             ticks = 0;
             scanArea(pos, world);
 
-            energyStorage.amount = MathHelper.clamp(energyStorage.amount - 500, 0, energyStorage.getCapacity());
+            energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
             machineBaseBlock.setState(true, world, pos);
         }
     }
@@ -211,19 +214,19 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         for (int i = 0; i < 4; i++) {
             BlockPos topCorner = getCorner(start, end, i, true);
             BlockPos bottomCorner = getCorner(start, end, i, false);
-            LineDrawer.drawLine(ParticleTypes.WAX_ON, topCorner, bottomCorner, world);
+            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), topCorner, bottomCorner, world);
         }
 
         for (int i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, true);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, true);
-            LineDrawer.drawLine(ParticleTypes.WAX_ON, startCorner, endCorner, world);
+            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), startCorner, endCorner, world);
         }
 
         for (int i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, false);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, false);
-            LineDrawer.drawLine(ParticleTypes.WAX_ON, startCorner, endCorner, world);
+            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), startCorner, endCorner, world);
         }
     }
 
