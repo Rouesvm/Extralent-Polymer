@@ -7,7 +7,20 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class BlockHighlight {
+    private static final Vector3f CONNECTED_BLOCK_COLOR = new Vector3f(0.25F, 1F, 0.25F);
+    private static final Vector3f OUTPUT_BLOCK_COLOR = new Vector3f(1F, 0.5F, 0F);
+    private static final Vector3f INPUT_BLOCK_COLOR = new Vector3f(0F, 0.75F, 1F);
+
+    private static final int[][] edges = {
+            {0, 1}, {0, 2}, {0, 4}, {1, 3}, {1, 5}, {2, 3}, {2, 6}, {3, 7},
+            {4, 5}, {4, 6}, {5, 7}, {6, 7}
+    };
+
+    private DustParticleEffect particleType;
+
     private final BlockPos position;
     private final Vector3f color;
 
@@ -15,12 +28,13 @@ public class BlockHighlight {
     private final ServerPlayerEntity player;
 
     private int ticks = 40;
-    private int randomInt = 0;
+
+    private int lastEdge = -1;
 
     private BlockHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position) {
         this.world = world;
         this.player = player;
-        this.color = new Vector3f(0.5F, 0.5F, 0.5F);
+        this.color = CONNECTED_BLOCK_COLOR;
         this.position = position;
     }
 
@@ -30,10 +44,12 @@ public class BlockHighlight {
         this.player = player;
 
         if (connection.getWeight() == 0) {
-            this.color = new Vector3f(1F, 0.5F, 0F);
+            this.color = OUTPUT_BLOCK_COLOR;
         } else if (connection.getWeight() == 10) {
-            this.color = new Vector3f(0.25F, 1F, 0.25F);
-        } else this.color = new Vector3f(0F, 0.75F, 1F);
+            this.color = CONNECTED_BLOCK_COLOR;
+        } else this.color = INPUT_BLOCK_COLOR;
+
+        this.particleType = new DustParticleEffect(color, 0.725F);
     }
 
     public void spawnEdgeParticles(BlockPos pos) {
@@ -42,19 +58,17 @@ public class BlockHighlight {
                 pos.add(0, 1, 0), pos.add(1, 1, 0), pos.add(0, 1, 1), pos.add(1, 1, 1)
         };
 
-        int[][] edges = {
-                {0, 1}, {0, 2}, {0, 4}, {1, 3}, {1, 5}, {2, 3}, {2, 6}, {3, 7},
-                {4, 5}, {4, 6}, {5, 7}, {6, 7}
-        };
+        int randomEdge;
+        do {
+            randomEdge = ThreadLocalRandom.current().nextInt(edges.length);
+        } while (randomEdge == lastEdge);
+        lastEdge = randomEdge;
 
-        randomInt++;
-        if (randomInt <= edges.length) {
-            int[] assignedPos = edges[randomInt - 1];
-            BlockPos start = corners[assignedPos[0]];
-            BlockPos end = corners[assignedPos[1]];
+        int[] assignedPos = edges[randomEdge];
+        BlockPos start = corners[assignedPos[0]];
+        BlockPos end = corners[assignedPos[1]];
 
-            spawnParticlesAlongEdge(start, end);
-        } else randomInt = 0;
+        spawnParticlesAlongEdge(start, end);
     }
 
     public void spawnParticlesAlongEdge(BlockPos start, BlockPos end) {
@@ -68,7 +82,7 @@ public class BlockHighlight {
             double y = start.getY() + i * dy;
             double z = start.getZ() + i * dz;
 
-            world.spawnParticles(player, new DustParticleEffect(color, 0.75F), true,
+            world.spawnParticles(player, particleType, true,
                     x, y, z, 0, 0, 0, 0, 0);
         }
     }
@@ -76,7 +90,7 @@ public class BlockHighlight {
     public void tick() {
         if (this.world != null) {
             if (this.ticks++ % 20 == 0) {
-                ticks = 0;
+                this.ticks = 0;
                 spawnEdgeParticles(position);
             }
         }

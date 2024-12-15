@@ -27,7 +27,6 @@ public class Extralent implements ModInitializer {
 		DataComponentRegistry.initialize();
 
 		ItemRegistry.initialize();
-		ItemRegistry.initialize();
 
 		BlockRegistry.initialize();
 		BlockEntityRegistry.initialize();

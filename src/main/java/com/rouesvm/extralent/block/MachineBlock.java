@@ -6,6 +6,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -22,11 +24,15 @@ public class MachineBlock extends ActivatedPolymerBlock implements BlockEntityPr
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof BasicMachineBlockEntity basicMachineBlock) {
-                if (basicMachineBlock.getInventory() == null) return;
-                ItemScatterer.spawn(world, pos, basicMachineBlock.getInventory());
+                if (basicMachineBlock.getInventory() != null) {
+                    ItemScatterer.spawn(world, pos, basicMachineBlock.getInventory());
+                }
             }
         }
-        super.onStateReplaced(state, world, pos, newState, moved);
+
+        if (state.hasBlockEntity() && !state.isOf(newState.getBlock())) {
+            world.removeBlockEntity(pos);
+        }
     }
 
     @ApiStatus.OverrideOnly

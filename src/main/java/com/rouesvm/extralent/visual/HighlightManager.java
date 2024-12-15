@@ -57,7 +57,7 @@ public class HighlightManager {
 
     // Tick
     public void tickHighlights(UUID uuid) {
-        getMultipleHighlights(uuid).forEach((pos, blockHighlight) -> blockHighlight.tick());
+        getMultipleHighlights(uuid).values().parallelStream().forEach(BlockHighlight::tick);
 
         if (getSingularHighlight(uuid) != null)
             getSingularHighlight(uuid).tick();
