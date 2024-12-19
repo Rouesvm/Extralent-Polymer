@@ -34,7 +34,8 @@
 
   "info.machine.inventory_empty": "Empty.",
 
-
   "general.info.out_of_energy": "Out of energy",
-  "general.info.stored_energy": "Stored Energy:"
+  "general.info.stored_energy": "Stored Energy:",
+
+  "ui.extralent.filter": "Filter"
 }

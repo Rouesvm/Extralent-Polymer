@@ -1,14 +1,20 @@
 package com.rouesvm.extralent.ui.inventory;
 
-import eu.pb4.sgui.api.gui.SlotGuiInterface;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class FakeInventory extends SimpleInventory {
     public FakeInventory(int size) {
         super(size);
+    }
+
+
+    @Override
+    public int count(Item item) {
+        return 1;
     }
 
     @Override

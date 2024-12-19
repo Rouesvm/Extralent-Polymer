@@ -3,30 +3,46 @@ package com.rouesvm.extralent.block.transport.entity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
+import com.rouesvm.extralent.ui.inventory.FakeInventory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import team.reborn.energy.api.EnergyStorageUtil;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
+    public List<Item> itemList = new ArrayList<>();
+
     public TransporterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSPORTER_BLOCK_ENTITY, pos, state);
     }
 
     @Override
     public ExtralentInventory createInventory() {
-        return super.createInventory(2);
+        return super.createInventory(1);
+    }
+
+    public void setItemList(List<ItemStack> inventory) {
+        itemList = new ArrayList<>();
+        if (inventory.isEmpty()) return;
+
+        inventory.forEach(stack -> itemList.add(stack.getItem()));
     }
 
     @Override
     public void tick() {
-        if (this.ticks++ % 5 == 0) {
+        if (this.ticks++ % 8 == 0) {
             super.onUpdate();
         }
     }
@@ -51,17 +67,18 @@ public class TransporterBlockEntity extends PipeBlockEntity {
 
     public boolean insertItem(Storage<ItemVariant> storage) {
         for (StorageView<ItemVariant> storageView : this.inventoryStorage) {
-            if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
+            if (isValidStorageView(storageView)) {
                 Transaction transaction = Transaction.openOuter();
-                var resource = storageView.getResource();
-                long extracted = this.inventoryStorage.extract(resource, 1, transaction);
+                ItemVariant resource = storageView.getResource();
+                long extracted = this.inventoryStorage.extract(resource, 4, transaction);
                 if (extracted > 0) {
-                    long inserted = storage.insert(resource, 1, transaction);
+                    long inserted = storage.insert(resource, extracted, transaction);
                     if (inserted > 0) {
                         transaction.commit();
                         return true;
                     }
                 }
+
                 transaction.close();
             }
         }
@@ -70,20 +87,31 @@ public class TransporterBlockEntity extends PipeBlockEntity {
 
     public boolean extractItem(Storage<ItemVariant> storage) {
         for (StorageView<ItemVariant> storageView : storage) {
-            if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
+            if (isValidStorageView(storageView)) {
+                ItemVariant resource = storageView.getResource();
                 Transaction transaction = Transaction.openOuter();
-                var resource = storageView.getResource();
-                long extracted = storage.extract(resource, 1, transaction);
-                if (extracted > 0) {
-                    long inserted = this.inventoryStorage.insert(resource, 1, transaction);
-                    if (inserted > 0) {
-                        transaction.commit();
-                        return true;
-                    }
+                long extracted = storage.extract(resource, 4, transaction);
+
+                if (isInvalidResource(resource) || extracted == 0)  {
+                    transaction.close();
+                    continue;
                 }
-                transaction.close();
+
+                long inserted = this.inventoryStorage.insert(resource, extracted, transaction);
+                if (inserted > 0) {
+                    transaction.commit();
+                    return true;
+                } else transaction.close();
             }
         }
         return false;
+    }
+
+    private boolean isValidStorageView(StorageView<ItemVariant> storageView) {
+        return storageView != null && !storageView.isResourceBlank() && storageView.getAmount() > 0;
+    }
+
+    private boolean isInvalidResource(ItemVariant resource) {
+        return !itemList.isEmpty() && !itemList.contains(resource.getItem());
     }
 }

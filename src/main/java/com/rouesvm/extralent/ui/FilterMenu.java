@@ -13,6 +13,7 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 
 import java.util.Optional;
 
@@ -22,13 +23,23 @@ public class FilterMenu extends SimpleGui {
 
     public FilterMenu(ItemStack stack, ServerPlayerEntity player) {
         super(ScreenHandlerType.HOPPER, player, false);
-        this.inventory = new FakeInventory(5);
+
+        FakeInventory fakeInventory = new FakeInventory(5);
+
+        ContainerComponent containerComponent = stack.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT);
+        containerComponent.copyTo(fakeInventory.heldStacks);
+
+        this.inventory = fakeInventory;
+
         this.stack = stack;
-        fillChest();
-        open();
 
         int k;
         int j;
+        for (j = 0; j < this.inventory.size(); ++j)
+            this.setSlotRedirect(j, new FilteredSlot(this.inventory, j, j, 0));
+
+        open();
+
         for(j = 0; j <= 3; ++j) {
             for(k = 0; k < 9; ++k) {
                 int index;
@@ -39,7 +50,7 @@ public class FilterMenu extends SimpleGui {
             }
         }
 
-        resetMousePosition();
+        this.setTitle(Text.translatable("ui.extralent.filter"));
     }
 
     @Override
@@ -58,8 +69,6 @@ public class FilterMenu extends SimpleGui {
             ItemStack stack = player.getInventory().getStack(index);
             if (stack != null && !stack.isOf(Items.AIR)) {
                 stack = stack.copy();
-                stack.setCount(1);
-
                 this.inventory.addStack(stack);
             }
         }
@@ -71,13 +80,9 @@ public class FilterMenu extends SimpleGui {
         stack.set(DataComponentTypes.CONTAINER, ContainerComponent.fromStacks(this.inventory.heldStacks));
     }
 
-    public void fillChest() {
-        for (int j = 0; j < this.inventory.size(); ++j)
-            this.setSlotRedirect(j, new FilteredSlot(this.inventory, j, j,0));
-    }
-
     private static class DisabledSlot extends Slot {
         private final ItemStack stack;
+
         public DisabledSlot(ItemStack stack, Inventory inventory, int index, int x, int y) {
             super(inventory, index, x, y);
             this.stack = stack;
@@ -113,6 +118,14 @@ public class FilterMenu extends SimpleGui {
         @Override
         public boolean canInsert(ItemStack stack) {
             return false;
+        }
+
+        @Override
+        public ItemStack insertStack(ItemStack stack, int count) {
+            ItemStack toInsert = stack.copy();
+            toInsert.setCount(count);
+            this.setStack(toInsert);
+            return stack;
         }
 
         @Override
