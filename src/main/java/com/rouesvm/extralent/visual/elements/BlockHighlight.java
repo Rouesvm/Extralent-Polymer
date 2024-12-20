@@ -27,7 +27,6 @@ public class BlockHighlight {
     private final ServerPlayerEntity player;
 
     private int ticks = 0;
-    private int lastEdge = -1;
 
     private BlockHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position, Vector3f color) {
         this.particleType = new DustParticleEffect(color, 0.725F);
@@ -42,12 +41,7 @@ public class BlockHighlight {
     }
 
     public void spawnEdgeParticles() {
-        int randomEdge;
-        do {
-            randomEdge = ThreadLocalRandom.current().nextInt(edges.length);
-        } while (randomEdge == lastEdge);
-        lastEdge = randomEdge;
-
+        int randomEdge = ThreadLocalRandom.current().nextInt(edges.length);
         int[] assignedPos = edges[randomEdge];
         BlockPos start = corners[assignedPos[0]];
         BlockPos end = corners[assignedPos[1]];
