@@ -67,16 +67,8 @@ public class InfoData extends BasicData {
 
     public void nextContent() {
         CONTENT_DISPLAY[] contents = CONTENT_DISPLAY.values();
-        int content_length = contents.length;
-
-        CONTENT_DISPLAY currentContentDisplay = getContent();
-        int current_index = currentContentDisplay.ordinal();
-        int next_index = current_index + 1;
-
-        currentContentDisplay = next_index == content_length
-                ? contents[1] : contents[next_index];
-
-        setContent(currentContentDisplay);
+        int nextIndex = (getContent().ordinal() + 1) % contents.length;
+        setContent(contents[nextIndex]);
     }
 
     public void setContent(CONTENT_DISPLAY content) {
