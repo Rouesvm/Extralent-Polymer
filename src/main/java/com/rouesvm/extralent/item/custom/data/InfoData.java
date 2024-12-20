@@ -5,7 +5,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class InfoData extends BasicData {
     private DISPLAY display = DISPLAY.FLOATING;
-    private CONTENT content = CONTENT.ENERGY;
+    private CONTENT_DISPLAY content = CONTENT_DISPLAY.ENERGY;
 
     private boolean visual = false;
     private BlockPos pos;
@@ -59,13 +59,27 @@ public class InfoData extends BasicData {
         this.display = display;
     }
 
-    public CONTENT getContent() {
+    public CONTENT_DISPLAY getContent() {
         if (getStackNbt().contains("content_visual"))
-            content = CONTENT.valueOf(nbtCompound.getString("content_visual"));
+            content = CONTENT_DISPLAY.valueOf(nbtCompound.getString("content_visual"));
         return content;
     }
 
-    public void setContent(CONTENT content) {
+    public void nextContent() {
+        CONTENT_DISPLAY[] contents = CONTENT_DISPLAY.values();
+        int content_length = contents.length;
+
+        CONTENT_DISPLAY currentContentDisplay = getContent();
+        int current_index = currentContentDisplay.ordinal();
+        int next_index = current_index + 1;
+
+        currentContentDisplay = next_index == content_length
+                ? contents[1] : contents[next_index];
+
+        setContent(currentContentDisplay);
+    }
+
+    public void setContent(CONTENT_DISPLAY content) {
         nbtCompound.putString("content_visual", content.toString());
         saveToStack();
         this.content = content;
@@ -76,8 +90,9 @@ public class InfoData extends BasicData {
         UI
     }
 
-    public enum CONTENT {
+    public enum CONTENT_DISPLAY {
         INVENTORY,
-        ENERGY
+        ENERGY,
+        MACHINE
     }
 }

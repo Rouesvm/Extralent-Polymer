@@ -118,13 +118,13 @@ public class InfoItem extends DoubleTexturedItem {
     }
 
     private boolean setContent(InfoData data, ServerWorld world) {
-        data.setContent(data.getContent() == InfoData.CONTENT.INVENTORY ? InfoData.CONTENT.ENERGY : InfoData.CONTENT.INVENTORY);
+        data.nextContent();
 
         if (data.getBlockPos() != null) {
             var blockEntity = world.getBlockEntity(data.getBlockPos());
             if (!(blockEntity instanceof BasicMachineBlockEntity basicMachineBlock)) return false;
             if (Objects.equals(basicMachineBlock.infoOnClicked(data.getContent()), Text.empty())) {
-                data.setContent(data.getContent() == InfoData.CONTENT.INVENTORY ? InfoData.CONTENT.ENERGY : InfoData.CONTENT.INVENTORY);
+                data.nextContent();
             }
         }
 
