@@ -69,7 +69,9 @@ public class InfoItem extends DoubleTexturedItem {
                 if (data.showVisual()) {
                     data.setVisual(false);
                     Activated.setVisual(stack, false);
+                    return TypedActionResult.pass(stack);
                 }
+
                 if (ELEMENT_MANAGER.getElement(uuid) != null) {
                     ELEMENT_MANAGER.removeElement(uuid);
                     return TypedActionResult.pass(stack);
