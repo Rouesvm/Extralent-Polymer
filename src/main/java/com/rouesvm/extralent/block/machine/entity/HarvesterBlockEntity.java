@@ -33,13 +33,12 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private static final int height = 8;
     private static final int depth = 8;
 
-    private int ticks;
-
     public static final long ENERGY_USED = 500;
 
     private static final int[] INPUT_SLOTS_ARRAY = {0, 1, 2};
     private static final int[] OUTPUT_SLOTS_ARRAY = {3, 4, 5, 6, 7, 8};
 
+    private int ticks;
     private final InventoryStorage outputInventory;
 
     public HarvesterBlockEntity(BlockPos pos, BlockState state) {

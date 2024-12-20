@@ -210,9 +210,10 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
 
     private void onEntityNull(ConnecterData data, PlayerEntity player) {
         player.sendMessage(Text.translatable("info.viewer.disconnected"), true);
-        data.setCurrentEntity(null);
         playSoundConnection(player, 5f);
+
         HIGHLIGHT_MANAGER.clearAllHighlights(data.getUuid());
+        data.setCurrentEntity(null);
     }
 
     private void sendMessage(@NotNull ConnecterData data, ServerWorld world, @NotNull PlayerEntity player, Connection connection) {

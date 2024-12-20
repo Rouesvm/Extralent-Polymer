@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QuarryBlockEntity extends BasicMachineBlockEntity {
+    public static final long ENERGY_USED = 100;
+
     private int progress;
     private BlockPos miningPos = this.pos.down();
-
-    public static final long ENERGY_USED = 100;
 
     public QuarryBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.QUARRY_BLOCK_ENTITY, pos, state);

@@ -1,7 +1,6 @@
 package com.rouesvm.extralent.visual;
 
 import com.rouesvm.extralent.visual.elements.BlockHighlight;
-import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -52,15 +51,13 @@ public class HighlightManager {
     }
 
     public void removeAllHighlightsFromMultiple(UUID uuid) {
-        multipleHighlights.remove(uuid);
+        multipleHighlights.replace(uuid, new HashMap<>());
     }
 
     // Tick
     public void tickHighlights(UUID uuid) {
         getMultipleHighlights(uuid).values().parallelStream().forEach(BlockHighlight::tick);
-
-        if (getSingularHighlight(uuid) != null)
-            getSingularHighlight(uuid).tick();
+        if (getSingularHighlight(uuid) != null) getSingularHighlight(uuid).tick();
     }
 
     // Clear

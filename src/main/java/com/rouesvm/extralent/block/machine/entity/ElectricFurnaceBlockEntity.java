@@ -19,22 +19,23 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
 
 public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
-    private int progress;
-    private boolean shouldBurn;
-
     protected static final int INPUT_SLOT_INDEX = 0;
     protected static final int OUTPUT_SLOT_INDEX = 1;
 
     private static final int[] INPUT_SLOTS_ARRAY = {INPUT_SLOT_INDEX};
     private static final int[] OUTPUT_SLOTS_ARRAY = {OUTPUT_SLOT_INDEX};
 
-    private SmeltingRecipe currentRecipe;
-
     private static final long ENERGY_USED_PER_SECOND = 10; // ENERGY_USED * (SECONDS * 20)
     private static final double TIME_TO_BURN_IN_SECONDS = 0.5;
+
+    private int progress;
+    private boolean shouldBurn;
+    private SmeltingRecipe currentRecipe;
 
     private final InventoryStorage outputInventory;
 
@@ -89,11 +90,15 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
+        nbt.putInt("progress", this.progress);
+        nbt.putBoolean("should_burn", this.shouldBurn);
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
+        this.progress = nbt.getInt("progress");
+        this.shouldBurn = nbt.getBoolean("should_burn");
     }
 
     @Override
