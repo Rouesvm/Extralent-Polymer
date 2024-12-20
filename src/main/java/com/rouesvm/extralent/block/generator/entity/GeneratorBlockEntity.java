@@ -6,16 +6,13 @@ import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -71,7 +68,7 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public SimpleEnergyStorage createEnergyStorage() {
-        return super.createEnergyStorage(250000, 0, 1000);
+        return super.createEnergyStorage(50_000, 0, 1_000);
     }
 
     @Override
@@ -88,8 +85,11 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
                 markDirty();
             }
 
-            if (this.progress++ < this.burnTime) {
-                energyStorage.amount = MathHelper.clamp(energyStorage.amount + this.burnTime / 80, 0, energyStorage.getCapacity());
+            if (this.progress++ < this.burnTime / 1.25) {
+               energyStorage.amount = (long) MathHelper.clamp(
+                        energyStorage.amount + (this.burnTime / 800.0),
+                        0, energyStorage.getCapacity()
+               );
             } else {
                 machineBaseBlock.setState(false, world, pos);
                 markDirty();
