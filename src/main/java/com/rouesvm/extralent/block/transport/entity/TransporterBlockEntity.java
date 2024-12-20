@@ -23,6 +23,7 @@ import java.util.List;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
     public List<Item> itemList = new ArrayList<>();
+    private static final int ITEM_TRANSFER_RATE = 2;
 
     public TransporterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSPORTER_BLOCK_ENTITY, pos, state);
@@ -42,9 +43,10 @@ public class TransporterBlockEntity extends PipeBlockEntity {
 
     @Override
     public void tick() {
-        if (this.ticks++ % 8 == 0) {
-            super.onUpdate();
-        }
+        if (this.getWorld() == null || this.getWorld().isClient) return;
+        if (this.getWorld().getTime() % 5 != 0) return;
+
+        super.onUpdate();
     }
 
     @Override
@@ -70,7 +72,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
             if (isValidStorageView(storageView)) {
                 Transaction transaction = Transaction.openOuter();
                 ItemVariant resource = storageView.getResource();
-                long extracted = this.inventoryStorage.extract(resource, 4, transaction);
+                long extracted = this.inventoryStorage.extract(resource, ITEM_TRANSFER_RATE, transaction);
                 if (extracted > 0) {
                     long inserted = storage.insert(resource, extracted, transaction);
                     if (inserted > 0) {
@@ -90,7 +92,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
             if (isValidStorageView(storageView)) {
                 ItemVariant resource = storageView.getResource();
                 Transaction transaction = Transaction.openOuter();
-                long extracted = storage.extract(resource, 4, transaction);
+                long extracted = storage.extract(resource, ITEM_TRANSFER_RATE, transaction);
 
                 if (isInvalidResource(resource) || extracted == 0)  {
                     transaction.close();

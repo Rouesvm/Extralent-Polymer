@@ -15,7 +15,6 @@ import java.util.*;
 public class PipeBlockEntity extends BasicMachineBlockEntity {
     private boolean connected;
 
-    public int ticks;
     public final HashSet<Connection> blocks = new HashSet<>();
 
     public PipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

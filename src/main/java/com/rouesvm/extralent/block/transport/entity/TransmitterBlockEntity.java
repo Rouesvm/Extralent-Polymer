@@ -20,10 +20,11 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
 
     @Override
     public void tick() {
-        if (this.ticks++ % 2 == 0) {
-            if (this.energyStorage.getCapacity() <= 0) return;
-            super.onUpdate();
-        }
+        if (this.getWorld() == null || this.getWorld().isClient) return;
+        if (this.energyStorage.getCapacity() <= 0) return;
+        if (this.getWorld().getTime() % 4 != 0) return;
+
+        super.onUpdate();
     }
 
     @Override
