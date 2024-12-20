@@ -19,45 +19,29 @@ public class BlockHighlight {
             {4, 5}, {4, 6}, {5, 7}, {6, 7}
     };
 
-    private DustParticleEffect particleType;
+    public DustParticleEffect particleType;
 
-    private final BlockPos position;
-    private final Vector3f color;
+    private final BlockPos[] corners;
 
     private final ServerWorld world;
     private final ServerPlayerEntity player;
 
-    private int ticks = 40;
-
+    private int ticks = 0;
     private int lastEdge = -1;
 
-    private BlockHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position) {
-        this.world = world;
-        this.player = player;
-        this.color = CONNECTED_BLOCK_COLOR;
-        this.position = position;
-    }
-
-    private BlockHighlight(ServerWorld world, ServerPlayerEntity player, Connection connection) {
-        this.world = world;
-        this.position = connection.getPos();
-        this.player = player;
-
-        if (connection.getWeight() == 0) {
-            this.color = OUTPUT_BLOCK_COLOR;
-        } else if (connection.getWeight() == 10) {
-            this.color = CONNECTED_BLOCK_COLOR;
-        } else this.color = INPUT_BLOCK_COLOR;
-
+    private BlockHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position, Vector3f color) {
         this.particleType = new DustParticleEffect(color, 0.725F);
+
+        this.world = world;
+        this.player = player;
+
+        this.corners = new BlockPos[] {
+                position.add(0, 0, 0), position.add(1, 0, 0), position.add(0, 0, 1), position.add(1, 0, 1),
+                position.add(0, 1, 0), position.add(1, 1, 0), position.add(0, 1, 1), position.add(1, 1, 1)
+        };
     }
 
-    public void spawnEdgeParticles(BlockPos pos) {
-        BlockPos[] corners = {
-                pos.add(0, 0, 0), pos.add(1, 0, 0), pos.add(0, 0, 1), pos.add(1, 0, 1),
-                pos.add(0, 1, 0), pos.add(1, 1, 0), pos.add(0, 1, 1), pos.add(1, 1, 1)
-        };
-
+    public void spawnEdgeParticles() {
         int randomEdge;
         do {
             randomEdge = ThreadLocalRandom.current().nextInt(edges.length);
@@ -89,18 +73,22 @@ public class BlockHighlight {
 
     public void tick() {
         if (this.world != null) {
-            if (this.ticks++ % 20 == 0) {
+            if (this.ticks++ % 40 == 0) {
                 this.ticks = 0;
-                spawnEdgeParticles(position);
+                spawnEdgeParticles();
             }
         }
     }
 
     public static BlockHighlight createHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position) {
-        return new BlockHighlight(world, player, position);
+        return new BlockHighlight(world, player, position, CONNECTED_BLOCK_COLOR);
     }
 
     public static BlockHighlight createHighlight(ServerWorld world, ServerPlayerEntity player, Connection connection) {
-        return new BlockHighlight(world, player, connection);
+        Vector3f color = connection.getWeight() <= 1
+                ? (connection.getWeight() == 0 ? OUTPUT_BLOCK_COLOR : INPUT_BLOCK_COLOR)
+                : CONNECTED_BLOCK_COLOR;
+
+        return new BlockHighlight(world, player, connection.getPos(), color);
     }
 }
