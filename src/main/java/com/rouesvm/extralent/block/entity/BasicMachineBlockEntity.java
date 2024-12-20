@@ -124,8 +124,8 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         return this.getFormattedInfo();
     }
 
-    public Text infoOnClicked(InfoData.CONTENT content) {
-        return content == InfoData.CONTENT.ENERGY ? getEnergyInfo(null, true) : getInventoryInfo(null, true);
+    public Text infoOnClicked(InfoData.CONTENT_DISPLAY content) {
+        return content == InfoData.CONTENT_DISPLAY.ENERGY ? getEnergyInfo(null, true) : getInventoryInfo(null, true);
     }
 
     private Text getInventoryInfo(Text text, boolean isUI) {
