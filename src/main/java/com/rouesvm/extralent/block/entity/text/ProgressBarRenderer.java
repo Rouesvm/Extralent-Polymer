@@ -11,19 +11,19 @@ public class ProgressBarRenderer {
 
     private static final char MIDDLE_FILLED = '\uE004';
     private static final char MIDDLE_HALF = '\uE008';
-    private static final char MIDDLE_EMPTY = '\uE003'
-            ;
+    private static final char MIDDLE_EMPTY = '\uE003';
+
     private static final char END_FILLED = '\uE006';
     private static final char END_HALF = '\uE009';
     private static final char END_EMPTY = '\uE005';
 
     private static final char NEGATIVE_SPACE = '\uF801';
 
-    private static final long maxSize = 10;
-    private static final long maxPercentageSize = 20;
+    private static final long MAX_SIZE = 10;
+    private static final long MAX_PERCENTAGE_SIZE = 20;
 
     public static Text getProgressBar(long energyAmount, long maxEnergy) {
-        long percentage = Math.round((float) energyAmount / maxEnergy * maxPercentageSize);
+        long percentage = Math.round((float) energyAmount / maxEnergy * MAX_PERCENTAGE_SIZE);
         return Text.literal(getEnergyUnicode(percentage)).setStyle(
                 Style.EMPTY.withFont(Identifier.of("extralent", "energybar"))
         );
@@ -33,7 +33,7 @@ public class ProgressBarRenderer {
         StringBuilder progressBar = new StringBuilder();
 
         float modifiedAmount = Math.max(0, Math.min(percentage, 20));
-        for (int i = 0; i < maxSize; i++) {
+        for (int i = 0; i < MAX_SIZE; i++) {
             DRAW draw = getIcon2Draw(i, modifiedAmount);
             char character = getCharacterForPosition(draw, i);
             progressBar.append(character).append(NEGATIVE_SPACE);
@@ -57,7 +57,7 @@ public class ProgressBarRenderer {
     private static char getCharacterForPosition(DRAW draw, int position) {
         if (position == 0) {
             return getIconForDRAW(draw, FIRST_FILLED, FIRST_HALF, FIRST_EMPTY);
-        } else if (position == maxSize - 1) {
+        } else if (position == MAX_SIZE - 1) {
             return getIconForDRAW(draw, END_FILLED, END_HALF, END_EMPTY);
         } else {
             return getIconForDRAW(draw, MIDDLE_FILLED, MIDDLE_HALF, MIDDLE_EMPTY);
