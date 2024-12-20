@@ -14,7 +14,7 @@ public class BlockHighlight {
     private static final Vector3f OUTPUT_BLOCK_COLOR = new Vector3f(1F, 0.5F, 0F);
     private static final Vector3f INPUT_BLOCK_COLOR = new Vector3f(0F, 0.75F, 1F);
 
-    private static final int[][] edges = {
+    private static final int[][] BLOCK_EDGES = {
             {0, 1}, {0, 2}, {0, 4}, {1, 3}, {1, 5}, {2, 3}, {2, 6}, {3, 7},
             {4, 5}, {4, 6}, {5, 7}, {6, 7}
     };
@@ -41,8 +41,8 @@ public class BlockHighlight {
     }
 
     public void spawnEdgeParticles() {
-        int randomEdge = ThreadLocalRandom.current().nextInt(edges.length);
-        int[] assignedPos = edges[randomEdge];
+        int randomEdge = ThreadLocalRandom.current().nextInt(BLOCK_EDGES.length);
+        int[] assignedPos = BLOCK_EDGES[randomEdge];
         BlockPos start = corners[assignedPos[0]];
         BlockPos end = corners[assignedPos[1]];
 
@@ -80,7 +80,6 @@ public class BlockHighlight {
 
     public static BlockHighlight createHighlight(ServerWorld world, ServerPlayerEntity player, Connection connection) {
         Vector3f color = connection.getWeight() == 0 ? OUTPUT_BLOCK_COLOR : INPUT_BLOCK_COLOR;
-
         return new BlockHighlight(world, player, connection.getPos(), color);
     }
 }
