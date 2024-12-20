@@ -101,6 +101,12 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
                 .input('c', Items.COPPER_BLOCK)
                 .criterion("get_redstone", InventoryChangedCriterion.Conditions.items(Items.REDSTONE))
                 .offerTo(exporter);
+
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemRegistry.FILTER, 1)
+                .pattern("iwi").pattern("www").pattern("iwi")
+                .input('i', Items.STICK).input('w', Items.STRING)
+                .criterion("get_copper", InventoryChangedCriterion.Conditions.items(Items.COPPER_INGOT))
+                .offerTo(exporter);
     }
 
     @Override

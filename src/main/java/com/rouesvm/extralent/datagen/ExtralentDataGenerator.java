@@ -8,6 +8,7 @@ public class ExtralentDataGenerator implements DataGeneratorEntrypoint {
     public void onInitializeDataGenerator(FabricDataGenerator generator) {
         FabricDataGenerator.Pack pack = generator.createPack();
         pack.addProvider(ModRecipeGenerator::new);
+        pack.addProvider(ModBlockTags::new);
         pack.addProvider(ModLootTables::new);
     }
 }
