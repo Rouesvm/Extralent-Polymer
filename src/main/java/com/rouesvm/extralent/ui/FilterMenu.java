@@ -61,21 +61,6 @@ public class FilterMenu extends SimpleGui {
     }
 
     @Override
-    public boolean onAnyClick(int index, ClickType type, SlotActionType action) {
-        int calculatedInt = (9 * 4) + 5;
-
-        if (index > calculatedInt - 10 && action.equals(SlotActionType.PICKUP)) {
-            index -= (calculatedInt - 9);
-            ItemStack stack = player.getInventory().getStack(index);
-            if (stack != null && !stack.isOf(Items.AIR)) {
-                stack = stack.copy();
-                this.inventory.addStack(stack);
-            }
-        }
-        return true;
-    }
-
-    @Override
     public void onClose() {
         stack.set(DataComponentTypes.CONTAINER, ContainerComponent.fromStacks(this.inventory.heldStacks));
     }
