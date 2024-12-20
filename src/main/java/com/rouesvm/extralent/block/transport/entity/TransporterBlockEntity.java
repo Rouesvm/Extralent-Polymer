@@ -14,7 +14,12 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import team.reborn.energy.api.EnergyStorageUtil;
 
 import java.util.ArrayList;
@@ -22,7 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
-    public List<Item> itemList = new ArrayList<>();
+    public HashSet<Item> itemList = new HashSet<>();
     private static final int ITEM_TRANSFER_RATE = 2;
 
     public TransporterBlockEntity(BlockPos pos, BlockState state) {
@@ -35,7 +40,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     }
 
     public void setItemList(List<ItemStack> inventory) {
-        itemList = new ArrayList<>();
+        itemList = new HashSet<>();
         if (inventory.isEmpty()) return;
 
         inventory.forEach(stack -> itemList.add(stack.getItem()));
@@ -65,6 +70,32 @@ public class TransporterBlockEntity extends PipeBlockEntity {
                 return extractItem(storage);
         }
         return false;
+    }
+
+    @Override
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
+        NbtList itemListNbt = new NbtList();
+
+        for (Item item : itemList) {
+            NbtCompound itemTag = new NbtCompound();
+            itemTag.putInt("id", Registries.ITEM.getRawId(item));
+            itemListNbt.add(itemTag);
+        }
+
+        nbt.put("filter", itemListNbt);
+    }
+
+    @Override
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.readNbt(nbt, registryLookup);
+        NbtList nbtList = nbt.getList("filter", 10);
+
+        for(int i = 0; i < nbtList.size(); ++i) {
+            NbtCompound nbtCompound = nbtList.getCompound(i);
+            Item item = Registries.ITEM.get(nbtCompound.getInt("id"));
+            itemList.add(item);
+        }
     }
 
     public boolean insertItem(Storage<ItemVariant> storage) {
