@@ -19,7 +19,7 @@ public class BlockHighlight {
             {4, 5}, {4, 6}, {5, 7}, {6, 7}
     };
 
-    public DustParticleEffect particleType;
+    private final DustParticleEffect particleType;
 
     private final BlockPos[] corners;
 
