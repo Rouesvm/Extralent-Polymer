@@ -11,7 +11,7 @@ import java.util.Objects;
 
 public class Connection {
     private final BlockPos pos;
-    private Direction side;
+    private final Direction side;
     private int weight;
 
     protected Connection(BlockPos pos, int weight, Direction side) {
