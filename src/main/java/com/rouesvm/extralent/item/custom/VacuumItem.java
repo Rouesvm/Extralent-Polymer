@@ -9,6 +9,8 @@ import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -40,12 +42,12 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
 
     @Override
     public long getEnergyCapacity(ItemStack stack) {
-        return 100_000;
+        return 2_500;
     }
 
     @Override
     public long getEnergyMaxInput(ItemStack stack) {
-        return 1000;
+        return 500;
     }
 
     @Override
@@ -97,6 +99,12 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
             ItemStack newStack = player.getStackInHand(hand);
 
             if (!entity.isAlive()) return ActionResult.PASS;
+
+            if (entity instanceof PlayerEntity
+                    || entity instanceof EnderDragonEntity
+                    || entity instanceof WitherEntity
+            ) return ActionResult.PASS;
+
             if (this.hasStoredEntity(newStack)) return ActionResult.PASS;
 
             setTexture(newStack, true);

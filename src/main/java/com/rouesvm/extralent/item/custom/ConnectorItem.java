@@ -28,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.base.SimpleEnergyItem;
 
 import java.util.List;
-import java.util.UUID;
 
 import static com.rouesvm.extralent.Extralent.HIGHLIGHT_MANAGER;
 
@@ -39,12 +38,12 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
 
     @Override
     public long getEnergyCapacity(ItemStack stack) {
-        return 100_000;
+        return 1_000;
     }
 
     @Override
     public long getEnergyMaxInput(ItemStack stack) {
-        return 1_000;
+        return 500;
     }
 
     @Override
@@ -274,7 +273,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
     }
 
     private void decreaseEnergy(ItemStack stack) {
-        if (getStoredEnergy(stack) < 15) return;
+        if (getStoredEnergy(stack) < 0) return;
         setStoredEnergy(stack, getStoredEnergy(stack) - 15);
     }
 
