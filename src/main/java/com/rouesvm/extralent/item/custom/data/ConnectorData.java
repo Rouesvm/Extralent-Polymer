@@ -6,13 +6,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
-public class ConnecterData extends BasicData {
+public class ConnectorData extends BasicData {
     private boolean visual = false;
 
     private int weight = 0;
     private BlockPos currentEntity;
 
-    public ConnecterData(ItemStack stack) {
+    public ConnectorData(ItemStack stack) {
         super(stack);
     }
 

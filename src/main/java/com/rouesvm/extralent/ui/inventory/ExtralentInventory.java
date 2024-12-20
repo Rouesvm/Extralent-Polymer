@@ -1,5 +1,4 @@
 package com.rouesvm.extralent.ui.inventory;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;

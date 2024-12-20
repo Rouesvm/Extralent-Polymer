@@ -24,10 +24,6 @@ public class Connection {
         return new Connection(pos, weight, side);
     }
 
-    public static Connection of(BlockPos pos, int weight) {
-        return new Connection(pos, weight, Direction.UP);
-    }
-
     public Direction getSide() {
         return side;
     }

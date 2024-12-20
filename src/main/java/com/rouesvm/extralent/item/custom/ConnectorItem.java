@@ -5,7 +5,7 @@ import com.rouesvm.extralent.block.transport.entity.PipeState;
 import com.rouesvm.extralent.item.custom.data.Activated;
 import com.rouesvm.extralent.visual.elements.BlockHighlight;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
-import com.rouesvm.extralent.item.custom.data.ConnecterData;
+import com.rouesvm.extralent.item.custom.data.ConnectorData;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
@@ -61,7 +61,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
 
     @Override
     public void onItemEntityDestroyed(ItemEntity entity) {
-        ConnecterData connecterData = new ConnecterData(entity.getStack());
+        ConnectorData connecterData = new ConnectorData(entity.getStack());
         PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) entity.getWorld());
 
         currentBlockEntity.setConnected(false);
@@ -76,7 +76,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
             if (!Activated.showVisual(stack)) return;
             if (shouldPass(stack, player, false)) return;
 
-            ConnecterData connecterData = new ConnecterData(stack);
+            ConnectorData connecterData = new ConnectorData(stack);
             if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getUuid());
 
             if (selected) {
@@ -114,7 +114,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         ServerWorld world = (ServerWorld) context.getWorld();
         var blockEntityResult = world.getBlockEntity(context.getBlockPos());
 
-        ConnecterData connecterData = new ConnecterData(context.getStack());
+        ConnectorData connecterData = new ConnectorData(context.getStack());
         PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity(world);
 
         if (currentBlockEntity != null && currentBlockEntity.isRemoved()) {
@@ -166,7 +166,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
     }
 
     private boolean changeWeight(PlayerEntity player, ServerWorld world, ItemStack stack) {
-        ConnecterData connecterData = new ConnecterData(stack);
+        ConnectorData connecterData = new ConnectorData(stack);
         PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity(world);
 
         if (connecterData.getCurrentEntity(world) != null && currentBlockEntity.isRemoved()) {
@@ -185,7 +185,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         return true;
     }
 
-    private void onConnectedChanged(@NotNull ConnecterData data, ServerWorld world, PlayerEntity player, boolean connected) {
+    private void onConnectedChanged(@NotNull ConnectorData data, ServerWorld world, PlayerEntity player, boolean connected) {
         this.setTexture(data.getStack(), connected);
         PipeBlockEntity currentBlockEntity = data.getCurrentEntity(world);
         data.setVisual(connected);
@@ -207,7 +207,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         }
     }
 
-    private void onEntityNull(ConnecterData data, PlayerEntity player) {
+    private void onEntityNull(ConnectorData data, PlayerEntity player) {
         player.sendMessage(Text.translatable("info.viewer.disconnected"), true);
         playSoundConnection(player, 5f);
 
@@ -215,7 +215,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         data.setCurrentEntity(null);
     }
 
-    private void sendMessage(@NotNull ConnecterData data, ServerWorld world, @NotNull PlayerEntity player, Connection connection) {
+    private void sendMessage(@NotNull ConnectorData data, ServerWorld world, @NotNull PlayerEntity player, Connection connection) {
         PipeBlockEntity currentBlockEntity = data.getCurrentEntity(world);
 
         if (player.isSneaking()) {
@@ -244,7 +244,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
             case IDENTICAL -> {
                 boolean removed = currentBlockEntity.removeBlock(connection);
                 if (removed && changeWeight(player, world, data.getStack())) {
-                    data = new ConnecterData(data.getStack());
+                    data = new ConnectorData(data.getStack());
                     connection.setWeight(data.getWeight());
                     currentBlockEntity.putBlock(connection);
 

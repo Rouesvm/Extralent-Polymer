@@ -19,8 +19,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
 
 public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
