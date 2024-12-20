@@ -85,9 +85,7 @@ public class BlockHighlight {
     }
 
     public static BlockHighlight createHighlight(ServerWorld world, ServerPlayerEntity player, Connection connection) {
-        Vector3f color = connection.getWeight() <= 1
-                ? (connection.getWeight() == 0 ? OUTPUT_BLOCK_COLOR : INPUT_BLOCK_COLOR)
-                : CONNECTED_BLOCK_COLOR;
+        Vector3f color = connection.getWeight() == 0 ? OUTPUT_BLOCK_COLOR : INPUT_BLOCK_COLOR;
 
         return new BlockHighlight(world, player, connection.getPos(), color);
     }

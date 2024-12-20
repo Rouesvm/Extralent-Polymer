@@ -23,8 +23,8 @@ public class HighlightManager {
         return singularHighlight.get(uuid);
     }
 
-    public void createSingularHighlight(UUID uuid, ServerWorld world, ServerPlayerEntity player, Connection connection) {
-        singularHighlight.put(uuid, BlockHighlight.createHighlight(world, player, connection));
+    public void createSingularHighlight(UUID uuid, ServerWorld world, ServerPlayerEntity player, BlockPos blockPos) {
+        singularHighlight.put(uuid, BlockHighlight.createHighlight(world, player, blockPos));
     }
 
     public void removeSingularHighlight(UUID uuid) {

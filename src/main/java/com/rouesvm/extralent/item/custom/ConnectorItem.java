@@ -204,7 +204,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
             player.sendMessage(Text.translatable("info.viewer.connected"), true);
             currentBlockEntity.setConnected(true);
             playSoundConnection(player, 3f);
-            HIGHLIGHT_MANAGER.createSingularHighlight(data.getUuid(), world, (ServerPlayerEntity) player, Connection.of(currentBlockEntity.getPos(), 10));
+            HIGHLIGHT_MANAGER.createSingularHighlight(data.getUuid(), world, (ServerPlayerEntity) player, currentBlockEntity.getPos());
         }
     }
 
