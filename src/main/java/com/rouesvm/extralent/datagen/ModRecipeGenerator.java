@@ -47,14 +47,14 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
                 .criterion("get_generator", InventoryChangedCriterion.Conditions.items(BlockRegistry.GENERATOR))
                 .offerTo(exporter);
 
-        ShapedRecipeJsonBuilder.create(RecipeCategory.TRANSPORTATION, BlockRegistry.TRANSMITTER, 4)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.TRANSPORTATION, BlockRegistry.TRANSMITTER, 2)
                 .pattern("rir").pattern("gbg").pattern("rir")
-                .input('r', ItemRegistry.ANTENNA).input('g', Items.GOLD_BLOCK)
+                .input('r', ItemRegistry.ANTENNA).input('g', Items.GOLD_INGOT)
                 .input('i', Items.COPPER_INGOT).input('b', ItemRegistry.MACHINE_BASE)
                 .criterion("get_redstone", InventoryChangedCriterion.Conditions.items(Items.REDSTONE))
                 .offerTo(exporter);
 
-        ShapedRecipeJsonBuilder.create(RecipeCategory.TRANSPORTATION, BlockRegistry.TRANSPORTER, 6)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.TRANSPORTATION, BlockRegistry.TRANSPORTER, 4)
                 .pattern("rer").pattern("ibi").pattern("rer")
                 .input('r', Items.COPPER_INGOT).input('e', Items.ENDER_PEARL)
                 .input('i', ItemTags.PLANKS).input('b', ItemRegistry.MACHINE_BASE)
@@ -89,7 +89,7 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
                 .offerTo(exporter);
 
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemRegistry.INFO, 1)
-                .pattern("   ").pattern("ici").pattern("   ")
+                .pattern(" i ").pattern("ici").pattern(" i ")
                 .input('c', ItemRegistry.CONNECTOR).input('i', Items.REDSTONE)
                 .criterion("get_pearl", InventoryChangedCriterion.Conditions.items(Items.ENDER_PEARL))
                 .offerTo(exporter);
@@ -104,7 +104,7 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, ItemRegistry.FILTER, 1)
                 .pattern("iwi").pattern("www").pattern("iwi")
                 .input('i', Items.STICK).input('w', Items.STRING)
-                .criterion("get_copper", InventoryChangedCriterion.Conditions.items(Items.COPPER_INGOT))
+                .criterion("get_string", InventoryChangedCriterion.Conditions.items(Items.STRING))
                 .offerTo(exporter);
     }
 
