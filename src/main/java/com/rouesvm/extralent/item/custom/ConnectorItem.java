@@ -277,15 +277,15 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         setStoredEnergy(stack, getStoredEnergy(stack) - 15);
     }
 
-    private void playSound(@NotNull PlayerEntity player, float pitch) {
+    public static void playSound(@NotNull PlayerEntity player, float pitch) {
         player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
     }
 
-    private void playSoundConnection(@NotNull PlayerEntity player, float pitch) {
+    public static void playSoundConnection(@NotNull PlayerEntity player, float pitch) {
         player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_SNARE.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
     }
 
-    private void playSoundChanged(@NotNull PlayerEntity player, float pitch) {
+    public static void playSoundChanged(@NotNull PlayerEntity player, float pitch) {
         player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_BANJO.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
     }
 }

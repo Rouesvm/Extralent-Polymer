@@ -11,6 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -24,6 +25,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.rouesvm.extralent.Extralent.ELEMENT_MANAGER;
+import static com.rouesvm.extralent.Extralent.HIGHLIGHT_MANAGER;
 
 public class InfoItem extends DoubleTexturedItem {
     public InfoItem(Settings settings) {
@@ -46,6 +48,10 @@ public class InfoItem extends DoubleTexturedItem {
                 data.setVisual(false);
                 return;
             }
+
+            if (world.getTime() % 60 == 0)
+                HIGHLIGHT_MANAGER.clearAllHighlights(data.getUuid());
+            else HIGHLIGHT_MANAGER.tickHighlights(data.getUuid());
 
             if (data.getDisplay() == InfoData.DISPLAY.UI) {
                 var blockEntity = world.getBlockEntity(data.getBlockPos());
@@ -82,10 +88,11 @@ public class InfoItem extends DoubleTexturedItem {
             } else if (data.getDisplay() == InfoData.DISPLAY.UI) {
                 if (!setContent(data, (ServerWorld) world)) return TypedActionResult.pass(stack);
             }
+
             return TypedActionResult.success(stack);
         }
 
-        return TypedActionResult.success(stack);
+        return TypedActionResult.pass(stack);
     }
 
     @Override
@@ -97,6 +104,15 @@ public class InfoItem extends DoubleTexturedItem {
 
             var blockEntityResult = world.getBlockEntity(context.getBlockPos());
             if (blockEntityResult instanceof BasicMachineBlockEntity basicPoweredEntity) {
+                ConnectorItem.playSoundConnection(context.getPlayer(), 2F);
+
+                HIGHLIGHT_MANAGER.createSingularHighlight(
+                        data.getUuid(),
+                        (ServerWorld) context.getWorld(),
+                        (ServerPlayerEntity) context.getPlayer(),
+                        context.getBlockPos()
+                );
+
                 if (data.getDisplay() != InfoData.DISPLAY.FLOATING) {
                     Activated.setVisual(context.getStack(), true);
                     if (!data.setBlockPos(basicPoweredEntity.getPos())) setContent(data, world);
