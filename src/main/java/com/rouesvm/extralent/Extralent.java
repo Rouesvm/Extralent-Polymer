@@ -38,13 +38,14 @@ public class Extralent implements ModInitializer {
 					entries.add(ItemRegistry.INFO);
 					entries.add(ItemRegistry.CONNECTOR);
 					entries.add(ItemRegistry.VACUUM);
-					entries.add(ItemRegistry.MACHINE_BASE);
+					entries.add(ItemRegistry.FILTER);
 					entries.add(BlockRegistry.ELECTRIC_FURNACE);
 					entries.add(BlockRegistry.GENERATOR);
 					entries.add(BlockRegistry.TRANSMITTER);
 					entries.add(BlockRegistry.TRANSPORTER);
 					entries.add(BlockRegistry.HARVESTER);
 					entries.add(BlockRegistry.QUARRY);
+					entries.add(ItemRegistry.MACHINE_BASE);
 					entries.add(ItemRegistry.COPPER_ROD);
 					entries.add(ItemRegistry.ANTENNA);
 				}).build());
