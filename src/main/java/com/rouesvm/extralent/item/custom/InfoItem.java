@@ -40,9 +40,8 @@ public class InfoItem extends DoubleTexturedItem {
 
             InfoData data = new InfoData(stack);
             if (!Activated.showVisual(stack) && !data.showVisual()) return;
-            if (data.getBlockPos() == null ||
-                    data.getBlockPos() != null
-                            && !entity.getBlockPos().isWithinDistance(data.getBlockPos(), 5)
+            if (data.getBlockPos() == null
+                    || data.getBlockPos() != null && !entity.getBlockPos().isWithinDistance(data.getBlockPos(), 5)
             ) {
                 Activated.setVisual(stack, false);
                 data.setVisual(false);

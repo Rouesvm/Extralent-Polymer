@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.ui.inventory;
+package com.rouesvm.extralent.visual.ui.inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;

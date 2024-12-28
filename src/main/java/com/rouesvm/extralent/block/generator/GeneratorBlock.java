@@ -4,7 +4,7 @@ import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity;
 import com.rouesvm.extralent.item.custom.data.Activated;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
-import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
+import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;

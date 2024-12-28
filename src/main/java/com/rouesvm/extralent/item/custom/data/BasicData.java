@@ -48,6 +48,12 @@ public class BasicData {
         saveToStack();
     }
 
+    public static void removeFromNbt(ItemStack stack, String name) {
+        NbtCompound compound = getStackNbt(stack);
+        compound.remove(name);
+        saveToStack(stack, compound);
+    }
+
     public void saveToStack() {
         stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbtCompound));
     }

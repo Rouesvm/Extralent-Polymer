@@ -4,7 +4,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class ProgressBarRenderer {
+public class ProgressBarText {
     private static final char FIRST_FILLED = '\uE002';
     private static final char FIRST_HALF = '\uE007';
     private static final char FIRST_EMPTY = '\uE001';

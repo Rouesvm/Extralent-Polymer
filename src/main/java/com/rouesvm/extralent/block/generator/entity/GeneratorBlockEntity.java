@@ -3,7 +3,7 @@ package com.rouesvm.extralent.block.generator.entity;
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
-import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
+import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;

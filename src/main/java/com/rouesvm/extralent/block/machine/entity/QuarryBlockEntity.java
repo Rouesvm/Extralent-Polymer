@@ -65,11 +65,12 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
                 return;
             }
 
-            List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(
-                    new LootContextParameterSet.Builder((ServerWorld) this.world)
-                            .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
-                            .add(LootContextParameters.ORIGIN, this.miningPos.toCenterPos())
-                            .addOptional(LootContextParameters.BLOCK_ENTITY, this)));
+            LootContextParameterSet.Builder builder = new LootContextParameterSet
+                    .Builder((ServerWorld) this.world)
+                    .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
+                    .add(LootContextParameters.ORIGIN, this.miningPos.toCenterPos())
+                    .addOptional(LootContextParameters.BLOCK_ENTITY, this);
+            List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(builder));
 
             this.world.breakBlock(this.miningPos, false);
 

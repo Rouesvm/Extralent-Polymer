@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.ui.inventory;
+package com.rouesvm.extralent.visual.ui.inventory;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;

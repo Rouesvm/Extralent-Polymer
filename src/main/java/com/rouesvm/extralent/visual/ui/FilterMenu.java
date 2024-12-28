@@ -1,6 +1,6 @@
-package com.rouesvm.extralent.ui;
+package com.rouesvm.extralent.visual.ui;
 
-import com.rouesvm.extralent.ui.inventory.FakeInventory;
+import com.rouesvm.extralent.visual.ui.inventory.FakeInventory;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;

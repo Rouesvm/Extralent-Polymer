@@ -2,7 +2,7 @@ package com.rouesvm.extralent.item.custom;
 
 import com.rouesvm.extralent.block.transport.entity.TransporterBlockEntity;
 import com.rouesvm.extralent.item.BasicPolymerItem;
-import com.rouesvm.extralent.ui.FilterMenu;
+import com.rouesvm.extralent.visual.ui.FilterMenu;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.player.PlayerEntity;

@@ -2,7 +2,7 @@ package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
-import com.rouesvm.extralent.ui.inventory.ExtralentInventory;
+import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;

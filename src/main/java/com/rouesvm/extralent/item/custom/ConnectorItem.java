@@ -25,13 +25,12 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import team.reborn.energy.api.base.SimpleEnergyItem;
 
 import java.util.List;
 
 import static com.rouesvm.extralent.Extralent.HIGHLIGHT_MANAGER;
 
-public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyItem {
+public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem {
     public ConnectorItem(Settings settings) {
         super("connector", settings, Items.COAL);
     }
@@ -52,11 +51,13 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
     }
 
     @Override
+    public long getEnergyCost() {
+        return 15;
+    }
+
+    @Override
     public void modifyClientTooltip(List<Text> tooltip, ItemStack stack, @Nullable ServerPlayerEntity player) {
-        tooltip.add(Text.translatable("general.info.stored_energy")
-                .append(" ")
-                .append(String.valueOf(getStoredEnergy(stack)))
-                .setStyle(Style.EMPTY.withColor(Formatting.BLUE)));
+        addEnergyTooltip(tooltip, stack);
     }
 
     @Override
@@ -261,21 +262,15 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
         }
     }
 
-    private boolean shouldPass(@NotNull ItemStack stack, PlayerEntity player, boolean showMessage) {
-        if (getStoredEnergy(stack) <= 0) {
-            if (showMessage) player.sendMessage(Text.translatable("general.info.out_of_energy")
-                    .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
-            this.setTexture(stack, false);
-            onConnectedChanged(new ConnectorData(stack), (ServerWorld) player.getWorld(), player, false);
-            return true;
-        }
-
-        return false;
+    @Override
+    public void onLowEnergy(ItemStack stack, PlayerEntity player) {
+        this.setTexture(stack, false);
+        onConnectedChanged(new ConnectorData(stack), (ServerWorld) player.getWorld(), player, false);
     }
 
     private void decreaseEnergy(ItemStack stack) {
-        if (getStoredEnergy(stack) < 15) return;
-        setStoredEnergy(stack, getStoredEnergy(stack) - 15);
+        if (getStoredEnergy(stack) < getEnergyCost()) return;
+        setStoredEnergy(stack, getStoredEnergy(stack) - getEnergyCost());
     }
 
     public static void playSound(@NotNull PlayerEntity player, float pitch) {

@@ -34,8 +34,7 @@ import team.reborn.energy.api.base.SimpleEnergyItem;
 
 import java.util.List;
 
-public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
-    public static final long ENERGY_COST = 24;
+public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
 
     public VacuumItem(Settings settings) {
         super("mob_vacuum", settings, Items.COAL);
@@ -57,11 +56,13 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
     }
 
     @Override
+    public long getEnergyCost() {
+        return 24;
+    }
+
+    @Override
     public void modifyClientTooltip(List<Text> tooltip, ItemStack stack, @Nullable ServerPlayerEntity player) {
-        tooltip.add(Text.translatable("general.info.stored_energy")
-                .append(" ")
-                .append(String.valueOf(getStoredEnergy(stack)))
-                .setStyle(Style.EMPTY.withColor(Formatting.BLUE)));
+        addEnergyTooltip(tooltip, stack);
     }
 
     @Override
@@ -85,8 +86,8 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
         if (currentTime - lastUpdateTime >= intervalTicks) {
             long currentEnergy = getStoredEnergy(stack);
 
-            if (currentEnergy >= ENERGY_COST) {
-                setStoredEnergy(stack, currentEnergy - ENERGY_COST);
+            if (currentEnergy >= getEnergyCost()) {
+                setStoredEnergy(stack, currentEnergy - getEnergyCost());
                 stack.set(DataComponentRegistry.LAST_UPDATE_TYPE, currentTime);
             }
         }
@@ -141,7 +142,7 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
                 else releasePos = blockPos.offset(direction);
 
                 spawnEntity(itemInHand, releasePos, context.getPlayer(), world);
-            return ActionResult.SUCCESS;
+                return ActionResult.SUCCESS;
             }
         } else return ActionResult.PASS;
     }
@@ -173,14 +174,8 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
         return compound;
     }
 
-    private boolean shouldPass(@NotNull ItemStack stack, PlayerEntity player, boolean showMessage) {
-        if (getStoredEnergy(stack) <= ENERGY_COST) {
-            if (showMessage) player.sendMessage(Text.translatable("general.info.out_of_energy")
-                    .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
-            this.setTexture(stack, false);
-            return true;
-        }
-
-        return false;
+    @Override
+    public void onLowEnergy(ItemStack stack, PlayerEntity player) {
+        this.setTexture(stack, false);
     }
 }
