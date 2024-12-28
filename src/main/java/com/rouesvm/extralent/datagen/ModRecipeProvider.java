@@ -14,8 +14,8 @@ import net.minecraft.registry.tag.ItemTags;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModRecipeGenerator extends FabricRecipeProvider {
-    public ModRecipeGenerator(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+public class ModRecipeProvider extends FabricRecipeProvider {
+    public ModRecipeProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
         super(output, registriesFuture);
     }
 
@@ -28,8 +28,8 @@ public class ModRecipeGenerator extends FabricRecipeProvider {
     private void blockRecipes(RecipeExporter exporter) {
         ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, BlockRegistry.ELECTRIC_FURNACE, 1)
                 .pattern("rir").pattern("ifi").pattern("ccc")
-                .input('r', Items.REDSTONE).input('i', Items.COPPER_INGOT)
-                .input('f', BlockRegistry.GENERATOR).input('c', Items.COPPER_BLOCK)
+                .input('r', Items.REDSTONE).input('i', ItemRegistry.COPPER_ROD)
+                .input('f', BlockRegistry.GENERATOR).input('c', Items.COPPER_INGOT)
                 .criterion("get_redstone", InventoryChangedCriterion.Conditions.items(Items.REDSTONE))
                 .offerTo(exporter);
 
