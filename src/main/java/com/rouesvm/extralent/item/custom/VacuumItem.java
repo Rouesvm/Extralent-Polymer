@@ -3,6 +3,7 @@ package com.rouesvm.extralent.item.custom;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
 import com.rouesvm.extralent.item.custom.data.Activated;
 import com.rouesvm.extralent.registries.data.DataComponentRegistry;
+import net.minecraft.advancement.criterion.PlayerInteractedWithEntityCriterion;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
@@ -110,7 +111,7 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
             setTexture(newStack, true);
 
             NbtCompound compound = saveEntity(entity);
-            newStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(compound));
+            newStack.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(compound));
             entity.stopRiding();
             entity.discard();
 
@@ -142,13 +143,11 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
                 spawnEntity(itemInHand, releasePos, context.getPlayer(), world);
             return ActionResult.SUCCESS;
             }
-        } else {
-            return ActionResult.PASS;
-        }
+        } else return ActionResult.PASS;
     }
 
     public void spawnEntity(ItemStack stack, BlockPos pos, PlayerEntity player, World world) {
-        NbtCompound tag = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt();
+        NbtCompound tag = stack.getOrDefault(DataComponentTypes.ENTITY_DATA, NbtComponent.DEFAULT).copyNbt();
         if (tag.isEmpty()) return;
         if (EntityType.getEntityFromNbt(tag, world).map((entity) -> {
             entity.setPos((double) pos.getX() + 0.5D, pos.getY(), (double) pos.getZ() + 0.5D);
@@ -158,13 +157,13 @@ public class VacuumItem extends DoubleTexturedItem implements SimpleEnergyItem {
             return entity;
         }).isPresent()) {
             world.emitGameEvent(player, GameEvent.ENTITY_PLACE, pos);
-            stack.remove(DataComponentTypes.CUSTOM_DATA);
+            stack.remove(DataComponentTypes.ENTITY_DATA);
             setTexture(stack, false);
         }
     }
 
     public boolean hasStoredEntity(ItemStack itemStack) {
-        return !itemStack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).isEmpty();
+        return !itemStack.getOrDefault(DataComponentTypes.ENTITY_DATA, NbtComponent.DEFAULT).isEmpty();
     }
 
     public static NbtCompound saveEntity(Entity entity) {

@@ -3,7 +3,8 @@
   "package": "com.rouesvm.extralent.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "DataRegistry"
+    "DataRegistry",
+    "VillagerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
