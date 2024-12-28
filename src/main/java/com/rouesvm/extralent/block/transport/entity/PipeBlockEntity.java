@@ -15,13 +15,13 @@ import java.util.*;
 public class PipeBlockEntity extends BasicMachineBlockEntity {
     private boolean connected;
 
-    public final HashSet<Connection> blocks = new HashSet<>();
 
     public PipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
-    private LinkedHashSet<Connection> orderedConnections = new LinkedHashSet<>();
+    public final HashSet<Connection> blocks = new HashSet<>(10);
+    private LinkedHashSet<Connection> orderedConnections = new LinkedHashSet<>(10);
 
     public void onUpdate() {
         if (blocks.isEmpty()) return;
