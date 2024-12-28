@@ -3,8 +3,8 @@
   "id": "extralent",
   "version": "${version}",
 
-  "name": "Key Item",
-  "description": "Adds a key item.",
+  "name": "Extralent",
+  "description": "The tech mod.",
   "authors": [
     "Rouesvm"
   ],
