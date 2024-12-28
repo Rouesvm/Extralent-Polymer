@@ -16,7 +16,6 @@ public class ExtralentInventory implements MinimalSidedInventory {
 
     @Override
     public void markDirty() {
-
     }
 
     @Override
@@ -59,6 +58,34 @@ public class ExtralentInventory implements MinimalSidedInventory {
         }
 
         return itemStack;
+    }
+
+    public ItemStack insertStack(ItemStack stack, int[] slots) {
+        ItemStack returnedStack = ItemStack.EMPTY;
+        for (int slot : slots) {
+            returnedStack = insertStackTo(stack, slot);
+        }
+        return returnedStack;
+    }
+
+    public ItemStack insertStackTo(ItemStack source, int slot) {
+        ItemStack target = this.getStack(slot);
+        if (target.isEmpty() || ItemStack.areItemsAndComponentsEqual(source, target)) {
+            int availableSpace = this.getMaxCount(target) - target.getCount();
+            int toInsert = Math.min(source.getCount(), availableSpace);
+
+            if (target.isEmpty()) {
+                ItemStack newStack = source.copy();
+                newStack.setCount(toInsert);
+                this.setStack(slot, newStack);
+            } else target.increment(toInsert);
+
+            source.decrement(toInsert);
+
+            if (source.isEmpty()) return ItemStack.EMPTY;
+        }
+
+        return target;
     }
 
     public ItemStack addStack(ItemStack stack) {
