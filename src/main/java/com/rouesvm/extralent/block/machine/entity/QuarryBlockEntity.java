@@ -47,12 +47,10 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
         Block machineBlock = getCachedState().getBlock();
         if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
 
-        if (energyStorage.amount <= ENERGY_USED) {
+        if (energyStorage.amount < ENERGY_USED) {
             machineBaseBlock.setState(false, world, pos);
             return;
         }
-
-        energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
 
         if (this.progress++ % 10 == 0) {
             machineBaseBlock.setState(true, world, pos);
@@ -75,11 +73,16 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
 
             this.world.breakBlock(this.miningPos, false);
 
-            Storage<ItemVariant> aboveStorage = findItemStorage((ServerWorld) this.world, this.pos.up());
-            if (aboveStorage != null && aboveStorage.supportsInsertion())
-                insertDrops(drops, aboveStorage);
-            if (!drops.isEmpty())
-                spawnDrops(drops, (ServerWorld) this.world, this.pos);
+            if (!drops.isEmpty()) {
+                Storage<ItemVariant> aboveStorage = findItemStorage((ServerWorld) this.world, this.pos.up());
+                if (aboveStorage != null && aboveStorage.supportsInsertion())
+                    insertDrops(drops, aboveStorage);
+                else spawnDrops(drops, (ServerWorld) this.world, this.pos);
+            }
+
+            energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
+            markDirty();
+
             this.miningPos = this.miningPos.down();
         }
     }
@@ -89,7 +92,7 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     }
 
     private void insertDrops(List<ItemStack> drops, Storage<ItemVariant> aboveStorage) {
-        drops.parallelStream().forEach(itemStack -> {
+        drops.forEach(itemStack -> {
             try(Transaction transaction = Transaction.openOuter()) {
                 long inserted = aboveStorage.insert(ItemVariant.of(itemStack), itemStack.getCount(),transaction);
                 if (inserted > 0) {
