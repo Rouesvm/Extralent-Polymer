@@ -266,6 +266,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
             if (showMessage) player.sendMessage(Text.translatable("general.info.out_of_energy")
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
             this.setTexture(stack, false);
+            onConnectedChanged(new ConnectorData(stack), (ServerWorld) player.getWorld(), player, false);
             return true;
         }
 
@@ -273,7 +274,7 @@ public class ConnectorItem extends DoubleTexturedItem implements SimpleEnergyIte
     }
 
     private void decreaseEnergy(ItemStack stack) {
-        if (getStoredEnergy(stack) < 0) return;
+        if (getStoredEnergy(stack) < 15) return;
         setStoredEnergy(stack, getStoredEnergy(stack) - 15);
     }
 
