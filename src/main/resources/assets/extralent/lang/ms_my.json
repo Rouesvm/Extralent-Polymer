@@ -1,0 +1,41 @@
+{
+  "item.extralent.extralent_group": "Extralent",
+
+  "item.extralent.antenna" : "Antena",
+  "item.extralent.copper_rod" : "Batang Kuprum",
+  "item.extralent.machine_base" : "Mesin",
+
+  "item.extralent.mob_vacuum" : "Vakum Mob",
+  "item.extralent.filter" : "Penapis Barang",
+  "item.extralent.connector" : "Penyambung",
+  "item.extralent.viewer" : "Pemapar Maklumat",
+
+
+  "block.extralent.transporter" : "Pengangkut",
+  "block.extralent.transmitter" : "Pemancar Tenaga",
+  "block.extralent.generator" : "Penjana",
+  "block.extralent.quarry" : "Kuari",
+  "block.extralent.electric_furnace" : "Relau Elektrik",
+  "block.extralent.tree_harvester" : "Mesin Penuai Pokok",
+
+
+  "info.viewer.display_changed": "Jenis paparan ditukar kepada:",
+
+  "info.viewer.already_connected": "Sudah disambungkan ke penyambung lain.",
+  "info.viewer.disconnected": "Terputus sambungan.",
+  "info.viewer.connected": "Disambung.",
+  "info.viewer.unbound": "Tidak terikat.",
+  "info.viewer.bound": "Terikat.",
+  "info.viewer.type_same_bound": "Telah terikat.",
+  "info.viewer.far_away": "Di luar jangkauan.",
+  "info.viewer.type_wrong": "Jenis tidak sah.",
+  "info.viewer.weight_changed": "Keutamaan dikemas kini kepada:",
+
+
+  "info.machine.inventory_empty": "Kosong.",
+
+  "general.info.out_of_energy": "Kehabisan tenaga.",
+  "general.info.stored_energy": "Tenaga tersimpan:",
+
+  "ui.extralent.filter": "Penapis Barang"
+}
