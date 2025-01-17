@@ -12,8 +12,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.world.ServerWorld;
@@ -203,7 +203,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
     private List<ItemStack> getDrops(BlockState state, BlockPos current) {
         return new ArrayList<>(state.getDroppedStacks(
-                new LootContextParameterSet.Builder((ServerWorld) this.world)
+                new LootWorldContext.Builder((ServerWorld) this.world)
                         .add(LootContextParameters.TOOL, Items.DIAMOND_AXE.getDefaultStack())
                         .add(LootContextParameters.ORIGIN, current.toCenterPos())
                         .addOptional(LootContextParameters.BLOCK_ENTITY, this)));

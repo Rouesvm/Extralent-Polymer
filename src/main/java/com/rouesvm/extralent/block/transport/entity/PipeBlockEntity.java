@@ -15,7 +15,6 @@ import java.util.*;
 public class PipeBlockEntity extends BasicMachineBlockEntity {
     private boolean connected;
 
-
     public PipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }

@@ -16,7 +16,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -64,34 +63,35 @@ public class InfoItem extends DoubleTexturedItem {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        ItemStack stack = player.getStackInHand(hand);
-
+    public ActionResult use(World world, PlayerEntity player, Hand hand) {
         if (world != null && !world.isClient) {
+            ItemStack stack = player.getStackInHand(hand);
+
             UUID uuid = BasicData.getUuid(stack);
             InfoData data = new InfoData(stack);
             if (player.isSneaking()) {
                 if (data.showVisual()) {
                     data.setVisual(false);
                     Activated.setVisual(stack, false);
-                    return TypedActionResult.pass(stack);
+                    return ActionResult.PASS;
                 }
 
                 if (ELEMENT_MANAGER.getElement(uuid) != null) {
                     ELEMENT_MANAGER.removeElement(uuid);
-                    return TypedActionResult.pass(stack);
+                    return ActionResult.PASS;
                 }
 
                 data.setDisplay(data.getDisplay() == InfoData.DISPLAY.FLOATING ? InfoData.DISPLAY.UI : InfoData.DISPLAY.FLOATING);
                 player.sendMessage(Text.translatable("info.viewer.display_changed").copy().append(" ").append(data.getDisplay().toString()), true);
             } else if (data.getDisplay() == InfoData.DISPLAY.UI) {
-                if (!setContent(data, (ServerWorld) world)) return TypedActionResult.pass(stack);
+                if (!setContent(data, (ServerWorld) world)) return ActionResult.PASS;
             }
 
-            return TypedActionResult.success(stack);
+            player.swingHand(hand, true);
+            return ActionResult.SUCCESS_SERVER;
         }
 
-        return TypedActionResult.pass(stack);
+        return ActionResult.PASS;
     }
 
     @Override

@@ -10,6 +10,7 @@ import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,6 +32,7 @@ import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.base.SimpleEnergyItem;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.List;
 
@@ -61,7 +63,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
     }
 
     @Override
-    public void modifyClientTooltip(List<Text> tooltip, ItemStack stack, @Nullable ServerPlayerEntity player) {
+    public void modifyClientTooltip(List<Text> tooltip, ItemStack stack, PacketContext context) {
         addEnergyTooltip(tooltip, stack);
     }
 
@@ -150,7 +152,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
     public void spawnEntity(ItemStack stack, BlockPos pos, PlayerEntity player, World world) {
         NbtCompound tag = stack.getOrDefault(DataComponentTypes.ENTITY_DATA, NbtComponent.DEFAULT).copyNbt();
         if (tag.isEmpty()) return;
-        if (EntityType.getEntityFromNbt(tag, world).map((entity) -> {
+        if (EntityType.getEntityFromNbt(tag, world, SpawnReason.EVENT).map((entity) -> {
             entity.setPos((double) pos.getX() + 0.5D, pos.getY(), (double) pos.getZ() + 0.5D);
             entity.setVelocity(Vec3d.ZERO);
             world.spawnEntity(entity);

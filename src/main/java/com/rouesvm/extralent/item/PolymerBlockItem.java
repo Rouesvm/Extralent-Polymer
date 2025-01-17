@@ -3,11 +3,11 @@ package com.rouesvm.extralent.item;
 import com.rouesvm.extralent.Extralent;
 import eu.pb4.polymer.core.api.item.PolymerItem;
 import eu.pb4.polymer.core.api.utils.PolymerKeepModel;
-import eu.pb4.polymer.resourcepack.api.PolymerModelData;
-import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.*;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -15,14 +15,14 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 public class PolymerBlockItem extends BlockItem implements PolymerItem, PolymerKeepModel {
-    private final PolymerModelData model;
+    private final Identifier id;
 
     public PolymerBlockItem(Settings settings, Block block, String name) {
-        super(block, settings);
-        this.model = PolymerResourcePackUtils.requestModel(Items.POISONOUS_POTATO,
-                Identifier.of(Extralent.MOD_ID, "item/block/" + name));
+        super(block, settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Extralent.of(name))));
+        this.id = Extralent.of(name);
     }
 
     @Override
@@ -42,12 +42,12 @@ public class PolymerBlockItem extends BlockItem implements PolymerItem, PolymerK
     }
 
     @Override
-    public Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
-        return this.model.item();
+    public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context) {
+        return this.id;
     }
 
     @Override
-    public int getPolymerCustomModelData(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
-        return this.model.value();
+    public Item getPolymerItem(ItemStack itemStack, PacketContext packetContext) {
+        return Items.POISONOUS_POTATO;
     }
 }

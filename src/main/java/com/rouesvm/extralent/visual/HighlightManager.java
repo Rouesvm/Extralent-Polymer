@@ -5,8 +5,10 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HighlightManager {
     private final HashMap<UUID, HashMap<BlockPos, BlockHighlight>> multipleHighlights;
@@ -56,9 +58,9 @@ public class HighlightManager {
 
     // Tick
     public void tickHighlights(UUID uuid) {
+        if (getSingularHighlight(uuid) != null) getSingularHighlight(uuid).tick();
         final HashMap<BlockPos, BlockHighlight> highlightFromMultiple = getMultipleHighlights(uuid);
         highlightFromMultiple.values().parallelStream().forEach(BlockHighlight::tick);
-        if (getSingularHighlight(uuid) != null) getSingularHighlight(uuid).tick();
     }
 
     // Clear

@@ -11,9 +11,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -112,28 +114,25 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         if (!shouldBurn && validItem()) {
             machineBaseBlock.setState(true, world, pos);
             markDirty();
-        } else if (!shouldBurn) {
-            progress = 0;
-            return;
-        }
+        } else if (!shouldBurn) return;
 
         if (progress++ >= TIME_TO_BURN_IN_SECONDS * 20) {
             if (energyStorage.amount < energy_used) return;
-            if (outputItem()) {
+            if (outputItem())
                 energyStorage.amount = MathHelper.clamp(energyStorage.amount - energy_used, 0, energyStorage.getCapacity());
+            machineBaseBlock.setState(false, world, pos);
+            markDirty();
 
-                machineBaseBlock.setState(false, world, pos);
-                markDirty();
-            }
+            progress = 0;
+            shouldBurn = false;
         }
     }
 
     private Optional<SmeltingRecipe> canSmelt(ItemStack input) {
-        Optional<SmeltingRecipe> stackRecipe = world.getRecipeManager().getFirstMatch(RecipeType.SMELTING,
-                new SingleStackRecipeInput(input), world).map(RecipeEntry::value);
-
-        if (stackRecipe.isPresent() && !stackRecipe.get().getResult(world.getRegistryManager()).isEmpty())
-            return stackRecipe;
+        Optional<RecipeEntry<SmeltingRecipe>> stackRecipe = ServerRecipeManager.createCachedMatchGetter(RecipeType.SMELTING)
+                .getFirstMatch(new SingleStackRecipeInput(input), (ServerWorld) world).stream().findFirst();
+        if (stackRecipe.isPresent() && !stackRecipe.get().value().craft(new SingleStackRecipeInput(input), world.getRegistryManager()).isEmpty())
+            return Optional.of(stackRecipe.get().value());
         else return Optional.empty();
     }
 
@@ -151,7 +150,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     }
 
     private boolean canAcceptOutput(SmeltingRecipe recipe) {
-        ItemStack recipeOutput = recipe.getResult(world.getRegistryManager());
+        ItemStack recipeOutput = recipe.craft(new SingleStackRecipeInput(inventory.getStack(INPUT_SLOT_INDEX)), world.getRegistryManager());
         ItemStack stack = inventory.getStack(OUTPUT_SLOT_INDEX);
         if (recipeOutput.isEmpty()) return false;
         if (stack.getCount() > 64) return false;
@@ -164,14 +163,14 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         if (inventory.getStack(INPUT_SLOT_INDEX).isEmpty()) return false;
         if (!canAcceptOutput(currentRecipe)) return false;
 
+        ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
         ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
         if (outputStack.getCount() >= outputStack.getMaxCount()) return false;
 
-        ItemStack result = currentRecipe.getResult(world.getRegistryManager());
+        ItemStack result = currentRecipe.craft(new SingleStackRecipeInput(inputStack), world.getRegistryManager());
         inventory.insertStackTo(result.copy(), OUTPUT_SLOT_INDEX);
         inventory.getStack(INPUT_SLOT_INDEX).decrement(1);
 
-        shouldBurn = false;
         return true;
     }
 

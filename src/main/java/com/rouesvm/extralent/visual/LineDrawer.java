@@ -4,6 +4,7 @@ import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Vec3i;
 import org.joml.Vector3f;
 
@@ -35,19 +36,19 @@ public class LineDrawer {
         for (int i = 0; i < 4; i++) {
             BlockPos topCorner = getCorner(start, end, i, true);
             BlockPos bottomCorner = getCorner(start, end, i, false);
-            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), topCorner, bottomCorner, world);
+            LineDrawer.drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), topCorner, bottomCorner, world);
         }
 
         for (int i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, true);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, true);
-            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), startCorner, endCorner, world);
+            LineDrawer.drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), startCorner, endCorner, world);
         }
 
         for (int i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, false);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, false);
-            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), startCorner, endCorner, world);
+            LineDrawer.drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), startCorner, endCorner, world);
         }
     }
 

@@ -11,6 +11,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 public class ActivatedPolymerBlock extends BasicPolymerBlock {
     private final BlockState activatedState;
@@ -40,9 +41,9 @@ public class ActivatedPolymerBlock extends BasicPolymerBlock {
     }
 
     @Override
-    public BlockState getPolymerBlockState(BlockState state) {
-        if (state.get(ACTIVATED) && activatedState != null)
+    public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
+        if (blockState.get(ACTIVATED) && activatedState != null)
             return activatedState;
-        return super.getPolymerBlockState(state);
+        return super.getPolymerBlockState(blockState, packetContext);
     }
 }

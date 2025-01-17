@@ -13,8 +13,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public class FilterItem extends BasicPolymerItem {
     public FilterItem(Settings settings) {
@@ -30,7 +31,10 @@ public class FilterItem extends BasicPolymerItem {
             ItemStack stack = context.getStack();
             if (blockEntityResult instanceof TransporterBlockEntity transporterBlockEntity) {
                 ContainerComponent component = stack.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT);
-                transporterBlockEntity.setItemList(component.stream().toList());
+                List<ItemStack> itemStackList = component.stream().toList();
+                if (itemStackList.isEmpty()) return ActionResult.PASS;
+
+                transporterBlockEntity.setItemList(itemStackList);
                 stack.copyAndEmpty();
                 return ActionResult.SUCCESS;
             }
@@ -40,11 +44,13 @@ public class FilterItem extends BasicPolymerItem {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+    public ActionResult use(World world, PlayerEntity player, Hand hand) {
+        if (world == null || world.isClient) return ActionResult.PASS;
         ItemStack stack = player.getStackInHand(hand);
-        if (world == null || world.isClient) return TypedActionResult.pass(stack);
+
+        player.swingHand(hand, true);
         new FilterMenu(stack, (ServerPlayerEntity) player);
 
-        return TypedActionResult.pass(stack);
+        return ActionResult.SUCCESS;
     }
 }

@@ -9,8 +9,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -26,15 +26,15 @@ public class GeneratorBlock extends MachineBlock {
     }
 
     @Override
-    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world == null || world.isClient) return ItemActionResult.FAIL;
+    protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (world == null || world.isClient) return ActionResult.FAIL;
 
         Optional<GeneratorBlockEntity> blockEntity = world.getBlockEntity(pos, BlockEntityRegistry.GENERATOR_BLOCK_ENTITY);
-        if (blockEntity.isEmpty()) return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (blockEntity.isEmpty()) return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
 
         GeneratorBlockEntity generatorBlockEntity = blockEntity.get();
         ExtralentInventory inventory = generatorBlockEntity.getInventory();
-        if (inventory == null) return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (inventory == null) return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
 
         ItemStack existingStack = inventory.getStack(GeneratorBlockEntity.CHARGING_SLOT_INDEX);
 
@@ -44,7 +44,7 @@ public class GeneratorBlock extends MachineBlock {
                 || (ItemStack.areItemsEqual(stack, existingStack)
                 && existingStack.getCount() < existingStack.getMaxCount())
         ) {
-            if (Activated.showVisual(stack)) return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            if (Activated.showVisual(stack)) return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
 
             int transferableAmount = Math.min(stack.getCount(), existingStack.getMaxCount() - existingStack.getCount());
             ItemStack toInsert = stack.split(transferableAmount);
@@ -52,17 +52,17 @@ public class GeneratorBlock extends MachineBlock {
             inventory.setStack(GeneratorBlockEntity.CHARGING_SLOT_INDEX, toInsert);
             generatorBlockEntity.markDirty();
 
-            if (stack.isEmpty()) return ItemActionResult.SUCCESS;
+            if (stack.isEmpty()) return ActionResult.SUCCESS;
         } else if (!existingStack.isEmpty()) {
             ItemStack extractedStack = inventory.removeStack(GeneratorBlockEntity.CHARGING_SLOT_INDEX);
             generatorBlockEntity.markDirty();
 
             if (!player.getInventory().insertStack(extractedStack)) player.dropItem(extractedStack, false);
 
-            return ItemActionResult.SUCCESS;
+            return ActionResult.SUCCESS;
         }
 
-        return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
     }
 
     @Override

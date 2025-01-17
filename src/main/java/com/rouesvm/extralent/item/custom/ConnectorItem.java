@@ -15,16 +15,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.List;
 
@@ -56,7 +54,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
     }
 
     @Override
-    public void modifyClientTooltip(List<Text> tooltip, ItemStack stack, @Nullable ServerPlayerEntity player) {
+    public void modifyClientTooltip(List<Text> tooltip, ItemStack stack, PacketContext context) {
         addEnergyTooltip(tooltip, stack);
     }
 
@@ -92,21 +90,23 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        ItemStack stack = user.getStackInHand(hand);
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (world != null && !world.isClient) {
-            if (shouldPass(stack, user, true)) return TypedActionResult.pass(stack);
+            ItemStack stack = user.getStackInHand(hand);
+            if (shouldPass(stack, user, true)) return ActionResult.PASS;
 
             var cast = user.raycast(5, 0, false);
             if (cast.getType() == HitResult.Type.ENTITY)
-                return TypedActionResult.pass(stack);
+                return ActionResult.PASS;
             if (cast.getType() == HitResult.Type.BLOCK)
-                return TypedActionResult.pass(stack);
+                return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
 
-            if (user.isSneaking() && changeWeight(user, (ServerWorld) world, stack))
-                return TypedActionResult.success(stack);
+            if (user.isSneaking() && changeWeight(user, (ServerWorld) world, stack)) {
+                user.swingHand(hand, true);
+                return ActionResult.SUCCESS;
+            }
         }
-        return TypedActionResult.pass(stack);
+        return ActionResult.PASS;
     }
 
     @Override
@@ -264,12 +264,11 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
 
     @Override
     public void onLowEnergy(ItemStack stack, PlayerEntity player) {
-        this.setTexture(stack, false);
         onConnectedChanged(new ConnectorData(stack), (ServerWorld) player.getWorld(), player, false);
     }
 
     private void decreaseEnergy(ItemStack stack) {
-        if (getStoredEnergy(stack) < getEnergyCost()) return;
+        if (getStoredEnergy(stack) <= 0) return;
         setStoredEnergy(stack, getStoredEnergy(stack) - getEnergyCost());
     }
 

@@ -26,8 +26,7 @@ public class ItemRegistry {
     public static final BasicPolymerItem ANTENNA = register(new BasicPolymerItem("antenna", new Item.Settings().maxCount(16), Items.CHORUS_FRUIT));
 
     private static <T extends BasicPolymerItem> T register(T item) {
-        Identifier id = Extralent.of(item.getItemName());
-        return Registry.register(Registries.ITEM, id, item);
+        return Registry.register(Registries.ITEM, item.getId(), item);
     }
 
     public static void initialize() {}

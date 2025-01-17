@@ -4,11 +4,12 @@ import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.mixin.content.registry.FuelRegistryMixin;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.FuelRegistry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -56,7 +57,7 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
             public boolean canInsert(int slot, ItemStack stack, Direction dir) {
                 if (slot != INPUT_SLOT_INDEX)
                     return EnergyStorageUtil.isEnergyStorage(stack);
-                return isFuel(stack.getItem());
+                return isFuel(stack);
             }
 
             @Override
@@ -127,16 +128,16 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         }
     }
 
-    public boolean isFuel(Item item) {
-        var burning = FuelRegistry.INSTANCE.get(item);
-        return burning != null && burning != 0;
+    public boolean isFuel(ItemStack stack) {
+        var burning = world.getFuelRegistry().getFuelTicks(stack);
+        return burning != 0;
     }
 
     public void validFuel() {
         ItemStack fuelStack = this.inventory.getStack(0);
         if (this.progress == 0 && !fuelStack.isEmpty()) {
-            var burning = FuelRegistry.INSTANCE.get(fuelStack.getItem());
-            if (burning != null && burning != 0) {
+            var burning = world.getFuelRegistry().getFuelTicks(fuelStack);
+            if (burning != 0) {
                 fuelStack.decrement(1);
                 this.inventory.setStack(0, fuelStack);
                 this.burnTime = burning;

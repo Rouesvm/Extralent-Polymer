@@ -7,13 +7,16 @@ import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 public class BasicPolymerBlock extends Block implements PolymerTexturedBlock {
     private final String name;
     private final BlockState polymerBlockState;
 
     public BasicPolymerBlock(String name, Settings settings) {
-        super(settings);
+        super(settings.registryKey(RegistryKey.of(RegistryKeys.BLOCK, Extralent.of(name))));
         this.name = name;
         this.polymerBlockState = PolymerBlockResourceUtils.requestBlock(BlockModelType.FULL_BLOCK,
                 PolymerBlockModel.of(Extralent.of("block/" + name)));
@@ -24,7 +27,7 @@ public class BasicPolymerBlock extends Block implements PolymerTexturedBlock {
     }
 
     @Override
-    public BlockState getPolymerBlockState(BlockState state) {
+    public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
         return polymerBlockState;
     }
 }

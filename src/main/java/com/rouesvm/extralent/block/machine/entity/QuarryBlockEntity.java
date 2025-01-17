@@ -11,8 +11,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.context.LootContextParameterSet;
+import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
@@ -65,7 +66,7 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
                 return;
             }
 
-            LootContextParameterSet.Builder builder = new LootContextParameterSet
+            LootWorldContext.Builder builder = new LootWorldContext
                     .Builder((ServerWorld) this.world)
                     .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
                     .add(LootContextParameters.ORIGIN, this.miningPos.toCenterPos())
