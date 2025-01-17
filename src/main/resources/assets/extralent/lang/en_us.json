@@ -11,12 +11,12 @@
   "item.extralent.viewer" : "Viewer",
 
 
-  "block.extralent.transporter" : "Transporter",
-  "block.extralent.transmitter" : "Transmitter",
-  "block.extralent.generator" : "Generator",
-  "block.extralent.quarry" : "Quarry",
-  "block.extralent.electric_furnace" : "Electric Furnace",
-  "block.extralent.tree_harvester" : "Tree Harvester",
+  "item.extralent.transporter" : "Transporter",
+  "item.extralent.transmitter" : "Transmitter",
+  "item.extralent.generator" : "Generator",
+  "item.extralent.quarry" : "Quarry",
+  "item.extralent.electric_furnace" : "Electric Furnace",
+  "item.extralent.tree_harvester" : "Tree Harvester",
 
 
   "info.viewer.display_changed": "Changed display type:",

@@ -11,12 +11,12 @@
   "item.extralent.viewer" : "Pemapar Maklumat",
 
 
-  "block.extralent.transporter" : "Pengangkut",
-  "block.extralent.transmitter" : "Pemancar Tenaga",
-  "block.extralent.generator" : "Penjana",
-  "block.extralent.quarry" : "Kuari",
-  "block.extralent.electric_furnace" : "Relau Elektrik",
-  "block.extralent.tree_harvester" : "Mesin Penuai Pokok",
+  "item.extralent.transporter" : "Pengangkut",
+  "item.extralent.transmitter" : "Pemancar Tenaga",
+  "item.extralent.generator" : "Penjana",
+  "item.extralent.quarry" : "Kuari",
+  "item.extralent.electric_furnace" : "Relau Elektrik",
+  "item.extralent.tree_harvester" : "Mesin Penuai Pokok",
 
 
   "info.viewer.display_changed": "Jenis paparan ditukar kepada:",
