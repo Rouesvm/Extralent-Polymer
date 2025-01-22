@@ -1,9 +1,13 @@
 package com.rouesvm.extralent.visual.ui.inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class ExtralentInventory implements MinimalSidedInventory {
     public final DefaultedList<ItemStack> stacks;
@@ -36,6 +40,13 @@ public class ExtralentInventory implements MinimalSidedInventory {
     @Override
     public boolean canExtract(int slot, ItemStack stack, Direction dir) {
         return false;
+    }
+
+    public Optional<Item> hasTag(TagKey<Item> item) {
+        return this.getStacks().stream()
+                .filter(stack -> stack.isIn(item))
+                .findFirst()
+                .map(ItemStack::getItem);
     }
 
     public ItemStack removeItem(Item item, int count) {
