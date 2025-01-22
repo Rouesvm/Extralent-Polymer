@@ -27,7 +27,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.*;
 
 public class HarvesterBlockEntity extends BasicMachineBlockEntity {
-    private static final Vec3i boxSize = new Vec3i(8, 8, 8);
+    private static final Vec3i boxSize = new Vec3i(9, 2, 9);
 
     public static final long ENERGY_USED = 500;
 
@@ -37,15 +37,22 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private int ticks;
     private final InventoryStorage outputInventory;
 
-    private final HashSet<BlockPos> soilPos = new HashSet<>(boxSize.getX() * boxSize.getZ() / 2);
-    private HashSet<BlockPos> cachedPos = null;
+    private final Box box;
 
-    private Queue<BlockPos> soilQueue = new LinkedList<>();
+    private final HashSet<BlockPos> soilPos = new HashSet<>(boxSize.getX() * boxSize.getZ() / 2);
+    private final Queue<BlockPos> soilQueue = new LinkedList<>();
+
+    private final HashSet<BlockPos> toHarvestPos = new HashSet<>(boxSize.getX() * boxSize.getZ() / 2);
+    private final Queue<BlockPos> toHarvestQueue = new LinkedList<>();
 
     public HarvesterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.HARVESTER_BLOCK_ENTITY, pos, state);
         this.outputInventory = InventoryStorage.of(inventory, Direction.UP);
         this.inventoryStorage = InventoryStorage.of(inventory, Direction.DOWN);
+
+        Vec3d startPos = new Vec3d(pos.getX() - (double) boxSize.getX() / 2, pos.getY() + 1, pos.getZ() - (double) boxSize.getZ() / 2);
+        Vec3d endPos = startPos.add(Vec3d.of(boxSize));
+        this.box = new Box(startPos, endPos);
     }
 
     @Override
@@ -71,14 +78,16 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
             @Override
             public boolean canInsert(int slot, ItemStack stack, Direction dir) {
-                return Arrays.stream(INPUT_SLOTS_ARRAY).anyMatch(input -> slot == input);
+                return Arrays.stream(INPUT_SLOTS_ARRAY)
+                        .anyMatch(input -> slot == input);
             }
 
             @Override
             public boolean canExtract(int slot, ItemStack stack, Direction dir) {
                 if (dir == Direction.UP && slot == INPUT_SLOTS_ARRAY[slot])
                     return true;
-                else return Arrays.stream(INPUT_SLOTS_ARRAY).anyMatch(input -> slot != input);
+                else return Arrays.stream(INPUT_SLOTS_ARRAY)
+                        .anyMatch(input -> slot != input);
             }
         };
     }
@@ -89,41 +98,24 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         Block machineBlock = getCachedState().getBlock();
         if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
 
-        if (cachedPos == null) {
-            cachedPos = new HashSet<>(boxSize.getX() * boxSize.getY() * boxSize.getZ());
-            cacheArea();
-        }
-
         if (energyStorage.amount <= ENERGY_USED) {
             machineBaseBlock.setState(false, world, pos);
-            return;
-        } else machineBaseBlock.setState(true, world, pos);
+        } else {
+            machineBaseBlock.setState(true, world, pos);
 
-        ticks++;
-        if (ticks % 6 == 0) {
-            plantSaplings(world);
-            energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED / ((long) boxSize.getX() * boxSize.getZ() / 2), 0, energyStorage.getCapacity());
-            markDirty();
-        }
+            ticks++;
+            if (ticks % 6 == 0) {
+                plantSaplings(world);
+                energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED / ((long) boxSize.getX() * boxSize.getZ() / 2), 0, energyStorage.getCapacity());
+                markDirty();
+            }
 
-        if (ticks % 80 == 0) {
-            scanAreaForSoil(world);
-            energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
-            markDirty();
-        }
-    }
-
-    private void cacheArea() {
-        int xStart = pos.getX() - boxSize.getX() / 2;
-        int zStart = pos.getZ() - boxSize.getZ() / 2;
-        int yStart = pos.getY() + 1;
-        int yEnd = yStart + boxSize.getY();
-
-        for (int x = xStart; x <= xStart + boxSize.getX(); x++) {
-            for (int z = zStart; z <= zStart + boxSize.getZ(); z++) {
-                for (int y = yStart; y < yEnd; y++) {
-                    cachedPos.add(new BlockPos(x, y, z));
-                }
+            if ((soilQueue.isEmpty() && toHarvestQueue.isEmpty())
+                    && ticks % 80 == 0
+            ) {
+                scanAreaForSoil(world);
+                energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
+                markDirty();
             }
         }
     }
@@ -131,22 +123,30 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private void plantSaplings(World world) {
         if (!soilQueue.isEmpty()) {
             BlockPos pos = soilQueue.poll();
-            boolean didPlant = plantSapling(world, pos.down());
-            if (!didPlant) plantSaplings(world);
+            plantSapling(world, pos);
+            soilQueue.remove(pos);
+        }
+
+        if (!toHarvestQueue.isEmpty()) {
+            BlockPos pos = toHarvestQueue.poll();
+            harvestTree(world, pos);
+            toHarvestQueue.remove(pos);
         }
     }
 
     private void scanAreaForSoil(World world) {
-        cachedPos.forEach(pos -> {
-            BlockState state = world.getBlockState(pos);
-            BlockState downState = world.getBlockState(pos.down());
-            if (isBreakableBlock(state))
-                harvestTree(world, pos);
-            if (isGroundSuitable(downState) && world.isAir(pos.up()))
-                soilPos.add(pos);
-            else soilPos.remove(pos);
-        });
+        for (BlockPos pos : getBlockPosInBox(box)) {
+            if (isLoaded(pos)) {
+                BlockState state = world.getBlockState(pos);
 
+                if (isBreakableBlock(state)) toHarvestPos.add(pos);
+                else toHarvestPos.remove(pos);
+                if (isGroundSuitable(state) && world.isAir(pos.up())) soilPos.add(pos);
+                else soilPos.remove(pos);
+            }
+        }
+
+        if (toHarvestQueue.isEmpty()) toHarvestQueue.addAll(toHarvestPos);
         if (soilQueue.isEmpty()) soilQueue.addAll(soilPos);
     }
 
@@ -166,7 +166,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
                 world.playSound(null, pos, SoundEvents.BLOCK_WOOD_BREAK, SoundCategory.BLOCKS, 2f, 1f);
             }
 
-            insertDrops(getDrops(state, current));
+            insertDrops(state, current);
             world.setBlockState(current, Blocks.AIR.getDefaultState());
             for (Direction direction : Direction.values()) {
                 BlockPos neighbor = current.offset(direction);
@@ -177,10 +177,10 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         }
     }
 
-    private boolean plantSapling(World world, BlockPos pos) {
-        if (world.isAir(pos)) return false;
-        if (!world.isAir(pos.up())) return false;
-        if (inventory.isEmpty()) return true;
+    private void plantSapling(World world, BlockPos pos) {
+        if (world.isAir(pos)) return;
+        if (!world.isAir(pos.up())) return;
+        if (inventory.isEmpty()) return;
 
         Item selectedSapling = inventory.getStacks().stream()
                 .filter(stack -> stack.isIn(ItemTags.SAPLINGS))
@@ -194,22 +194,17 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
                 Block saplingBlock = Block.getBlockFromItem(selectedSapling);
                 world.playSound(null, pos.up(), SoundEvents.BLOCK_GRASS_PLACE, SoundCategory.BLOCKS, 1f, 1f);
                 world.setBlockState(pos.up(), saplingBlock.getDefaultState());
-                return true;
             }
         }
-
-        return false;
     }
 
-    private List<ItemStack> getDrops(BlockState state, BlockPos current) {
-        return new ArrayList<>(state.getDroppedStacks(
+    private void insertDrops(BlockState state, BlockPos current) {
+        List<ItemStack> drops = state.getDroppedStacks(
                 new LootWorldContext.Builder((ServerWorld) this.world)
                         .add(LootContextParameters.TOOL, Items.DIAMOND_AXE.getDefaultStack())
                         .add(LootContextParameters.ORIGIN, current.toCenterPos())
-                        .addOptional(LootContextParameters.BLOCK_ENTITY, this)));
-    }
+                        .addOptional(LootContextParameters.BLOCK_ENTITY, this));
 
-    private void insertDrops(List<ItemStack> drops) {
         drops.forEach(drop -> {
             if (drop.isIn(ItemTags.SAPLINGS))
                 drop = inventory.insertStack(drop, INPUT_SLOTS_ARRAY);
@@ -223,6 +218,23 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
     private boolean isGroundSuitable(BlockState state) {
         return state.isIn(BlockTags.DIRT);
+    }
+
+    private boolean isLoaded(BlockPos pos) {
+        if (world == null) return false;
+        return world.isChunkLoaded(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()));
+    }
+
+    private static List<BlockPos> getBlockPosInBox(Box axisAlignedBox) {
+        List<BlockPos> blocks = new ArrayList<>();
+        for (double y = axisAlignedBox.minY; y < axisAlignedBox.maxY; ++y) {
+            for (double x = axisAlignedBox.minX; x < axisAlignedBox.maxX; ++x) {
+                for (double z = axisAlignedBox.minZ; z < axisAlignedBox.maxZ; ++z) {
+                    blocks.add(new BlockPos((int) x, (int) y, (int) z));
+                }
+            }
+        }
+        return blocks;
     }
 
     @Override

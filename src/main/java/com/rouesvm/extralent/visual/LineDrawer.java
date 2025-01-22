@@ -6,7 +6,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Vec3i;
-import org.joml.Vector3f;
 
 public class LineDrawer {
     public static <T extends ParticleEffect> void drawLine(T particleType, BlockPos start, BlockPos end, ServerWorld world) {
@@ -33,22 +32,23 @@ public class LineDrawer {
         BlockPos start = machinePos.add(-size.getX() / 2, 0, -size.getZ() / 2); // Bottom-left front corner
         BlockPos end = machinePos.add(size.getX() / 2, size.getY(), size.getZ() / 2); // Top-right back corner
 
-        for (int i = 0; i < 4; i++) {
+        int i;
+        for (i = 0; i < 4; i++) {
             BlockPos topCorner = getCorner(start, end, i, true);
             BlockPos bottomCorner = getCorner(start, end, i, false);
-            LineDrawer.drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), topCorner, bottomCorner, world);
+            drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), topCorner, bottomCorner, world);
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, true);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, true);
-            LineDrawer.drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), startCorner, endCorner, world);
+            drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), startCorner, endCorner, world);
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, false);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, false);
-            LineDrawer.drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), startCorner, endCorner, world);
+            drawLine(new DustParticleEffect(ColorHelper.getArgb(25, 25, 25), 0.75F), startCorner, endCorner, world);
         }
     }
 
