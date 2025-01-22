@@ -32,22 +32,23 @@ public class LineDrawer {
         BlockPos start = machinePos.add(-size.getX() / 2, 0, -size.getZ() / 2); // Bottom-left front corner
         BlockPos end = machinePos.add(size.getX() / 2, size.getY(), size.getZ() / 2); // Top-right back corner
 
-        for (int i = 0; i < 4; i++) {
+        int i;
+        for (i = 0; i < 4; i++) {
             BlockPos topCorner = getCorner(start, end, i, true);
             BlockPos bottomCorner = getCorner(start, end, i, false);
-            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), topCorner, bottomCorner, world);
+            drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), topCorner, bottomCorner, world);
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, true);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, true);
-            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), startCorner, endCorner, world);
+            drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), startCorner, endCorner, world);
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (i = 0; i < 4; i++) {
             BlockPos startCorner = getCorner(start, end, i, false);
             BlockPos endCorner = getCorner(start, end, (i + 1) % 4, false);
-            LineDrawer.drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), startCorner, endCorner, world);
+            drawLine(new DustParticleEffect(new Vector3f(0F, 0.75F, 1F), 0.75F), startCorner, endCorner, world);
         }
     }
 
