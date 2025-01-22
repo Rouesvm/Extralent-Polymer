@@ -105,7 +105,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
             ticks++;
             if (ticks % 6 == 0) {
-                plantSaplings(world);
+                harvestAndPlant(world);
                 energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED / ((long) boxSize.getX() * boxSize.getZ() / 2), 0, energyStorage.getCapacity());
                 markDirty();
             }
@@ -113,14 +113,14 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             if ((soilQueue.isEmpty() && toHarvestQueue.isEmpty())
                     && ticks % 80 == 0
             ) {
-                scanAreaForSoil(world);
+                scanArea(world);
                 energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
                 markDirty();
             }
         }
     }
 
-    private void plantSaplings(World world) {
+    private void harvestAndPlant(World world) {
         if (!soilQueue.isEmpty()) {
             BlockPos pos = soilQueue.poll();
             plantSapling(world, pos);
@@ -134,7 +134,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         }
     }
 
-    private void scanAreaForSoil(World world) {
+    private void scanArea(World world) {
         for (BlockPos pos : getBlockPosInBox(box)) {
             if (isLoaded(pos)) {
                 BlockState state = world.getBlockState(pos);
@@ -154,15 +154,14 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         Queue<BlockPos> toCheck = new LinkedList<>();
         toCheck.add(pos);
 
-        boolean playSound = false;
-
+        boolean playedSound = false;
         while (!toCheck.isEmpty()) {
             BlockPos current = toCheck.poll();
             BlockState state = world.getBlockState(current);
             if (!isBreakableBlock(state)) continue;
 
-            if (!playSound) {
-                playSound = true;
+            if (!playedSound) {
+                playedSound = true;
                 world.playSound(null, pos, SoundEvents.BLOCK_WOOD_BREAK, SoundCategory.BLOCKS, 2f, 1f);
             }
 
