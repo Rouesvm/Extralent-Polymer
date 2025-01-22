@@ -38,11 +38,13 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     private SmeltingRecipe currentRecipe;
 
     private final InventoryStorage outputInventory;
+    private final ServerRecipeManager.MatchGetter<SingleStackRecipeInput, SmeltingRecipe> matchGetter;
 
     public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.ELECTRIC_FURNACE_BLOCK_ENTITY, pos, state);
         this.outputInventory = InventoryStorage.of(inventory, Direction.UP);
         this.inventoryStorage = InventoryStorage.of(inventory, Direction.DOWN);
+        this.matchGetter = ServerRecipeManager.createCachedMatchGetter(RecipeType.SMELTING);
     }
 
     @Override
@@ -90,8 +92,9 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
+
         nbt.putInt("progress", this.progress);
-        nbt.putBoolean("should_burn", this.shouldBurn);
+        nbt.putBoolean("should_burn", false);
     }
 
     @Override
@@ -128,10 +131,23 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         }
     }
 
+    private ItemStack getOutputStack() {
+        ItemStack stack = inventory.getStack(INPUT_SLOT_INDEX);
+        return getOutputStack(stack);
+    }
+
+    private ItemStack getOutputStack(ItemStack inputStack) {
+        return getOutputStack(currentRecipe, inputStack);
+    }
+
+    private ItemStack getOutputStack(SmeltingRecipe recipe, ItemStack inputStack) {
+        return recipe.craft(new SingleStackRecipeInput(inputStack), world.getRegistryManager());
+    }
+
     private Optional<SmeltingRecipe> canSmelt(ItemStack input) {
-        Optional<RecipeEntry<SmeltingRecipe>> stackRecipe = ServerRecipeManager.createCachedMatchGetter(RecipeType.SMELTING)
+        Optional<RecipeEntry<SmeltingRecipe>> stackRecipe = matchGetter
                 .getFirstMatch(new SingleStackRecipeInput(input), (ServerWorld) world).stream().findFirst();
-        if (stackRecipe.isPresent() && !stackRecipe.get().value().craft(new SingleStackRecipeInput(input), world.getRegistryManager()).isEmpty())
+        if (stackRecipe.isPresent() && !getOutputStack(stackRecipe.get().value(), input).isEmpty())
             return Optional.of(stackRecipe.get().value());
         else return Optional.empty();
     }
@@ -141,7 +157,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         if (!inputStack.isEmpty()) {
             Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
 
-            if (stackRecipe.isPresent() && canAcceptOutput(stackRecipe.get())) {
+            if (stackRecipe.isPresent() && canAcceptOutput()) {
                 currentRecipe = stackRecipe.get();
                 shouldBurn = true;
             }
@@ -149,8 +165,8 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         return shouldBurn;
     }
 
-    private boolean canAcceptOutput(SmeltingRecipe recipe) {
-        ItemStack recipeOutput = recipe.craft(new SingleStackRecipeInput(inventory.getStack(INPUT_SLOT_INDEX)), world.getRegistryManager());
+    private boolean canAcceptOutput() {
+        ItemStack recipeOutput = getOutputStack();
         ItemStack stack = inventory.getStack(OUTPUT_SLOT_INDEX);
         if (recipeOutput.isEmpty()) return false;
         if (stack.getCount() > 64) return false;
@@ -161,13 +177,12 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     private boolean outputItem() {
         if (currentRecipe == null) return false;
         if (inventory.getStack(INPUT_SLOT_INDEX).isEmpty()) return false;
-        if (!canAcceptOutput(currentRecipe)) return false;
+        if (!canAcceptOutput()) return false;
 
-        ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
         ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
         if (outputStack.getCount() >= outputStack.getMaxCount()) return false;
 
-        ItemStack result = currentRecipe.craft(new SingleStackRecipeInput(inputStack), world.getRegistryManager());
+        ItemStack result = getOutputStack();
         inventory.insertStackTo(result.copy(), OUTPUT_SLOT_INDEX);
         inventory.getStack(INPUT_SLOT_INDEX).decrement(1);
 
