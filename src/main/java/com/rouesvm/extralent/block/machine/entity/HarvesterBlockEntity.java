@@ -106,7 +106,11 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             ticks++;
             if (ticks % 6 == 0) {
                 harvestAndPlant(world);
-                energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED / ((long) boxSize.getX() * boxSize.getZ() / 2), 0, energyStorage.getCapacity());
+                energyStorage.amount = MathHelper.clamp(
+                        energyStorage.amount - ENERGY_USED / ((long) boxSize.getX() * boxSize.getZ() / 2),
+                        0,
+                        energyStorage.getCapacity());
+
                 markDirty();
             }
 
@@ -114,7 +118,11 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
                     && ticks % 80 == 0
             ) {
                 scanArea(world);
-                energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
+                energyStorage.amount = MathHelper.clamp(
+                        energyStorage.amount - ENERGY_USED,
+                        0,
+                        energyStorage.getCapacity());
+
                 markDirty();
             }
         }
@@ -140,9 +148,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
                 BlockState state = world.getBlockState(pos);
 
                 if (isBreakableBlock(state)) toHarvestPos.add(pos);
-                else toHarvestPos.remove(pos);
                 if (isGroundSuitable(state) && world.isAir(pos.up())) soilPos.add(pos);
-                else soilPos.remove(pos);
             }
         }
 
@@ -151,6 +157,8 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     }
 
     private void harvestTree(World world, BlockPos pos) {
+        if (world.isAir(pos)) return;
+
         Queue<BlockPos> toCheck = new LinkedList<>();
         toCheck.add(pos);
 
@@ -177,20 +185,15 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     }
 
     private void plantSapling(World world, BlockPos pos) {
-        if (world.isAir(pos)) return;
-        if (!world.isAir(pos.up())) return;
+        if (world.isAir(pos) && !world.isAir(pos.up())) return;
         if (inventory.isEmpty()) return;
 
-        Item selectedSapling = inventory.getStacks().stream()
-                .filter(stack -> stack.isIn(ItemTags.SAPLINGS))
-                .map(ItemStack::getItem)
-                .findFirst()
-                .orElse(null);
+        Optional<Item> selectedSapling = inventory.hasTag(ItemTags.SAPLINGS);
 
-        if (selectedSapling != null) {
-            ItemStack removedStack = inventory.removeItem(selectedSapling, 1);
+        if (selectedSapling.isPresent()) {
+            ItemStack removedStack = inventory.removeItem(selectedSapling.get(), 1);
             if (!removedStack.isEmpty()) {
-                Block saplingBlock = Block.getBlockFromItem(selectedSapling);
+                Block saplingBlock = Block.getBlockFromItem(selectedSapling.get());
                 world.playSound(null, pos.up(), SoundEvents.BLOCK_GRASS_PLACE, SoundCategory.BLOCKS, 1f, 1f);
                 world.setBlockState(pos.up(), saplingBlock.getDefaultState());
             }
