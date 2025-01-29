@@ -136,6 +136,10 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         return world.getFuelRegistry().getFuelTicks(item);
     }
 
+    public Integer getBurnTime(ItemStack item) {
+        return FuelRegistry.INSTANCE.get(item.getItem());
+    }
+
     public void validFuel() {
         ItemStack fuelStack = this.inventory.getStack(0);
         if (this.progress == 0 && !fuelStack.isEmpty()) {
