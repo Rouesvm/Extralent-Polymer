@@ -29,6 +29,8 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
 
     public final SimpleEnergyStorage energyStorage;
 
+    public int progress;
+
     public BasicMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
 
@@ -82,6 +84,8 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
                 this.energyStorage.amount = nbt.getLong("energy");
             }
         }
+
+        this.progress = nbt.getInt("progress");
     }
 
     @Override
@@ -92,6 +96,8 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
             Inventories.writeNbt(nbt, this.inventory.getStacks(), registryLookup);
         if (this.energyStorage != null)
             nbt.putLong("energy", this.energyStorage.amount);
+
+        nbt.putInt("progress", this.progress);
     }
 
     public void update() {
@@ -128,8 +134,13 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         return switch (content) {
             case ENERGY -> getEnergyInfo(null, true);
             case INVENTORY -> getInventoryInfo(null, true);
-            default -> Text.empty();
+            case MACHINE -> getCustomInfo();
         };
+    }
+
+    // UI only.
+    private Text getCustomInfo() {
+        return getEnergyInfo(null, true); // Default.
     }
 
     private Text getInventoryInfo(Text text, boolean isUI) {

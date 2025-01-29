@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.block.machine.entity;
 
+import com.rouesvm.extralent.block.ActivatedPolymerBlock;
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
@@ -31,9 +32,8 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     private static final long ENERGY_USED_PER_SECOND = 10; // ENERGY_USED * (SECONDS * 20)
     private static final double TIME_TO_BURN_IN_SECONDS = 0.5;
 
-    private int progress;
-    private boolean shouldBurn;
-    private SmeltingRecipe currentRecipe;
+    private boolean is_burning;
+    private SmeltingRecipe current_recipe;
 
     private final InventoryStorage outputInventory;
 
@@ -86,20 +86,6 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.putInt("progress", this.progress);
-        nbt.putBoolean("should_burn", this.shouldBurn);
-    }
-
-    @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        this.progress = nbt.getInt("progress");
-        this.shouldBurn = nbt.getBoolean("should_burn");
-    }
-
-    @Override
     public void tick() {
         if (world == null || world.isClient) return;
 
@@ -109,23 +95,23 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         Block machineBlock = getCachedState().getBlock();
         if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
 
-        if (!shouldBurn && validItem()) {
-            machineBaseBlock.setState(true, world, pos);
-            markDirty();
-        } else if (!shouldBurn) {
-            progress = 0;
-            return;
-        }
-
-        if (progress++ >= TIME_TO_BURN_IN_SECONDS * 20) {
-            if (energyStorage.amount < energy_used) return;
-            if (outputItem()) {
-                energyStorage.amount = MathHelper.clamp(energyStorage.amount - energy_used, 0, energyStorage.getCapacity());
-
-                machineBaseBlock.setState(false, world, pos);
+        if (!is_burning && validItem()) {
+            boolean isActivated = machineBlock.getDefaultState().get(ActivatedPolymerBlock.ACTIVATED);
+            if (!isActivated) {
+                machineBaseBlock.setState(true, world, pos);
                 markDirty();
             }
-        }
+
+            if (progress++ >= TIME_TO_BURN_IN_SECONDS * 20) {
+                if (energyStorage.amount < energy_used) return;
+                if (outputItem()) {
+                    energyStorage.amount = MathHelper.clamp(energyStorage.amount - energy_used, 0, energyStorage.getCapacity());
+
+                    machineBaseBlock.setState(false, world, pos);
+                    markDirty();
+                }
+            }
+        } else if (!is_burning) progress = 0;
     }
 
     private Optional<SmeltingRecipe> canSmelt(ItemStack input) {
@@ -143,11 +129,11 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
             Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
 
             if (stackRecipe.isPresent() && canAcceptOutput(stackRecipe.get())) {
-                currentRecipe = stackRecipe.get();
-                shouldBurn = true;
+                current_recipe = stackRecipe.get();
+                is_burning = true;
             }
         }
-        return shouldBurn;
+        return is_burning;
     }
 
     private boolean canAcceptOutput(SmeltingRecipe recipe) {
@@ -160,18 +146,18 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     }
 
     private boolean outputItem() {
-        if (currentRecipe == null) return false;
+        if (current_recipe == null) return false;
         if (inventory.getStack(INPUT_SLOT_INDEX).isEmpty()) return false;
-        if (!canAcceptOutput(currentRecipe)) return false;
+        if (!canAcceptOutput(current_recipe)) return false;
 
         ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
         if (outputStack.getCount() >= outputStack.getMaxCount()) return false;
 
-        ItemStack result = currentRecipe.getResult(world.getRegistryManager());
+        ItemStack result = current_recipe.getResult(world.getRegistryManager());
         inventory.insertStackTo(result.copy(), OUTPUT_SLOT_INDEX);
         inventory.getStack(INPUT_SLOT_INDEX).decrement(1);
 
-        shouldBurn = false;
+        is_burning = false;
         return true;
     }
 

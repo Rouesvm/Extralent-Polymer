@@ -4,12 +4,15 @@
   "item.extralent.antenna" : "Antenna",
   "item.extralent.copper_rod" : "Copper Rod",
   "item.extralent.machine_base" : "Machine Base",
+  "item.extralent.jar" : "Jar",
 
   "item.extralent.mob_vacuum" : "Mob Vacuum",
   "item.extralent.filter" : "Filter",
   "item.extralent.connector" : "Connector",
   "item.extralent.viewer" : "Viewer",
 
+  "item.extralent.apple_jam" : "Apple Jam",
+  "item.extralent.apple_jam_sandwich" : "Apple Jam Sandwich",
 
   "block.extralent.transporter" : "Transporter",
   "block.extralent.transmitter" : "Transmitter",

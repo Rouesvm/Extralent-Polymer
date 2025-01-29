@@ -5,6 +5,7 @@ import com.rouesvm.extralent.block.machine.entity.ElectricFurnaceBlockEntity;
 import com.rouesvm.extralent.block.generator.entity.GeneratorBlockEntity;
 import com.rouesvm.extralent.block.machine.entity.HarvesterBlockEntity;
 import com.rouesvm.extralent.block.machine.entity.QuarryBlockEntity;
+import com.rouesvm.extralent.block.transport.entity.TeleporterBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.TransmitterBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.TransporterBlockEntity;
 import eu.pb4.polymer.core.api.block.PolymerBlockUtils;
@@ -16,14 +17,9 @@ import net.minecraft.registry.Registry;
 import team.reborn.energy.api.EnergyStorage;
 
 public class BlockEntityRegistry {
-    public static final BlockEntityType<GeneratorBlockEntity> GENERATOR_BLOCK_ENTITY = register(
-            "generator_block_entity",
-            BlockEntityType.Builder.create(GeneratorBlockEntity::new, BlockRegistry.GENERATOR).build());
-
-    public static final BlockEntityType<QuarryBlockEntity> QUARRY_BLOCK_ENTITY = register(
-            "quarry_block_entity",
-            BlockEntityType.Builder.create(QuarryBlockEntity::new, BlockRegistry.QUARRY).build());
-
+    public static final BlockEntityType<TeleporterBlockEntity> TELEPORTER_BLOCK_ENTITY = register(
+            "teleporter_block_entity",
+            BlockEntityType.Builder.create(TeleporterBlockEntity::new, BlockRegistry.TELEPORTER).build());
     public static final BlockEntityType<TransporterBlockEntity> TRANSPORTER_BLOCK_ENTITY = register(
             "transporter_block_entity",
             BlockEntityType.Builder.create(TransporterBlockEntity::new, BlockRegistry.TRANSPORTER).build());
@@ -31,10 +27,15 @@ public class BlockEntityRegistry {
             "transmitter_block_entity",
             BlockEntityType.Builder.create(TransmitterBlockEntity::new, BlockRegistry.TRANSMITTER).build());
 
+    public static final BlockEntityType<GeneratorBlockEntity> GENERATOR_BLOCK_ENTITY = register(
+            "generator_block_entity",
+            BlockEntityType.Builder.create(GeneratorBlockEntity::new, BlockRegistry.GENERATOR).build());
+    public static final BlockEntityType<QuarryBlockEntity> QUARRY_BLOCK_ENTITY = register(
+            "quarry_block_entity",
+            BlockEntityType.Builder.create(QuarryBlockEntity::new, BlockRegistry.QUARRY).build());
     public static final BlockEntityType<HarvesterBlockEntity> HARVESTER_BLOCK_ENTITY = register(
             "harvester_block_entity",
             BlockEntityType.Builder.create(HarvesterBlockEntity::new, BlockRegistry.HARVESTER).build());
-
     public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE_BLOCK_ENTITY = register(
             "electric_furnace_block_entity",
             BlockEntityType.Builder.create(ElectricFurnaceBlockEntity::new, BlockRegistry.ELECTRIC_FURNACE).build());
