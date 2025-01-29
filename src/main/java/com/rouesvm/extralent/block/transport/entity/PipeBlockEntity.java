@@ -64,8 +64,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         if (this.world == null) return PipeState.FAIL;
         if (this.world.isClient) return PipeState.FAIL;
 
-        int maxDist = 5;
-        if (connection.getPos().isWithinDistance(this.pos, maxDist)) {
+        if (getMaxDist() == 0 || connection.getPos().isWithinDistance(this.pos, getMaxDist())) {
             if (correctBlock(connection.getPos())) {
                 blocks.add(connection);
                 orderedConnections = new LinkedHashSet<>(blocks);
@@ -82,6 +81,10 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
             return block != null;
         }
         return false;
+    }
+
+    public int getMaxDist() {
+        return 5;
     }
 
     @ApiStatus.OverrideOnly

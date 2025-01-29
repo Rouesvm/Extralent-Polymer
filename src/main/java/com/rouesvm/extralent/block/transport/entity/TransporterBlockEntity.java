@@ -21,8 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
-    public HashSet<Item> itemList = new HashSet<>();
     private static final int ITEM_TRANSFER_RATE = 2;
+    public HashSet<Item> itemList = new HashSet<>();
 
     public TransporterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSPORTER_BLOCK_ENTITY, pos, state);

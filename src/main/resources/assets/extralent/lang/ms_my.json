@@ -4,12 +4,15 @@
   "item.extralent.antenna" : "Antena",
   "item.extralent.copper_rod" : "Batang Kuprum",
   "item.extralent.machine_base" : "Mesin",
+  "item.extralent.jar" : "Balang",
 
   "item.extralent.mob_vacuum" : "Vakum Mob",
   "item.extralent.filter" : "Penapis Barang",
   "item.extralent.connector" : "Penyambung",
   "item.extralent.viewer" : "Pemapar Maklumat",
 
+  "item.extralent.apple_jam" : "Kaya Epal",
+  "item.extralent.apple_jam_sandwich" : "Roti Kaya Epal",
 
   "item.extralent.transporter" : "Pengangkut",
   "item.extralent.transmitter" : "Pemancar Tenaga",

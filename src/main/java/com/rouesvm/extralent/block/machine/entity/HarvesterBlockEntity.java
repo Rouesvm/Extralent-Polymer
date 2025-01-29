@@ -34,7 +34,6 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private static final int[] INPUT_SLOTS_ARRAY = {0, 1, 2};
     private static final int[] OUTPUT_SLOTS_ARRAY = {3, 4, 5, 6, 7, 8};
 
-    private int ticks;
     private final InventoryStorage outputInventory;
 
     private final Box box;
@@ -50,7 +49,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         this.outputInventory = InventoryStorage.of(inventory, Direction.UP);
         this.inventoryStorage = InventoryStorage.of(inventory, Direction.DOWN);
 
-        Vec3d startPos = new Vec3d(pos.getX() - (double) boxSize.getX() / 2, pos.getY() + 1, pos.getZ() - (double) boxSize.getZ() / 2);
+        Vec3d startPos = new Vec3d(pos.getX() - (double) boxSize.getX() / 2, pos.getY() + 2, pos.getZ() - (double) boxSize.getZ() / 2);
         Vec3d endPos = startPos.add(Vec3d.of(boxSize));
         this.box = new Box(startPos, endPos);
     }
@@ -103,11 +102,11 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         } else {
             machineBaseBlock.setState(true, world, pos);
 
-            ticks++;
-            if (ticks % 6 == 0) {
+            progress++;
+            if (progress % 6 == 0) {
                 harvestAndPlant(world);
                 energyStorage.amount = MathHelper.clamp(
-                        energyStorage.amount - ENERGY_USED / ((long) boxSize.getX() * boxSize.getZ() / 2),
+                        energyStorage.amount - ENERGY_USED / (((long) boxSize.getX() * boxSize.getZ())/ 2),
                         0,
                         energyStorage.getCapacity());
 
@@ -115,7 +114,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             }
 
             if ((soilQueue.isEmpty() && toHarvestQueue.isEmpty())
-                    && ticks % 80 == 0
+                    && progress % 80 == 0
             ) {
                 scanArea(world);
                 energyStorage.amount = MathHelper.clamp(

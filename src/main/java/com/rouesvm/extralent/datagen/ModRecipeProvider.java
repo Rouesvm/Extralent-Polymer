@@ -8,6 +8,7 @@ import net.minecraft.advancement.criterion.InventoryChangedCriterion;
 import net.minecraft.data.recipe.RecipeExporter;
 import net.minecraft.data.recipe.RecipeGenerator;
 import net.minecraft.data.recipe.ShapedRecipeJsonBuilder;
+import net.minecraft.data.recipe.ShapelessRecipeJsonBuilder;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.book.RecipeCategory;
@@ -75,17 +76,8 @@ public class ModRecipeProvider extends FabricRecipeProvider {
     }
 
     private void itemRecipes(RegistryEntryLookup<Item> itemWrap, RecipeExporter exporter) {
-        ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, ItemRegistry.COPPER_ROD, 6)
-                .pattern("i  ").pattern(" i ").pattern("  i")
-                .input('i', Items.COPPER_INGOT)
-                .criterion("get_copper", InventoryChangedCriterion.Conditions.items(Items.COPPER_INGOT))
-                .offerTo(exporter);
-
-        ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, ItemRegistry.ANTENNA, 1)
-                .pattern(" r ").pattern(" i ").pattern(" i ")
-                .input('r', Items.REDSTONE).input('i', ItemRegistry.COPPER_ROD)
-                .criterion("get_copper_rod", InventoryChangedCriterion.Conditions.items(ItemRegistry.COPPER_ROD))
-                .offerTo(exporter);
+        itemMaterialsRecipes(itemWrap, exporter);
+        itemFoodRecipes(itemWrap, exporter);
 
         ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, ItemRegistry.CONNECTOR, 1)
                 .pattern("i i").pattern("rbr").pattern("rbr")
@@ -106,6 +98,14 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                 .criterion("get_pearl", InventoryChangedCriterion.Conditions.items(Items.ENDER_PEARL))
                 .offerTo(exporter);
 
+        ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, ItemRegistry.FILTER, 1)
+                .pattern("iwi").pattern("www").pattern("iwi")
+                .input('i', Items.STICK).input('w', Items.STRING)
+                .criterion("get_string", InventoryChangedCriterion.Conditions.items(Items.STRING))
+                .offerTo(exporter);
+    }
+
+    private void itemMaterialsRecipes(RegistryEntryLookup<Item> itemWrap, RecipeExporter exporter) {
         ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.REDSTONE, ItemRegistry.MACHINE_BASE, 1)
                 .pattern("iri").pattern("rcr").pattern("iri")
                 .input('r', Items.REDSTONE).input('i', Items.IRON_INGOT)
@@ -116,7 +116,36 @@ public class ModRecipeProvider extends FabricRecipeProvider {
         ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, ItemRegistry.FILTER, 1)
                 .pattern("iwi").pattern("www").pattern("iwi")
                 .input('i', Items.STICK).input('w', Items.STRING)
-                .criterion("get_string", InventoryChangedCriterion.Conditions.items(Items.STRING))
+                .criterion("get_string", InventoryChangedCriterion.Conditions.items(Items.STRING));
+
+        ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, ItemRegistry.COPPER_ROD, 6)
+                .pattern("i  ").pattern(" i ").pattern("  i")
+                .input('i', Items.COPPER_INGOT)
+                .criterion("get_copper", InventoryChangedCriterion.Conditions.items(Items.COPPER_INGOT))
+                .offerTo(exporter);
+
+        ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, ItemRegistry.ANTENNA, 1)
+                .pattern(" r ").pattern(" i ").pattern(" i ")
+                .input('r', Items.REDSTONE).input('i', ItemRegistry.COPPER_ROD)
+                .criterion("get_copper_rod", InventoryChangedCriterion.Conditions.items(ItemRegistry.COPPER_ROD))
+                .offerTo(exporter);
+
+        ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, ItemRegistry.JAR, 1)
+                .pattern("r r").pattern("rrr")
+                .input('r', Items.GLASS)
+                .criterion("get_glass", InventoryChangedCriterion.Conditions.items(Items.GLASS))
+                .offerTo(exporter);
+    }
+
+    private void itemFoodRecipes(RegistryEntryLookup<Item> itemWrap, RecipeExporter exporter) {
+        ShapelessRecipeJsonBuilder.create(itemWrap, RecipeCategory.FOOD, ItemRegistry.APPLE_JAM, 1)
+                .input(Items.SUGAR).input(Items.APPLE).input(Items.APPLE).input(ItemRegistry.JAR)
+                .criterion("get_apple", InventoryChangedCriterion.Conditions.items(Items.APPLE))
+                .offerTo(exporter);
+
+        ShapelessRecipeJsonBuilder.create(itemWrap, RecipeCategory.FOOD, ItemRegistry.APPLE_JAM_SANDWICH, 1)
+                .input(ItemRegistry.APPLE_JAM).input(Items.BREAD)
+                .criterion("get_apple_jam", InventoryChangedCriterion.Conditions.items(ItemRegistry.APPLE_JAM))
                 .offerTo(exporter);
     }
 

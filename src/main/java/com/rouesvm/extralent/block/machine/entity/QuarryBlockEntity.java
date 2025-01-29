@@ -11,7 +11,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.nbt.NbtCompound;
@@ -29,8 +28,7 @@ import java.util.List;
 public class QuarryBlockEntity extends BasicMachineBlockEntity {
     public static final long ENERGY_USED = 100;
 
-    private int progress;
-    private BlockPos miningPos = this.pos.down();
+    private BlockPos mining_pos = this.pos.down();
 
     public QuarryBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.QUARRY_BLOCK_ENTITY, pos, state);
@@ -56,24 +54,24 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
         if (this.progress++ % 10 == 0) {
             machineBaseBlock.setState(true, world, pos);
 
-            if (this.miningPos.getY() <= this.world.getBottomY()) {
-                this.miningPos = this.pos.down();
+            if (this.mining_pos.getY() <= this.world.getBottomY()) {
+                this.mining_pos = this.pos.down();
             }
 
-            BlockState state = this.world.getBlockState(this.miningPos);
-            if (state.isAir() || state.getHardness(this.world, this.miningPos) < 0) {
-                this.miningPos = this.miningPos.down();
+            BlockState state = this.world.getBlockState(this.mining_pos);
+            if (state.isAir() || state.getHardness(this.world, this.mining_pos) < 0) {
+                this.mining_pos = this.mining_pos.down();
                 return;
             }
 
             LootWorldContext.Builder builder = new LootWorldContext
                     .Builder((ServerWorld) this.world)
                     .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
-                    .add(LootContextParameters.ORIGIN, this.miningPos.toCenterPos())
+                    .add(LootContextParameters.ORIGIN, this.mining_pos.toCenterPos())
                     .addOptional(LootContextParameters.BLOCK_ENTITY, this);
             List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(builder));
 
-            this.world.breakBlock(this.miningPos, false);
+            this.world.breakBlock(this.mining_pos, false);
 
             if (!drops.isEmpty()) {
                 Storage<ItemVariant> aboveStorage = findItemStorage((ServerWorld) this.world, this.pos.up());
@@ -85,7 +83,7 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
             energyStorage.amount = MathHelper.clamp(energyStorage.amount - ENERGY_USED, 0, energyStorage.getCapacity());
             markDirty();
 
-            this.miningPos = this.miningPos.down();
+            this.mining_pos = this.mining_pos.down();
         }
     }
 
@@ -115,14 +113,13 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        this.progress = nbt.getInt("progress");
-        this.miningPos = BlockPos.fromLong(nbt.getLong("mining_pos"));
+        this.mining_pos = BlockPos.fromLong(nbt.getLong("mining_pos"));
     }
 
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
         nbt.putInt("progress", this.progress);
-        nbt.putLong("mining_pos", this.miningPos.asLong());
+        nbt.putLong("mining_pos", this.mining_pos.asLong());
     }
 }

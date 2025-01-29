@@ -6,11 +6,8 @@ import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.fabricmc.fabric.mixin.content.registry.FuelRegistryMixin;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.item.FuelRegistry;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
@@ -22,8 +19,7 @@ import team.reborn.energy.api.EnergyStorageUtil;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class GeneratorBlockEntity extends BasicMachineBlockEntity {
-    private int progress;
-    private int burnTime;
+    private int current_burn_time;
 
     public static final int INPUT_SLOT_INDEX = 0;
     public static final int CHARGING_SLOT_INDEX = 1;
@@ -80,22 +76,25 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
             Block machineBlock = getCachedState().getBlock();
             if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
 
-            if (this.burnTime == 0) {
+            if (this.current_burn_time == 0) {
                 machineBaseBlock.setState(true, world, pos);
                 validFuel();
                 markDirty();
             }
 
-            if (this.progress++ < this.burnTime / 1.25) {
+            if (this.progress++ < this.current_burn_time / 1.25) {
                energyStorage.amount = (long) MathHelper.clamp(
-                        energyStorage.amount + (this.burnTime / 800.0),
+                        energyStorage.amount + (this.current_burn_time / 800.0),
                         0, energyStorage.getCapacity()
                );
             } else {
-                machineBaseBlock.setState(false, world, pos);
-                markDirty();
-                this.progress = 0;
-                this.burnTime = 0;
+                if (this.progress != 0 || this.current_burn_time != 0) {
+                    this.progress = 0;
+                    this.current_burn_time = 0;
+
+                    machineBaseBlock.setState(false, world, pos);
+                    markDirty();
+                }
             }
         }
 
@@ -133,14 +132,18 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         return burning != 0;
     }
 
+    public Integer getBurnTime(ItemStack item) {
+        return world.getFuelRegistry().getFuelTicks(item);
+    }
+
     public void validFuel() {
         ItemStack fuelStack = this.inventory.getStack(0);
         if (this.progress == 0 && !fuelStack.isEmpty()) {
-            var burning = world.getFuelRegistry().getFuelTicks(fuelStack);
-            if (burning != 0) {
+            var burning = getBurnTime(fuelStack);
+            if (burning != null && burning != 0) {
                 fuelStack.decrement(1);
                 this.inventory.setStack(0, fuelStack);
-                this.burnTime = burning;
+                this.current_burn_time = burning;
             }
         }
     }
@@ -148,14 +151,12 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        this.progress = nbt.getInt("progress");
-        this.burnTime = nbt.getInt("burnTime");
+        this.current_burn_time = nbt.getInt("burnTime");
     }
 
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
-        nbt.putInt("progress", this.progress);
-        nbt.putInt("burnTime", this.burnTime);
+        nbt.putInt("burnTime", this.current_burn_time);
     }
 }
