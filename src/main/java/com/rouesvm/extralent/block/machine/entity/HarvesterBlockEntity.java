@@ -1,7 +1,8 @@
 package com.rouesvm.extralent.block.machine.entity;
 
-import com.rouesvm.extralent.block.MachineBlock;
+import com.rouesvm.extralent.block.ActivatedPolymerBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
+import com.rouesvm.extralent.item.custom.data.InfoData;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import com.rouesvm.extralent.visual.LineDrawer;
@@ -9,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -27,21 +29,22 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.*;
 
 public class HarvesterBlockEntity extends BasicMachineBlockEntity {
-    private static final Vec3i boxSize = new Vec3i(9, 2, 9);
+    private static final Vec3i BOX_SIZE = new Vec3i(9, 2, 9);
 
     public static final long ENERGY_USED = 500;
 
     private static final int[] INPUT_SLOTS_ARRAY = {0, 1, 2};
     private static final int[] OUTPUT_SLOTS_ARRAY = {3, 4, 5, 6, 7, 8};
 
-    private final InventoryStorage outputInventory;
 
     private final Box box;
 
-    private final HashSet<BlockPos> soilPos = new HashSet<>(boxSize.getX() * boxSize.getZ() / 2);
+    private final InventoryStorage outputInventory;
+
+    private final HashSet<BlockPos> soilPos = new HashSet<>(BOX_SIZE.getX() * BOX_SIZE.getZ() / 2);
     private final Queue<BlockPos> soilQueue = new LinkedList<>();
 
-    private final HashSet<BlockPos> toHarvestPos = new HashSet<>(boxSize.getX() * boxSize.getZ() / 2);
+    private final HashSet<BlockPos> toHarvestPos = new HashSet<>(BOX_SIZE.getX() * BOX_SIZE.getZ() / 2);
     private final Queue<BlockPos> toHarvestQueue = new LinkedList<>();
 
     public HarvesterBlockEntity(BlockPos pos, BlockState state) {
@@ -49,8 +52,8 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         this.outputInventory = InventoryStorage.of(inventory, Direction.UP);
         this.inventoryStorage = InventoryStorage.of(inventory, Direction.DOWN);
 
-        Vec3d startPos = new Vec3d(pos.getX() - (double) boxSize.getX() / 2, pos.getY() + 2, pos.getZ() - (double) boxSize.getZ() / 2);
-        Vec3d endPos = startPos.add(Vec3d.of(boxSize));
+        Vec3d startPos = new Vec3d((pos.getX() - (double) BOX_SIZE.getX() / 2), (pos.getY() + 1), (pos.getZ() - (double) BOX_SIZE.getZ() / 2));
+        Vec3d endPos = startPos.add(Vec3d.of(BOX_SIZE));
         this.box = new Box(startPos, endPos);
     }
 
@@ -92,25 +95,23 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    public void tick() {
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
         if (world == null || world.isClient) return;
-        Block machineBlock = getCachedState().getBlock();
-        if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
 
         if (energyStorage.amount <= ENERGY_USED) {
-            machineBaseBlock.setState(false, world, pos);
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
+            world.setBlockState(pos, state, Block.NOTIFY_ALL);
         } else {
-            machineBaseBlock.setState(true, world, pos);
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
+            world.setBlockState(pos, state, Block.NOTIFY_ALL);
 
             progress++;
             if (progress % 6 == 0) {
                 harvestAndPlant(world);
                 energyStorage.amount = MathHelper.clamp(
-                        energyStorage.amount - ENERGY_USED / (((long) boxSize.getX() * boxSize.getZ())/ 2),
+                        energyStorage.amount - ENERGY_USED / (((long) BOX_SIZE.getX() * BOX_SIZE.getZ())/ 2),
                         0,
                         energyStorage.getCapacity());
-
-                markDirty();
             }
 
             if ((soilQueue.isEmpty() && toHarvestQueue.isEmpty())
@@ -121,9 +122,9 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
                         energyStorage.amount - ENERGY_USED,
                         0,
                         energyStorage.getCapacity());
-
-                markDirty();
             }
+
+            BlockEntity.markDirty(world, pos, state);
         }
     }
 
@@ -239,9 +240,18 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    public Text infoOnClicked() {
-        LineDrawer.visualizeScanArea(pos, (ServerWorld) world, boxSize);
-        return super.infoOnClicked();
+    public Text infoOnClicked(InfoData.DISPLAY display) {
+        if (display.equals(InfoData.DISPLAY.FLOATING)) getCustomInfo();
+        return super.infoOnClicked(display);
+    }
+
+    @Override
+    public Text getCustomInfo() {
+        LineDrawer.visualizeScanArea(pos, (ServerWorld) world, BOX_SIZE);
+        return Text.translatable("info.machine.display_range").append(
+                "XYZ: " + BOX_SIZE.getX() + " / " +
+                BOX_SIZE.getY() + " / " +
+                BOX_SIZE.getZ());
     }
 
     @Override

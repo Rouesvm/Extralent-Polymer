@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -16,6 +17,7 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.EnergyStorageUtil;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -71,15 +73,14 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    public void tick() {
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
         if (this.world == null || this.world.isClient) return;
 
         if (energyStorage.amount < energyStorage.capacity) {
-            Block machineBlock = getCachedState().getBlock();
-            if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
-
             if (this.current_burn_time == 0) {
-                machineBaseBlock.setState(true, world, pos);
+                state = state.with(MachineBlock.ACTIVATED, true);
+                world.setBlockState(pos, state, Block.NOTIFY_ALL);
+
                 validFuel();
                 markDirty();
             }
@@ -94,10 +95,12 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
                     this.progress = 0;
                     this.current_burn_time = 0;
 
-                    machineBaseBlock.setState(false, world, pos);
-                    markDirty();
+                    state = state.with(MachineBlock.ACTIVATED, false);
+                    world.setBlockState(pos, state, Block.NOTIFY_ALL);
                 }
             }
+
+            BlockEntity.markDirty(world, pos, state);
         }
 
         extractEnergy();

@@ -8,16 +8,17 @@ import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.Optional;
@@ -32,9 +33,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     private static final long ENERGY_USED_PER_SECOND = 10; // ENERGY_USED * (SECONDS * 20)
     private static final double TIME_TO_BURN_IN_SECONDS = 0.5;
 
-    private boolean is_burning;
     private SmeltingRecipe current_recipe;
-
     private final InventoryStorage outputInventory;
 
     public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {
@@ -86,32 +85,31 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    public void tick() {
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
         if (world == null || world.isClient) return;
 
         long energy_used = calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS);
-        if (energyStorage.amount < energy_used) return;
+        if (energyStorage.amount < energy_used) {
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
+            world.setBlockState(pos, state, Block.NOTIFY_ALL);
+            return;
+        }
 
-        Block machineBlock = getCachedState().getBlock();
-        if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
-
-        if (!is_burning && validItem()) {
-            boolean isActivated = machineBlock.getDefaultState().get(ActivatedPolymerBlock.ACTIVATED);
-            if (!isActivated) {
-                machineBaseBlock.setState(true, world, pos);
-                markDirty();
-            }
-
+        if (validItem()) {
             if (progress++ >= TIME_TO_BURN_IN_SECONDS * 20) {
                 if (energyStorage.amount < energy_used) return;
                 if (outputItem()) {
                     energyStorage.amount = MathHelper.clamp(energyStorage.amount - energy_used, 0, energyStorage.getCapacity());
-
-                    machineBaseBlock.setState(false, world, pos);
-                    markDirty();
+                    state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
+                    world.setBlockState(pos, state, Block.NOTIFY_ALL);
                 }
+            } else {
+                state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
+                world.setBlockState(pos, state, Block.NOTIFY_ALL);
             }
-        } else if (!is_burning) progress = 0;
+
+            BlockEntity.markDirty(world, pos, state);
+        } else progress = 0;
     }
 
     private Optional<SmeltingRecipe> canSmelt(ItemStack input) {
@@ -130,10 +128,10 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
             if (stackRecipe.isPresent() && canAcceptOutput(stackRecipe.get())) {
                 current_recipe = stackRecipe.get();
-                is_burning = true;
+                return true;
             }
         }
-        return is_burning;
+        return false;
     }
 
     private boolean canAcceptOutput(SmeltingRecipe recipe) {
@@ -157,7 +155,6 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         inventory.insertStackTo(result.copy(), OUTPUT_SLOT_INDEX);
         inventory.getStack(INPUT_SLOT_INDEX).decrement(1);
 
-        is_burning = false;
         return true;
     }
 

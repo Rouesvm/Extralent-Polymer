@@ -29,11 +29,6 @@ public class ActivatedPolymerBlock extends BasicPolymerBlock {
         } else this.activatedState = null;
     }
 
-    public void setState(boolean activated, World world, BlockPos pos) {
-        if (!hasCustomStates) return;
-        world.setBlockState(pos, world.getBlockState(pos).with(ACTIVATED, activated));
-    }
-
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(ACTIVATED);

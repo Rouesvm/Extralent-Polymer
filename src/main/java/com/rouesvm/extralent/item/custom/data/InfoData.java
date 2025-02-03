@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.item.custom.data;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 
 public class InfoData extends BasicData {
@@ -9,6 +10,11 @@ public class InfoData extends BasicData {
 
     private boolean visual = false;
     private BlockPos pos;
+
+    public InfoData(ItemStack stack, boolean bedrockPlayer) {
+        super(stack);
+        if (bedrockPlayer) setDisplay(DISPLAY.UI);
+    }
 
     public InfoData(ItemStack stack) {
         super(stack);

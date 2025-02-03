@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.block.machine.entity;
 
+import com.rouesvm.extralent.block.ActivatedPolymerBlock;
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
@@ -9,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
@@ -20,6 +22,7 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.ArrayList;
@@ -40,25 +43,23 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    public void tick() {
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
         if (this.world == null || this.world.isClient) return;
 
-        Block machineBlock = getCachedState().getBlock();
-        if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
-
         if (energyStorage.amount < ENERGY_USED) {
-            machineBaseBlock.setState(false, world, pos);
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
+            world.setBlockState(pos, state, Block.NOTIFY_ALL);
             return;
         }
 
         if (this.progress++ % 10 == 0) {
-            machineBaseBlock.setState(true, world, pos);
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
+            world.setBlockState(pos, state, Block.NOTIFY_ALL);
 
             if (this.mining_pos.getY() <= this.world.getBottomY()) {
                 this.mining_pos = this.pos.down();
             }
 
-            BlockState state = this.world.getBlockState(this.mining_pos);
             if (state.isAir() || state.getHardness(this.world, this.mining_pos) < 0) {
                 this.mining_pos = this.mining_pos.down();
                 return;

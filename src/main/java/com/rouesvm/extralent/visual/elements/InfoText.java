@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.visual.elements;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
+import com.rouesvm.extralent.item.custom.data.InfoData;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
@@ -21,7 +22,7 @@ public class InfoText extends ElementHolder {
         this.timer = 200;
 
         this.machineBlockEntity = machineBlockEntity;
-        this.display = new TextDisplayElement(machineBlockEntity.infoOnClicked());
+        this.display = new TextDisplayElement(machineBlockEntity.infoOnClicked(InfoData.DISPLAY.FLOATING));
         this.display.setViewRange(0.2f);
         this.display.setShadow(false);
         this.display.setBackground(1);
@@ -49,7 +50,7 @@ public class InfoText extends ElementHolder {
             this.display.startInterpolation();
         }
 
-        this.display.setText(machineBlockEntity.infoOnClicked());
+        this.display.setText(machineBlockEntity.infoOnClicked(InfoData.DISPLAY.FLOATING));
     }
 
     public static InfoText createText(Vec3d pos, BasicMachineBlockEntity basicPoweredEntity, ServerWorld world) {

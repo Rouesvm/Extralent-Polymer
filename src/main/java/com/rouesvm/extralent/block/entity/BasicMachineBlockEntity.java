@@ -18,6 +18,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.HashMap;
@@ -71,7 +72,7 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
     }
 
     @Override
-    public void tick() {}
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity blockEntity) {}
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
@@ -126,7 +127,7 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         return (long) (energy_used * (seconds * 20));
     }
 
-    public Text infoOnClicked() {
+    public Text infoOnClicked(InfoData.DISPLAY display) {
         return this.getFormattedInfo();
     }
 
@@ -139,7 +140,7 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
     }
 
     // UI only.
-    private Text getCustomInfo() {
+    public Text getCustomInfo() {
         return getEnergyInfo(null, true); // Default.
     }
 

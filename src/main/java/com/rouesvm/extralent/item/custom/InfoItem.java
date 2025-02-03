@@ -6,6 +6,7 @@ import com.rouesvm.extralent.item.custom.data.Activated;
 import com.rouesvm.extralent.item.custom.data.BasicData;
 import com.rouesvm.extralent.item.custom.data.InfoData;
 import com.rouesvm.extralent.visual.elements.InfoText;
+import eu.pb4.polymer.common.api.PolymerCommonUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -55,7 +56,7 @@ public class InfoItem extends DoubleTexturedItem {
             if (data.getDisplay() == InfoData.DISPLAY.UI) {
                 var blockEntity = world.getBlockEntity(data.getBlockPos());
                 if (!(blockEntity instanceof BasicMachineBlockEntity basicMachineBlock)) return;
-                if (basicMachineBlock.infoOnClicked() == null) return;
+                if (basicMachineBlock.infoOnClicked(data.getDisplay()) == null) return;
                 data.setVisual(true);
                 PlayerEntity player = (PlayerEntity) entity;
                 player.sendMessage(basicMachineBlock.infoOnClicked(data.getContent()), true);
@@ -70,6 +71,7 @@ public class InfoItem extends DoubleTexturedItem {
         if (world != null && !world.isClient) {
             UUID uuid = BasicData.getUuid(stack);
             InfoData data = new InfoData(stack);
+
             if (player.isSneaking()) {
                 if (data.showVisual()) {
                     data.setVisual(false);
@@ -99,7 +101,7 @@ public class InfoItem extends DoubleTexturedItem {
         if (context.getPlayer() != null && !context.getWorld().isClient) {
             ServerWorld world = (ServerWorld) context.getWorld();
 
-            InfoData data = new InfoData(context.getStack());
+            InfoData data = new InfoData(context.getStack(), PolymerCommonUtils.isBedrockPlayer((ServerPlayerEntity) context.getPlayer()));
 
             var blockEntityResult = world.getBlockEntity(context.getBlockPos());
             if (blockEntityResult instanceof BasicMachineBlockEntity basicPoweredEntity) {
@@ -120,7 +122,7 @@ public class InfoItem extends DoubleTexturedItem {
 
                 UUID uuid = BasicData.getUuid(context.getStack());
                 if (ELEMENT_MANAGER.getElement(uuid) != null) ELEMENT_MANAGER.removeElement(uuid);
-                if (basicPoweredEntity.infoOnClicked() == null)
+                if (basicPoweredEntity.infoOnClicked(data.getDisplay()) == null)
                     return ActionResult.PASS;
 
                 Direction direction = context.getSide();
