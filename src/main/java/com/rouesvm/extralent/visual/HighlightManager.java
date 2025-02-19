@@ -1,6 +1,8 @@
 package com.rouesvm.extralent.visual;
 
+import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import com.rouesvm.extralent.visual.elements.BlockHighlight;
+import com.rouesvm.extralent.visual.elements.BlockHighlights;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -8,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.*;
 
 public class HighlightManager {
-    private final HashMap<UUID, HashMap<BlockPos, BlockHighlight>> multipleHighlights;
+    private final HashMap<UUID, BlockHighlights> multipleHighlights;
     private final HashMap<UUID, BlockHighlight> singularHighlight;
 
     public HighlightManager() {
@@ -31,33 +33,35 @@ public class HighlightManager {
     }
 
     // Multiple
-    public HashMap<BlockPos, BlockHighlight> getMultipleHighlights(UUID uuid) {
-        return multipleHighlights.getOrDefault(uuid, new HashMap<>());
+    public void createMultipleHighlights(UUID uuid, ServerWorld world, ServerPlayerEntity player) {
+        multipleHighlights.putIfAbsent(uuid, new BlockHighlights(world, player));
     }
 
-    public void addHighlightToMultiple(BlockPos pos, BlockHighlight highlight, UUID uuid) {
-        multipleHighlights.computeIfAbsent(uuid, k -> new HashMap<>()).put(pos, highlight);
+    public BlockHighlights getMultipleHighlights(UUID uuid) {
+        return multipleHighlights.get(uuid);
     }
 
-    public BlockHighlight getHighlightFromMultiple(BlockPos pos, UUID uuid) {
-        return getMultipleHighlights(uuid).get(pos);
+    public void addHighlightToMultiple(Connection connection, UUID uuid) {
+        BlockHighlights highlights = getMultipleHighlights(uuid);
+        highlights.addConnection(connection);
     }
 
-    public void removeHighlightFromMultiple(BlockPos pos, UUID uuid) {
-        HashMap<BlockPos, BlockHighlight> highlights = getMultipleHighlights(uuid);
-        BlockHighlight highlight = highlights.get(pos);
-        if (highlight != null) highlights.remove(pos);
+    public void removeHighlightFromMultiple(Connection connection, UUID uuid) {
+        BlockHighlights highlights = getMultipleHighlights(uuid);
+        highlights.removeConnection(connection);
     }
 
     public void removeAllHighlightsFromMultiple(UUID uuid) {
-        multipleHighlights.replace(uuid, new HashMap<>());
+        multipleHighlights.replace(uuid, null);
     }
 
     // Tick
     public void tickHighlights(UUID uuid) {
-        if (getSingularHighlight(uuid) != null) getSingularHighlight(uuid).tick();
-        final HashMap<BlockPos, BlockHighlight> highlightFromMultiple = getMultipleHighlights(uuid);
-        highlightFromMultiple.values().parallelStream().forEach(BlockHighlight::tick);
+        var highlight = getSingularHighlight(uuid);
+        var highlights = getMultipleHighlights(uuid);
+
+        if (highlight != null) highlight.tick();
+        if (highlights != null) highlights.tick();
     }
 
     // Clear
