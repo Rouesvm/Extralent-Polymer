@@ -5,5 +5,6 @@ public enum PipeState {
     FAIL,
     SUCCESS,
     TYPE_ERROR,
+    OVERFLOW,
     FAR
 }

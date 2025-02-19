@@ -14,6 +14,7 @@ import java.util.*;
 
 public class PipeBlockEntity extends BasicMachineBlockEntity {
     private boolean connected;
+    private int current_connections = 0;
 
     public PipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -52,22 +53,28 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
 
     public boolean removeBlock(Connection connection) {
         if (blocks.contains(connection)) {
+            if (current_connections > 0) current_connections -= 1;
             blocks.remove(connection);
             orderedConnections = new LinkedHashSet<>(blocks);
+            this.markDirty();
             return true;
         }
         return false;
     }
 
     public PipeState putBlock(Connection connection) {
+        if (this.world == null || this.world.isClient) return PipeState.FAIL;
         if (blocks.contains(connection)) return PipeState.IDENTICAL;
-        if (this.world == null) return PipeState.FAIL;
-        if (this.world.isClient) return PipeState.FAIL;
+        if (!blocks.contains(connection) && current_connections > getMaxConnections() - 1) return PipeState.OVERFLOW;
 
-        if (getMaxDist() == 0 || connection.getPos().isWithinDistance(this.pos, getMaxDist())) {
+        if (getMaxDistance() == 0
+                || connection.getPos().isWithinDistance(this.pos, getMaxDistance())
+        ) {
             if (correctBlock(connection.getPos())) {
+                current_connections += 1;
                 blocks.add(connection);
                 orderedConnections = new LinkedHashSet<>(blocks);
+                this.markDirty();
                 return PipeState.SUCCESS;
             } else return PipeState.TYPE_ERROR;
         } else return PipeState.FAR;
@@ -83,8 +90,20 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         return false;
     }
 
-    public int getMaxDist() {
+    public int getCurrentConnections() {
+        return current_connections;
+    }
+
+    public int getMaxDistance() {
         return 5;
+    }
+
+    public int getMaxConnections() {
+        return 125;
+    }
+
+    public void setCurrentConnections(int current_connections) {
+        this.current_connections = current_connections;
     }
 
     @ApiStatus.OverrideOnly
@@ -101,12 +120,14 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
         Connection.readNbt(nbt, this.blocks, registryLookup);
+        current_connections = nbt.getInt("connections");
     }
 
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
         Connection.writeNbt(nbt, this.blocks, registryLookup);
+        nbt.putInt("connections", current_connections);
     }
 
     public Set<Connection> getBlocks() {
