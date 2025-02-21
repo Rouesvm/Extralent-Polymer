@@ -66,7 +66,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
         PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) entity.getWorld());
 
         currentBlockEntity.setConnected(false);
-        HIGHLIGHT_MANAGER.clearAllHighlights(connecterData.getUuid());
+        HIGHLIGHT_MANAGER.clearAllHighlights(connecterData.getBlockPos());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             if (shouldPass(stack, player, false)) return;
 
             ConnectorData connecterData = new ConnectorData(stack);
-            if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getUuid());
+            if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getBlockPos());
 
             if (selected) {
                 PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
@@ -129,7 +129,9 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
         if (shouldPass(connecterData.getStack(), context.getPlayer(), true)) return ActionResult.PASS;
 
         if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
-            HIGHLIGHT_MANAGER.createMultipleHighlights(connecterData.getUuid(), world, (ServerPlayerEntity) context.getPlayer());
+            if (connecterData.getBlockPos() != null) {
+                HIGHLIGHT_MANAGER.createMultipleHighlights(connecterData.getBlockPos(), world, (ServerPlayerEntity) context.getPlayer());
+            }
 
             if (currentBlockEntity != null) {
                 if (currentBlockEntity.isRemoved()) connecterData.setCurrentEntity(null);
@@ -145,6 +147,10 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
                 return ActionResult.PASS;
             }
 
+            if (connecterData.getBlockPos() == null) {
+                HIGHLIGHT_MANAGER.createMultipleHighlights(pipeBlockEntity.getPos(), world, (ServerPlayerEntity) context.getPlayer());
+            }
+
             connecterData.setCurrentEntity(pipeBlockEntity.getPos());
 
             pipeBlockEntity.onUpdate();
@@ -152,7 +158,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
 
             if (!pipeBlockEntity.getBlocks().isEmpty()) {
                 pipeBlockEntity.getBlocks().parallelStream().forEach(blockConnection ->
-                        HIGHLIGHT_MANAGER.addHighlightToMultiple(blockConnection, connecterData.getUuid())
+                        HIGHLIGHT_MANAGER.addHighlightToMultiple(blockConnection, connecterData.getBlockPos())
                 );
             }
 
@@ -206,7 +212,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             player.sendMessage(Text.translatable("info.viewer.connected"), true);
             currentBlockEntity.setConnected(true);
             playSoundConnection(player, 3f);
-            HIGHLIGHT_MANAGER.createSingularHighlight(data.getUuid(), world, (ServerPlayerEntity) player, currentBlockEntity.getPos());
+            HIGHLIGHT_MANAGER.createSingularHighlight(data.getBlockPos(), world, (ServerPlayerEntity) player, currentBlockEntity.getPos());
         }
     }
 
@@ -214,7 +220,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
         player.sendMessage(Text.translatable("info.viewer.disconnected"), true);
         playSoundConnection(player, 5f);
 
-        HIGHLIGHT_MANAGER.clearAllHighlights(data.getUuid());
+        HIGHLIGHT_MANAGER.clearAllHighlights(data.getBlockPos());
         data.setCurrentEntity(null);
     }
 
@@ -226,7 +232,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             if (removed) {
                 player.sendMessage(Text.translatable("info.viewer.unbound"), true);
                 playSound(player, -2f);
-                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getUuid());
+                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getBlockPos());
                 return;
             }
         }
@@ -237,8 +243,8 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
                 decreaseEnergy(data.getStack());
                 player.sendMessage(Text.translatable("info.viewer.bound"), true);
                 playSound(player, 2f);
-                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getUuid());
-                HIGHLIGHT_MANAGER.addHighlightToMultiple(connection, data.getUuid());
+                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getBlockPos());
+                HIGHLIGHT_MANAGER.addHighlightToMultiple(connection, data.getBlockPos());
             }
             case IDENTICAL -> {
                 boolean removed = currentBlockEntity.removeBlock(connection);
@@ -248,8 +254,8 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
                     currentBlockEntity.putBlock(connection);
 
                     playSoundChanged(player, 3f);
-                    HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getUuid());
-                    HIGHLIGHT_MANAGER.addHighlightToMultiple(connection, data.getUuid());
+                    HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getBlockPos());
+                    HIGHLIGHT_MANAGER.addHighlightToMultiple(connection, data.getBlockPos());
                 }
             }
             case FAR -> player.sendMessage(Text.translatable("info.viewer.far_away"), true);

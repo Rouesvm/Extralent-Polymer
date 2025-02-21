@@ -1,6 +1,5 @@
 package com.rouesvm.extralent.block.transport;
 
-import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
@@ -8,7 +7,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
-public class TransporterBlock extends MachineBlock {
+public class TransporterBlock extends PipeBlock {
     public TransporterBlock(AbstractBlock.Settings settings) {
         super("transporter", settings, false);
     }

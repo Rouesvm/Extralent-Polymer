@@ -48,8 +48,8 @@ public class InfoItem extends DoubleTexturedItem {
             }
 
             if (world.getTime() % 60 == 0)
-                HIGHLIGHT_MANAGER.clearAllHighlights(data.getUuid());
-            else HIGHLIGHT_MANAGER.tickHighlights(data.getUuid());
+                HIGHLIGHT_MANAGER.clearAllHighlights(data.getBlockPos());
+            else HIGHLIGHT_MANAGER.tickHighlights(data.getBlockPos());
 
             if (data.getDisplay() == InfoData.DISPLAY.UI) {
                 var blockEntity = world.getBlockEntity(data.getBlockPos());
@@ -106,7 +106,7 @@ public class InfoItem extends DoubleTexturedItem {
                 ConnectorItem.playSoundConnection(context.getPlayer(), 2F);
 
                 HIGHLIGHT_MANAGER.createSingularHighlight(
-                        data.getUuid(),
+                        data.getBlockPos(),
                         (ServerWorld) context.getWorld(),
                         (ServerPlayerEntity) context.getPlayer(),
                         context.getBlockPos()

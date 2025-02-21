@@ -23,6 +23,9 @@ public class Connection {
     public static Connection of(BlockPos pos, int weight, Direction side) {
         return new Connection(pos, weight, side);
     }
+    public static Connection of(BlockPos pos) {
+        return new Connection(pos, 0, null);
+    }
 
     public Direction getSide() {
         return side;

@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.block.transport.entity;
 
+import com.rouesvm.extralent.Extralent;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.block.BlockState;
@@ -8,6 +9,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -20,7 +22,9 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         super(type, pos, state);
     }
 
+    public final HashSet<Connection> connectedTo = new HashSet<>(10);
     public final HashSet<Connection> blocks = new HashSet<>(10);
+
     private LinkedHashSet<Connection> orderedConnections = new LinkedHashSet<>(10);
 
     public void onUpdate() {
@@ -46,11 +50,46 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         }
 
         if (!posToRemove.isEmpty()) {
+            current_connections -= posToRemove.size();
             blocks.removeAll(posToRemove);
             orderedConnections.removeAll(posToRemove);
         }
     }
 
+    // To be removed from this block's connected from list.
+    public void removeConnection(Connection connection) {
+        if (connectedTo.contains(connection)) {
+            PipeBlockEntity entity = (PipeBlockEntity) world.getBlockEntity(connection.getPos());
+            if (entity != null) {
+                Connection newConnection = Connection.of(pos);
+                entity.removeBlock(newConnection);
+                Extralent.HIGHLIGHT_MANAGER.removeHighlightFromMultiple(newConnection, connection.getPos());
+            }
+
+            connectedTo.remove(connection);
+            this.markDirty();
+        }
+    }
+
+    public void removeConnections() {
+        if (world == null) return;
+        if (connectedTo.isEmpty()) return;
+        for (Connection connection : connectedTo) removeConnection(connection);
+    }
+
+    // To be added from this block's connected from list.
+    public void putConnection(Connection connection) {
+        if (this.world == null || this.world.isClient) return;
+        if (connectedTo.contains(connection)) return;
+        if (!(world.getBlockEntity(connection.getPos()) instanceof PipeBlockEntity)) return;
+
+        if (correctBlock(connection.getPos())) {
+            connectedTo.add(connection);
+            this.markDirty();
+        }
+    }
+
+    // To be removed from this block's connected to list.
     public boolean removeBlock(Connection connection) {
         if (blocks.contains(connection)) {
             if (current_connections > 0) current_connections -= 1;
@@ -62,6 +101,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         return false;
     }
 
+    // To be added from this block's connected to list.
     public PipeState putBlock(Connection connection) {
         if (this.world == null || this.world.isClient) return PipeState.FAIL;
         if (blocks.contains(connection)) return PipeState.IDENTICAL;
@@ -71,6 +111,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
                 || connection.getPos().isWithinDistance(this.pos, getMaxDistance())
         ) {
             if (correctBlock(connection.getPos())) {
+                putConnection(connection);
                 current_connections += 1;
                 blocks.add(connection);
                 orderedConnections = new LinkedHashSet<>(blocks);
@@ -90,20 +131,12 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         return false;
     }
 
-    public int getCurrentConnections() {
-        return current_connections;
-    }
-
     public int getMaxDistance() {
         return 5;
     }
 
     public int getMaxConnections() {
         return 125;
-    }
-
-    public void setCurrentConnections(int current_connections) {
-        this.current_connections = current_connections;
     }
 
     @ApiStatus.OverrideOnly
@@ -120,6 +153,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
         Connection.readNbt(nbt, this.blocks, registryLookup);
+        Connection.readNbt(nbt, this.connectedTo, registryLookup);
         current_connections = nbt.getInt("connections");
     }
 
@@ -127,6 +161,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
         Connection.writeNbt(nbt, this.blocks, registryLookup);
+        Connection.writeNbt(nbt, this.connectedTo, registryLookup);
         nbt.putInt("connections", current_connections);
     }
 

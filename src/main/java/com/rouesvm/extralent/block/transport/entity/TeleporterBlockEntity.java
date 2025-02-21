@@ -2,6 +2,7 @@ package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -10,7 +11,9 @@ import java.util.LinkedHashSet;
 
 public class TeleporterBlockEntity extends PipeBlockEntity {
     private boolean teleported = false;
+
     private Connection blockEntity;
+    private BlockPos otherPos;
 
     public TeleporterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TELEPORTER_BLOCK_ENTITY, pos, state);
@@ -27,10 +30,15 @@ public class TeleporterBlockEntity extends PipeBlockEntity {
             progress = 0;
         }
 
+        if (blockEntity != null && world.getBlockEntity(blockEntity.getPos()) == null) blockEntity = null;
         if (blockEntity == null) for (Connection connection : blocks) {
-            blockEntity = connection;
+                blockEntity = connection;
         }
 
+        if (blockEntity != null && otherPos == null) otherPos = blockEntity.getPos();
+        else otherPos = null;
+
+        if (otherPos == null) return;
 
         BlockPos blockPos = this.pos;
         double blockTopY = blockPos.getY() + 1.0;
@@ -43,7 +51,7 @@ public class TeleporterBlockEntity extends PipeBlockEntity {
                 false
         );
 
-        TeleporterBlockEntity entity = (TeleporterBlockEntity) world.getBlockEntity(blockEntity.getPos());
+        TeleporterBlockEntity entity = (TeleporterBlockEntity) world.getBlockEntity(otherPos);
 
         if (entity != null && player != null) {
             double playerX = player.getX();
@@ -55,13 +63,12 @@ public class TeleporterBlockEntity extends PipeBlockEntity {
             boolean nearTopY = Math.abs(playerY - blockTopY) < 0.5;
 
             if (withinX && withinZ && nearTopY) {
-                BlockPos position = blockEntity.getPos();
                 entity.setTeleported(true);
 
                 player.teleport(
-                        position.getX() + 0.5,
-                        position.getY() + 1.5,
-                        position.getZ() + 0.5,
+                        otherPos.getX() + 0.5,
+                        otherPos.getY() + 1.5,
+                        otherPos.getZ() + 0.5,
                         true
                 );
 

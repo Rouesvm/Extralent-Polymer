@@ -1,13 +1,12 @@
 package com.rouesvm.extralent.block.transport;
 
-import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
-public class TeleporterBlock extends MachineBlock {
+public class TeleporterBlock extends PipeBlock {
     public TeleporterBlock(Settings settings) {
         super("teleporter", settings, false);
     }
