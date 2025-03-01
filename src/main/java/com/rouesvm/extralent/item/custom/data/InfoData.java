@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.item.custom.data;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 
 public class InfoData extends BasicData {
@@ -14,7 +15,42 @@ public class InfoData extends BasicData {
         super(stack);
     }
 
-    public boolean showVisual() {
+    public static BlockPos getBlockPos(ItemStack stack) {
+        NbtCompound compound = getStackNbt(stack);
+        if (compound.contains("blockPos")) {
+            long data = compound.getLong("blockPos");
+            return BlockPos.fromLong(data);
+        } else return null;
+    }
+
+    public static DISPLAY getDisplay(ItemStack stack) {
+        NbtCompound compound = getStackNbt(stack);
+        if (compound.contains("display_visual"))
+            return DISPLAY.valueOf(compound.getString("display_visual"));
+        else return DISPLAY.FLOATING;
+    }
+
+    public static CONTENT_DISPLAY getContent(ItemStack stack) {
+        NbtCompound compound = getStackNbt(stack);
+        if (compound.contains("content_visual"))
+            return CONTENT_DISPLAY.valueOf(compound.getString("content_visual"));
+        else return CONTENT_DISPLAY.MACHINE;
+    }
+
+    public static boolean getVisual(ItemStack stack) {
+        NbtCompound compound = getStackNbt(stack);
+        if (compound.contains("visual"))
+            return compound.getBoolean("visual");
+        else return false;
+    }
+
+    public static void setVisual(ItemStack stack, boolean visual) {
+        NbtCompound compound = getStackNbt(stack);
+        compound.putBoolean("visual", visual);
+        saveToStack(stack, compound);
+    }
+
+    public boolean getVisual() {
         if (getStackNbt().contains("visual"))
             visual = nbtCompound.getBoolean("visual");
         return visual;

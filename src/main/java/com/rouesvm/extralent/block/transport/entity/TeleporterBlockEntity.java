@@ -3,8 +3,10 @@ package com.rouesvm.extralent.block.transport.entity;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class TeleporterBlockEntity extends PipeBlockEntity {
     private boolean teleported = false;
@@ -17,7 +19,7 @@ public class TeleporterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void tick() {
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (world == null || world.isClient()) return;
         if (teleported) {
             progress++;
@@ -48,9 +50,9 @@ public class TeleporterBlockEntity extends PipeBlockEntity {
                 false
         );
 
-        TeleporterBlockEntity entity = (TeleporterBlockEntity) world.getBlockEntity(otherPos);
+        TeleporterBlockEntity otherEntity = (TeleporterBlockEntity) world.getBlockEntity(otherPos);
 
-        if (entity != null && player != null) {
+        if (otherEntity != null && player != null) {
             double playerX = player.getX();
             double playerY = player.getY();
             double playerZ = player.getZ();
@@ -60,7 +62,7 @@ public class TeleporterBlockEntity extends PipeBlockEntity {
             boolean nearTopY = Math.abs(playerY - blockTopY) < 0.5;
 
             if (withinX && withinZ && nearTopY) {
-                entity.setTeleported(true);
+                otherEntity.setTeleported(true);
 
                 player.teleport(
                         otherPos.getX() + 0.5,

@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.block.entity;
 
 import com.rouesvm.extralent.block.TickableBlockEntity;
+import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.item.custom.data.InfoData;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import com.rouesvm.extralent.block.entity.text.ProgressBarText;
@@ -18,6 +19,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.HashMap;
@@ -71,7 +73,7 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
     }
 
     @Override
-    public void tick() {}
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {}
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
@@ -136,6 +138,11 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
             case INVENTORY -> getInventoryInfo(null, true);
             case MACHINE -> getCustomInfo();
         };
+    }
+
+    // set weight logic
+    public int setWeight(int prevWeight) {
+        return prevWeight == 1 ? 0 : 1;
     }
 
     // UI only.

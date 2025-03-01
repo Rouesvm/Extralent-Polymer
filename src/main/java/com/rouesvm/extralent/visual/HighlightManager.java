@@ -23,8 +23,8 @@ public class HighlightManager {
         return singularHighlight.get(pos.asLong());
     }
 
-    public void createSingularHighlight(BlockPos pos, ServerWorld world, ServerPlayerEntity player, BlockPos blockPos) {
-        singularHighlight.put(pos.asLong(), BlockHighlight.createHighlight(world, player, blockPos));
+    public void createSingularHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos blockPos) {
+        singularHighlight.put(blockPos.asLong(), BlockHighlight.createHighlight(world, player, blockPos));
     }
 
     public void removeSingularHighlight(BlockPos pos) {

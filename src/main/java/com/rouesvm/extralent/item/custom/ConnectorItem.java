@@ -74,17 +74,16 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             if (!Activated.showVisual(stack)) return;
             if (shouldPass(stack, player, false)) return;
 
-            ConnectorData connectorData = new ConnectorData(stack);
-            if (connectorData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connectorData.getBlockPos());
+            HIGHLIGHT_MANAGER.tickHighlights(ConnectorData.getBlockPos(stack));
 
             if (selected) {
-                PipeBlockEntity currentBlockEntity = connectorData.getCurrentEntity((ServerWorld) world);
+                PipeBlockEntity currentBlockEntity = ConnectorData.getCurrentEntity((ServerWorld) world, stack);
                 if (currentBlockEntity == null) {
-                    onConnectedChanged(connectorData, (ServerWorld) world, player, false);
+                    onConnectedChanged(new ConnectorData(stack), (ServerWorld) world, player, false);
                     return;
                 }
-                if (!connectorData.showVisual()) connectorData.setVisual(true);
-            } else if (connectorData.showVisual()) connectorData.setVisual(false);
+                if (!ConnectorData.getVisual(stack)) ConnectorData.setVisual(stack, true);
+            } else if (ConnectorData.getVisual(stack)) ConnectorData.setVisual(stack, false);
         }
     }
 
@@ -180,13 +179,16 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             return false;
         } else if (currentBlockEntity == null) return false;
 
-        int weight = connectorData.getWeight() == 1 ? 0 : 1;
+        int previousWeight = connectorData.getWeight();
+        int weight = currentBlockEntity.setWeight(previousWeight);
         connectorData.setWeight(weight);
 
-        playSoundChanged(player, 2f);
-        player.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(weight)), true);
+        if (weight != previousWeight) {
+            playSoundChanged(player, 2f);
+            player.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(weight)), true);
 
-        decreaseEnergy(stack);
+            decreaseEnergy(stack);
+        }
 
         return true;
     }
@@ -209,7 +211,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             player.sendMessage(Text.translatable("info.viewer.connected"), true);
             currentBlockEntity.setConnected(true);
             playSoundConnection(player, 3f);
-            HIGHLIGHT_MANAGER.createSingularHighlight(data.getBlockPos(), world, (ServerPlayerEntity) player, currentBlockEntity.getPos());
+            HIGHLIGHT_MANAGER.createSingularHighlight(world, (ServerPlayerEntity) player, currentBlockEntity.getPos());
         }
     }
 

@@ -3,12 +3,11 @@ package com.rouesvm.extralent.item.custom.data;
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
 public class ConnectorData extends BasicData {
-    private boolean visual = false;
-
     private int weight = 0;
     private BlockPos currentEntity;
 
@@ -25,10 +24,38 @@ public class ConnectorData extends BasicData {
         else return null;
     }
 
-    public boolean showVisual() {
-        if (getStackNbt().contains("visual"))
-            visual = nbtCompound.getBoolean("visual");
-        return visual;
+    public static PipeBlockEntity getCurrentEntity(ServerWorld world, ItemStack stack) {
+        NbtCompound compound = getStackNbt(stack);
+        if (compound.contains("blockPos")) {
+            long data = compound.getLong("blockPos");
+            BlockPos blockPos =  BlockPos.fromLong(data);
+            BlockEntity state = world.getBlockEntity(blockPos);
+
+            if (state == null) return null;
+            else if (state instanceof PipeBlockEntity blockEntity) return blockEntity;
+            else return null;
+        } else return null;
+    }
+
+    public static BlockPos getBlockPos(ItemStack stack) {
+        NbtCompound compound = getStackNbt(stack);
+        if (compound.contains("blockPos")) {
+            long data = compound.getLong("blockPos");
+            return BlockPos.fromLong(data);
+        } else return null;
+    }
+
+    public static boolean getVisual(ItemStack stack) {
+        NbtCompound compound = getStackNbt(stack);
+        if (compound.contains("visual"))
+            return compound.getBoolean("visual");
+        else return false;
+    }
+
+    public static void setVisual(ItemStack stack, boolean visual) {
+        NbtCompound compound = getStackNbt(stack);
+        compound.putBoolean("visual", visual);
+        saveToStack(stack, compound);
     }
 
     public int getWeight() {
@@ -48,7 +75,6 @@ public class ConnectorData extends BasicData {
     public void setVisual(boolean visual) {
         nbtCompound.putBoolean("visual", visual);
         saveToStack();
-        this.visual = visual;
     }
 
     public void setCurrentEntity(BlockPos currentEntity) {

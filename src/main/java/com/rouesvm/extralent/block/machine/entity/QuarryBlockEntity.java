@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameters;
@@ -20,6 +21,7 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.ArrayList;
@@ -40,7 +42,7 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    public void tick() {
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (this.world == null || this.world.isClient) return;
 
         Block machineBlock = getCachedState().getBlock();
@@ -58,8 +60,8 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
                 this.mining_pos = this.pos.down();
             }
 
-            BlockState state = this.world.getBlockState(this.mining_pos);
-            if (state.isAir() || state.getHardness(this.world, this.mining_pos) < 0) {
+            BlockState otherState = this.world.getBlockState(this.mining_pos);
+            if (otherState.isAir() || otherState.getHardness(this.world, this.mining_pos) < 0) {
                 this.mining_pos = this.mining_pos.down();
                 return;
             }
@@ -69,7 +71,7 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
                     .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
                     .add(LootContextParameters.ORIGIN, this.mining_pos.toCenterPos())
                     .addOptional(LootContextParameters.BLOCK_ENTITY, this);
-            List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(builder));
+            List<ItemStack> drops = new ArrayList<>(otherState.getDroppedStacks(builder));
 
             this.world.breakBlock(this.mining_pos, false);
 

@@ -37,27 +37,26 @@ public class InfoItem extends DoubleTexturedItem {
             if (!selected) return;
             if (!Activated.showVisual(stack)) return;
 
-            InfoData data = new InfoData(stack);
-            if (!Activated.showVisual(stack) && !data.showVisual()) return;
-            if (data.getBlockPos() == null
-                    || data.getBlockPos() != null && !entity.getBlockPos().isWithinDistance(data.getBlockPos(), 5)
+            if (!Activated.showVisual(stack) && !InfoData.getVisual(stack)) return;
+            if (InfoData.getBlockPos(stack) == null
+                    || InfoData.getBlockPos(stack) != null && !entity.getBlockPos().isWithinDistance(InfoData.getBlockPos(stack), 5)
             ) {
                 Activated.setVisual(stack, false);
-                data.setVisual(false);
+                InfoData.setVisual(stack, false);
                 return;
             }
 
             if (world.getTime() % 60 == 0)
-                HIGHLIGHT_MANAGER.clearAllHighlights(data.getBlockPos());
-            else HIGHLIGHT_MANAGER.tickHighlights(data.getBlockPos());
+                HIGHLIGHT_MANAGER.clearAllHighlights(InfoData.getBlockPos(stack));
+            else HIGHLIGHT_MANAGER.tickHighlights(InfoData.getBlockPos(stack));
 
-            if (data.getDisplay() == InfoData.DISPLAY.UI) {
-                var blockEntity = world.getBlockEntity(data.getBlockPos());
+            if (InfoData.getDisplay(stack) == InfoData.DISPLAY.UI) {
+                var blockEntity = world.getBlockEntity(InfoData.getBlockPos(stack));
                 if (!(blockEntity instanceof BasicMachineBlockEntity basicMachineBlock)) return;
                 if (basicMachineBlock.infoOnClicked() == null) return;
-                data.setVisual(true);
+                InfoData.setVisual(stack, true);
                 PlayerEntity player = (PlayerEntity) entity;
-                player.sendMessage(basicMachineBlock.infoOnClicked(data.getContent()), true);
+                player.sendMessage(basicMachineBlock.infoOnClicked(InfoData.getContent(stack)), true);
             }
         }
     }
@@ -70,7 +69,7 @@ public class InfoItem extends DoubleTexturedItem {
             UUID uuid = BasicData.getUuid(stack);
             InfoData data = new InfoData(stack);
             if (player.isSneaking()) {
-                if (data.showVisual()) {
+                if (data.getVisual()) {
                     data.setVisual(false);
                     Activated.setVisual(stack, false);
                     return ActionResult.PASS;
@@ -106,7 +105,6 @@ public class InfoItem extends DoubleTexturedItem {
                 ConnectorItem.playSoundConnection(context.getPlayer(), 2F);
 
                 HIGHLIGHT_MANAGER.createSingularHighlight(
-                        data.getBlockPos(),
                         (ServerWorld) context.getWorld(),
                         (ServerPlayerEntity) context.getPlayer(),
                         context.getBlockPos()

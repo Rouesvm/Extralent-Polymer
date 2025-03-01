@@ -4,7 +4,9 @@ import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
@@ -19,7 +21,7 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void tick() {
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (this.getWorld() == null || this.getWorld().isClient) return;
         if (this.energyStorage.getCapacity() <= 0) return;
         if (this.getWorld().getTime() % 4 != 0) return;
@@ -48,5 +50,10 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
             }
         }
         return false;
+    }
+
+    @Override
+    public int setWeight(int prevWeight) {
+        return 0;
     }
 }
