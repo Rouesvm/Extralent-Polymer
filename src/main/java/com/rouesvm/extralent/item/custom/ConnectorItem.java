@@ -1,11 +1,8 @@
 package com.rouesvm.extralent.item.custom;
 
-import com.rouesvm.extralent.Extralent;
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.PipeState;
 import com.rouesvm.extralent.item.custom.data.Activated;
-import com.rouesvm.extralent.visual.HighlightManager;
-import com.rouesvm.extralent.visual.elements.BlockHighlight;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
 import com.rouesvm.extralent.item.custom.data.ConnectorData;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
@@ -21,9 +18,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.List;
@@ -226,13 +223,14 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
 
     private void sendMessage(@NotNull ConnectorData data, ServerWorld world, @NotNull PlayerEntity player, Connection connection) {
         PipeBlockEntity currentBlockEntity = data.getCurrentEntity(world);
+        BlockPos pos = data.getBlockPos();
 
         if (player.isSneaking()) {
             boolean removed = currentBlockEntity.removeBlock(connection);
             if (removed) {
                 player.sendMessage(Text.translatable("info.viewer.unbound"), true);
                 playSound(player, -2f);
-                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getBlockPos());
+                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, pos);
                 return;
             }
         }
@@ -243,8 +241,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
                 decreaseEnergy(data.getStack());
                 player.sendMessage(Text.translatable("info.viewer.bound"), true);
                 playSound(player, 2f);
-                HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getBlockPos());
-                HIGHLIGHT_MANAGER.addHighlightToMultiple(connection, data.getBlockPos());
+                HIGHLIGHT_MANAGER.replaceHighlightToMultiple(connection, pos);
             }
             case IDENTICAL -> {
                 boolean removed = currentBlockEntity.removeBlock(connection);
@@ -254,8 +251,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
                     currentBlockEntity.putBlock(connection);
 
                     playSoundChanged(player, 3f);
-                    HIGHLIGHT_MANAGER.removeHighlightFromMultiple(connection, data.getBlockPos());
-                    HIGHLIGHT_MANAGER.addHighlightToMultiple(connection, data.getBlockPos());
+                    HIGHLIGHT_MANAGER.replaceHighlightToMultiple(connection, pos);
                 }
             }
             case FAR -> player.sendMessage(Text.translatable("info.viewer.far_away"), true);

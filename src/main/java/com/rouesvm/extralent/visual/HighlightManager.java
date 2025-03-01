@@ -19,40 +19,46 @@ public class HighlightManager {
     }
 
     // Singular
-    public BlockHighlight getSingularHighlight(BlockPos uuid) {
-        return singularHighlight.get(uuid.asLong());
+    public BlockHighlight getSingularHighlight(BlockPos pos) {
+        return singularHighlight.get(pos.asLong());
     }
 
-    public void createSingularHighlight(BlockPos uuid, ServerWorld world, ServerPlayerEntity player, BlockPos blockPos) {
-        singularHighlight.put(uuid.asLong(), BlockHighlight.createHighlight(world, player, blockPos));
+    public void createSingularHighlight(BlockPos pos, ServerWorld world, ServerPlayerEntity player, BlockPos blockPos) {
+        singularHighlight.put(pos.asLong(), BlockHighlight.createHighlight(world, player, blockPos));
     }
 
-    public void removeSingularHighlight(BlockPos uuid) {
-        BlockHighlight highlight = getSingularHighlight(uuid);
-        if (highlight != null) singularHighlight.remove(uuid.asLong());
+    public void removeSingularHighlight(BlockPos pos) {
+        BlockHighlight highlight = getSingularHighlight(pos);
+        if (highlight != null) singularHighlight.remove(pos.asLong());
     }
 
     // Multiple
-    public void createMultipleHighlights(BlockPos uuid, ServerWorld world, ServerPlayerEntity player) {
-        multipleHighlights.putIfAbsent(uuid.asLong(), new BlockHighlights(world, player));
+    public void createMultipleHighlights(BlockPos pos, ServerWorld world, ServerPlayerEntity player) {
+        multipleHighlights.putIfAbsent(pos.asLong(), new BlockHighlights(world, player));
     }
 
-    public BlockHighlights getMultipleHighlights(BlockPos uuid) {
-        return multipleHighlights.get(uuid.asLong());
+    public BlockHighlights getMultipleHighlights(BlockPos pos) {
+        return multipleHighlights.get(pos.asLong());
     }
 
-    public void addHighlightToMultiple(Connection connection, BlockPos uuid) {
-        BlockHighlights highlights = getMultipleHighlights(uuid);
+    public void addHighlightToMultiple(Connection connection, BlockPos pos) {
+        BlockHighlights highlights = getMultipleHighlights(pos);
         highlights.addConnection(connection);
     }
 
-    public void removeHighlightFromMultiple(Connection connection, BlockPos uuid) {
-        BlockHighlights highlights = getMultipleHighlights(uuid);
+    public void removeHighlightFromMultiple(Connection connection, BlockPos pos) {
+        BlockHighlights highlights = getMultipleHighlights(pos);
         highlights.removeConnection(connection);
     }
 
-    public void removeAllHighlightsFromMultiple(BlockPos uuid) {
-        multipleHighlights.replace(uuid.asLong(), null);
+    public void replaceHighlightToMultiple(Connection connection, BlockPos pos) {
+        BlockHighlights highlights = getMultipleHighlights(pos);
+        highlights.removeConnection(connection);
+        highlights.addConnection(connection);
+    }
+
+    public void removeAllHighlightsFromMultiple(BlockPos pos) {
+        multipleHighlights.replace(pos.asLong(), null);
     }
 
     public void tickHighlights(BlockPos uuid) {
