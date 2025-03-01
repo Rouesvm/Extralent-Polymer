@@ -140,7 +140,7 @@ public class ModAdvancementProvider extends FabricAdvancementProvider {
                         true,
                         false
                 )
-                .criterion("got_harvestor", ItemCriterion.Conditions.createPlacedBlock(BlockRegistry.HARVESTER))
+                .criterion("got_harvester", ItemCriterion.Conditions.createPlacedBlock(BlockRegistry.HARVESTER))
                 .build(consumer, MOD_ID + "/got_harvester");
     }
 }

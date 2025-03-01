@@ -2,12 +2,9 @@ package com.rouesvm.extralent.block.transport.entity;
 
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.LinkedHashSet;
 
 public class TeleporterBlockEntity extends PipeBlockEntity {
     private boolean teleported = false;

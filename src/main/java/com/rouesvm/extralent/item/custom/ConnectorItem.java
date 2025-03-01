@@ -59,11 +59,11 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
 
     @Override
     public void onItemEntityDestroyed(ItemEntity entity) {
-        ConnectorData connecterData = new ConnectorData(entity.getStack());
-        PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) entity.getWorld());
+        ConnectorData connectorData = new ConnectorData(entity.getStack());
+        PipeBlockEntity currentBlockEntity = connectorData.getCurrentEntity((ServerWorld) entity.getWorld());
 
         currentBlockEntity.setConnected(false);
-        HIGHLIGHT_MANAGER.clearAllHighlights(connecterData.getBlockPos());
+        HIGHLIGHT_MANAGER.clearAllHighlights(connectorData.getBlockPos());
     }
 
     @Override
@@ -74,17 +74,17 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             if (!Activated.showVisual(stack)) return;
             if (shouldPass(stack, player, false)) return;
 
-            ConnectorData connecterData = new ConnectorData(stack);
-            if (connecterData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connecterData.getBlockPos());
+            ConnectorData connectorData = new ConnectorData(stack);
+            if (connectorData.showVisual()) HIGHLIGHT_MANAGER.tickHighlights(connectorData.getBlockPos());
 
             if (selected) {
-                PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity((ServerWorld) world);
+                PipeBlockEntity currentBlockEntity = connectorData.getCurrentEntity((ServerWorld) world);
                 if (currentBlockEntity == null) {
-                    onConnectedChanged(connecterData, (ServerWorld) world, player, false);
+                    onConnectedChanged(connectorData, (ServerWorld) world, player, false);
                     return;
                 }
-                if (!connecterData.showVisual()) connecterData.setVisual(true);
-            } else if (connecterData.showVisual()) connecterData.setVisual(false);
+                if (!connectorData.showVisual()) connectorData.setVisual(true);
+            } else if (connectorData.showVisual()) connectorData.setVisual(false);
         }
     }
 
@@ -114,27 +114,27 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
         ServerWorld world = (ServerWorld) context.getWorld();
         var blockEntityResult = world.getBlockEntity(context.getBlockPos());
 
-        ConnectorData connecterData = new ConnectorData(context.getStack());
-        PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity(world);
+        ConnectorData connectorData = new ConnectorData(context.getStack());
+        PipeBlockEntity currentBlockEntity = connectorData.getCurrentEntity(world);
 
         if (currentBlockEntity != null && currentBlockEntity.isRemoved()) {
-            onConnectedChanged(connecterData, world, context.getPlayer(), false);
+            onConnectedChanged(connectorData, world, context.getPlayer(), false);
         }
 
-        Connection connection = Connection.of(context.getBlockPos(), connecterData.getWeight(), context.getSide());
+        Connection connection = Connection.of(context.getBlockPos(), connectorData.getWeight(), context.getSide());
 
-        if (shouldPass(connecterData.getStack(), context.getPlayer(), true)) return ActionResult.PASS;
+        if (shouldPass(connectorData.getStack(), context.getPlayer(), true)) return ActionResult.PASS;
 
         if (blockEntityResult instanceof PipeBlockEntity pipeBlockEntity) {
-            if (connecterData.getBlockPos() != null) {
-                HIGHLIGHT_MANAGER.createMultipleHighlights(connecterData.getBlockPos(), world, (ServerPlayerEntity) context.getPlayer());
+            if (connectorData.getBlockPos() != null) {
+                HIGHLIGHT_MANAGER.createMultipleHighlights(connectorData.getBlockPos(), world, (ServerPlayerEntity) context.getPlayer());
             }
 
             if (currentBlockEntity != null) {
-                if (currentBlockEntity.isRemoved()) connecterData.setCurrentEntity(null);
+                if (currentBlockEntity.isRemoved()) connectorData.setCurrentEntity(null);
                 if (currentBlockEntity == pipeBlockEntity)
-                    onConnectedChanged(connecterData, world, context.getPlayer(), false);
-                else sendMessage(connecterData, world, context.getPlayer(), connection);
+                    onConnectedChanged(connectorData, world, context.getPlayer(), false);
+                else sendMessage(connectorData, world, context.getPlayer(), connection);
 
                 return ActionResult.SUCCESS;
             }
@@ -144,18 +144,18 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
                 return ActionResult.PASS;
             }
 
-            if (connecterData.getBlockPos() == null) {
+            if (connectorData.getBlockPos() == null) {
                 HIGHLIGHT_MANAGER.createMultipleHighlights(pipeBlockEntity.getPos(), world, (ServerPlayerEntity) context.getPlayer());
             }
 
-            connecterData.setCurrentEntity(pipeBlockEntity.getPos());
+            connectorData.setCurrentEntity(pipeBlockEntity.getPos());
 
             pipeBlockEntity.onUpdate();
-            onConnectedChanged(connecterData, world, context.getPlayer(), true);
+            onConnectedChanged(connectorData, world, context.getPlayer(), true);
 
             if (!pipeBlockEntity.getBlocks().isEmpty()) {
                 pipeBlockEntity.getBlocks().parallelStream().forEach(blockConnection ->
-                        HIGHLIGHT_MANAGER.addHighlightToMultiple(blockConnection, connecterData.getBlockPos())
+                        HIGHLIGHT_MANAGER.addHighlightToMultiple(blockConnection, connectorData.getBlockPos())
                 );
             }
 
@@ -164,7 +164,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
                 && currentBlockEntity != null
                 && !currentBlockEntity.isRemoved()
         ) {
-            sendMessage(connecterData, world, context.getPlayer(), connection);
+            sendMessage(connectorData, world, context.getPlayer(), connection);
             return ActionResult.SUCCESS;
         } else if (context.getPlayer().isSneaking() && changeWeight(context.getPlayer(), world, context.getStack()))
                 return ActionResult.SUCCESS;
@@ -172,16 +172,16 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
     }
 
     private boolean changeWeight(PlayerEntity player, ServerWorld world, ItemStack stack) {
-        ConnectorData connecterData = new ConnectorData(stack);
-        PipeBlockEntity currentBlockEntity = connecterData.getCurrentEntity(world);
+        ConnectorData connectorData = new ConnectorData(stack);
+        PipeBlockEntity currentBlockEntity = connectorData.getCurrentEntity(world);
 
-        if (connecterData.getCurrentEntity(world) != null && currentBlockEntity.isRemoved()) {
-            onConnectedChanged(connecterData, world, player, false);
+        if (connectorData.getCurrentEntity(world) != null && currentBlockEntity.isRemoved()) {
+            onConnectedChanged(connectorData, world, player, false);
             return false;
         } else if (currentBlockEntity == null) return false;
 
-        int weight = connecterData.getWeight() == 1 ? 0 : 1;
-        connecterData.setWeight(weight);
+        int weight = connectorData.getWeight() == 1 ? 0 : 1;
+        connectorData.setWeight(weight);
 
         playSoundChanged(player, 2f);
         player.sendMessage(Text.translatable("info.viewer.weight_changed").copy().append(" ").append(String.valueOf(weight)), true);

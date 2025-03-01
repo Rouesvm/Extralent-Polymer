@@ -1,7 +1,6 @@
 package com.rouesvm.extralent.visual.ui.inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.Direction;
