@@ -12,6 +12,9 @@ base {
 
 repositories {
     maven { url 'https://maven.nucleoid.xyz' }
+    maven {
+        url = uri("https://repo.opencollab.dev/main/")
+    }
 }
 
 loom {
@@ -42,6 +45,8 @@ dependencies {
     modImplementation ("eu.pb4:polymer-virtual-entity:${project.polymer}")
 
     modImplementation include("eu.pb4:sgui:${project.sgui}")
+
+    compileOnly('org.geysermc.geyser:api:2.6.1-SNAPSHOT')
 }
 
 processResources {

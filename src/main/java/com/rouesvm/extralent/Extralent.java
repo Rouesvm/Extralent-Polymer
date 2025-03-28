@@ -4,11 +4,13 @@ import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.registries.block.BlockRegistry;
 import com.rouesvm.extralent.registries.data.DataComponentRegistry;
 import com.rouesvm.extralent.registries.item.ItemRegistry;
+import com.rouesvm.extralent.utils.bedrock.GeyserEntry;
 import com.rouesvm.extralent.visual.ElementManager;
 import com.rouesvm.extralent.visual.HighlightManager;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -30,6 +32,8 @@ public class Extralent implements ModInitializer {
 
 		BlockRegistry.initialize();
 		BlockEntityRegistry.initialize();
+
+		if (FabricLoader.getInstance().isModLoaded("geyser-fabric")) GeyserEntry.initialize();
 
 		PolymerItemGroupUtils.registerPolymerItemGroup(of("extralent_group"), PolymerItemGroupUtils.builder()
 				.icon(() -> new ItemStack(ItemRegistry.CONNECTOR))

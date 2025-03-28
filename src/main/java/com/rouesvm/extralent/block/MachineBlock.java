@@ -1,11 +1,13 @@
 package com.rouesvm.extralent.block;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
+import com.rouesvm.extralent.utils.bedrock.BedrockBlock;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

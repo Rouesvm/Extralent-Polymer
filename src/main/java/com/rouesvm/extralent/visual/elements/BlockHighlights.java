@@ -21,10 +21,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import static com.rouesvm.extralent.visual.elements.BlockHighlight.*;
 
 public class BlockHighlights {
+    private final static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+
     public static final Vector3f OUTPUT_BLOCK_COLOR = new Vector3f(1F, 0.5F, 0F);
     public static final Vector3f INPUT_BLOCK_COLOR = new Vector3f(0F, 0.75F, 1F);
-
-    private final static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
     public final Set<Connection> connections = ConcurrentHashMap.newKeySet();
 

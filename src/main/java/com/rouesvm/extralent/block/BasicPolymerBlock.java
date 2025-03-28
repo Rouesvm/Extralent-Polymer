@@ -11,7 +11,8 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class BasicPolymerBlock extends Block implements PolymerTexturedBlock {
+public class
+BasicPolymerBlock extends Block implements PolymerTexturedBlock {
     private final String name;
     private final BlockState polymerBlockState;
 
