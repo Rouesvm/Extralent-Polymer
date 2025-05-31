@@ -1,13 +1,12 @@
 package com.rouesvm.extralent.block;
 
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
-import com.rouesvm.extralent.utils.bedrock.BedrockBlock;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -20,8 +19,8 @@ public class MachineBlock extends ActivatedPolymerBlock implements BlockEntityPr
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (state.getBlock() != newState.getBlock()) {
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        if (state.getBlock() != null) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof BasicMachineBlockEntity basicMachineBlock) {
                 if (basicMachineBlock.getInventory() != null) {
@@ -30,7 +29,7 @@ public class MachineBlock extends ActivatedPolymerBlock implements BlockEntityPr
             }
         }
 
-        if (state.hasBlockEntity() && !state.isOf(newState.getBlock())) {
+        if (state.hasBlockEntity()) {
             world.removeBlockEntity(pos);
         }
     }

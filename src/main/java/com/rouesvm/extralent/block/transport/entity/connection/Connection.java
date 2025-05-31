@@ -48,7 +48,7 @@ public class Connection {
 
         connections.forEach(connection -> {
             NbtCompound nbtCompound = new NbtCompound();
-            nbtCompound.putInt("side", connection.getSide().getId());
+            nbtCompound.putInt("side", connection.getSide().getIndex());
             nbtCompound.putInt("weight", connection.getWeight());
             nbtCompound.putLong("pos", connection.getPos().asLong());
             nbtList.add(nbtCompound);
@@ -58,14 +58,14 @@ public class Connection {
     }
 
     public static void readNbt(NbtCompound nbt, HashSet<Connection> connections, RegistryWrapper.WrapperLookup registries) {
-        NbtList nbtList = nbt.getList("storedBlocks", 10);
+        NbtList nbtList = nbt.getListOrEmpty("storedBlocks");
 
         for(int i = 0; i < nbtList.size(); ++i) {
-            NbtCompound nbtCompound = nbtList.getCompound(i);
-            int side = nbtCompound.getInt("side");
-            long pos = nbtCompound.getLong("pos");
-            int weight = nbtCompound.getInt("weight");
-            connections.add(of(BlockPos.fromLong(pos), weight, Direction.byId(side)));
+            NbtCompound nbtCompound = nbtList.getCompoundOrEmpty(i);
+            int side = nbtCompound.getInt("side", 0);
+            long pos = nbtCompound.getLong("pos", 0);
+            int weight = nbtCompound.getInt("weight", 0);
+            connections.add(of(BlockPos.fromLong(pos), weight, Direction.byIndex(side)));
         }
     }
 

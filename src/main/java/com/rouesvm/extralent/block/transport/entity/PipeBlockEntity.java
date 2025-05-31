@@ -153,7 +153,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         super.readNbt(nbt, registryLookup);
         Connection.readNbt(nbt, this.blocks, registryLookup);
         Connection.readNbt(nbt, this.connectedTo, registryLookup);
-        current_connections = nbt.getInt("connections");
+        current_connections = nbt.getInt("connections", 0);
     }
 
     @Override

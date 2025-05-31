@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.8-SNAPSHOT'
+    id 'fabric-loom' version '1.10-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -33,7 +33,7 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    include modApi('teamreborn:energy:4.1.0') {
+    include modApi('teamreborn:energy:4.2.0') {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
@@ -46,7 +46,7 @@ dependencies {
 
     modImplementation include("eu.pb4:sgui:${project.sgui}")
 
-    compileOnly('org.geysermc.geyser:api:2.6.1-SNAPSHOT')
+    compileOnly('org.geysermc.geyser:api:2.7.1-SNAPSHOT')
 }
 
 processResources {

@@ -27,7 +27,7 @@ public class ConnectorData extends BasicData {
     public static PipeBlockEntity getCurrentEntity(ServerWorld world, ItemStack stack) {
         NbtCompound compound = getStackNbt(stack);
         if (compound.contains("blockPos")) {
-            long data = compound.getLong("blockPos");
+            long data = compound.getLong("blockPos", 0);
             BlockPos blockPos =  BlockPos.fromLong(data);
             BlockEntity state = world.getBlockEntity(blockPos);
 
@@ -40,16 +40,13 @@ public class ConnectorData extends BasicData {
     public static BlockPos getBlockPos(ItemStack stack) {
         NbtCompound compound = getStackNbt(stack);
         if (compound.contains("blockPos")) {
-            long data = compound.getLong("blockPos");
+            long data = compound.getLong("blockPos", 0);
             return BlockPos.fromLong(data);
         } else return null;
     }
 
     public static boolean getVisual(ItemStack stack) {
-        NbtCompound compound = getStackNbt(stack);
-        if (compound.contains("visual"))
-            return compound.getBoolean("visual");
-        else return false;
+        return getStackNbt(stack).getBoolean("visual", false);
     }
 
     public static void setVisual(ItemStack stack, boolean visual) {
@@ -60,16 +57,12 @@ public class ConnectorData extends BasicData {
 
     public int getWeight() {
         if (getStackNbt().contains("weight"))
-            weight = nbtCompound.getInt("weight");
+            weight = nbtCompound.getInt("weight", 0);
         return weight;
     }
 
     public BlockPos getBlockPos() {
-        if (getStackNbt().contains("blockPos")) {
-            long data = nbtCompound.getLong("blockPos");
-            currentEntity = BlockPos.fromLong(data);
-        } else currentEntity = null;
-        return currentEntity;
+        return getBlockPos(stack());
     }
 
     public void setVisual(boolean visual) {

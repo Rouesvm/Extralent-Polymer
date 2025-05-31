@@ -18,30 +18,24 @@ public class InfoData extends BasicData {
     public static BlockPos getBlockPos(ItemStack stack) {
         NbtCompound compound = getStackNbt(stack);
         if (compound.contains("blockPos")) {
-            long data = compound.getLong("blockPos");
+            long data = compound.getLong("blockPos", 0);
             return BlockPos.fromLong(data);
         } else return null;
     }
 
     public static DISPLAY getDisplay(ItemStack stack) {
         NbtCompound compound = getStackNbt(stack);
-        if (compound.contains("display_visual"))
-            return DISPLAY.valueOf(compound.getString("display_visual"));
-        else return DISPLAY.FLOATING;
+        return DISPLAY.valueOf(compound.getString("display_visual", DISPLAY.FLOATING.toString()));
     }
 
     public static CONTENT_DISPLAY getContent(ItemStack stack) {
         NbtCompound compound = getStackNbt(stack);
-        if (compound.contains("content_visual"))
-            return CONTENT_DISPLAY.valueOf(compound.getString("content_visual"));
-        else return CONTENT_DISPLAY.MACHINE;
+        return CONTENT_DISPLAY.valueOf(compound.getString("content_visual", CONTENT_DISPLAY.MACHINE.toString()));
     }
 
     public static boolean getVisual(ItemStack stack) {
         NbtCompound compound = getStackNbt(stack);
-        if (compound.contains("visual"))
-            return compound.getBoolean("visual");
-        else return false;
+        return compound.getBoolean("visual", false);
     }
 
     public static void setVisual(ItemStack stack, boolean visual) {
@@ -52,7 +46,7 @@ public class InfoData extends BasicData {
 
     public boolean getVisual() {
         if (getStackNbt().contains("visual"))
-            visual = nbtCompound.getBoolean("visual");
+            visual = nbtCompound.getBoolean("visual", false);
         return visual;
     }
 
@@ -64,7 +58,7 @@ public class InfoData extends BasicData {
 
     public BlockPos getBlockPos() {
         if (getStackNbt().contains("blockPos")) {
-            long data = nbtCompound.getLong("blockPos");
+            long data = nbtCompound.getLong("blockPos", 0);
             pos = BlockPos.fromLong(data);
         } else pos = null;
         return pos;
@@ -74,7 +68,7 @@ public class InfoData extends BasicData {
         if (pos == null) {
             removeFromNbt("blockPos");
             return false;
-        } else if (pos.asLong() == nbtCompound.getLong("blockPos"))
+        } else if (pos.asLong() == nbtCompound.getLong("blockPos", 0))
             return false;
 
         nbtCompound.putLong("blockPos", pos.asLong());
@@ -84,9 +78,7 @@ public class InfoData extends BasicData {
     }
 
     public DISPLAY getDisplay() {
-        if (getStackNbt().contains("display_visual"))
-            display = DISPLAY.valueOf(nbtCompound.getString("display_visual"));
-        return display;
+        return getDisplay(stack());
     }
 
     public void setDisplay(DISPLAY display) {
@@ -96,9 +88,7 @@ public class InfoData extends BasicData {
     }
 
     public CONTENT_DISPLAY getContent() {
-        if (getStackNbt().contains("content_visual"))
-            content = CONTENT_DISPLAY.valueOf(nbtCompound.getString("content_visual"));
-        return content;
+        return getContent(stack());
     }
 
     public void nextContent() {

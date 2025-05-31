@@ -115,7 +115,7 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        this.mining_pos = BlockPos.fromLong(nbt.getLong("mining_pos"));
+        this.mining_pos = BlockPos.fromLong(nbt.getLong("mining_pos", 0));
     }
 
     @Override

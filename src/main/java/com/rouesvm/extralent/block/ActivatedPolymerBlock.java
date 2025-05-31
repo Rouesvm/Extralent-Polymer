@@ -1,7 +1,6 @@
 package com.rouesvm.extralent.block;
 
 import com.rouesvm.extralent.Extralent;
-import com.rouesvm.extralent.utils.bedrock.BedrockBlock;
 import eu.pb4.polymer.blocks.api.BlockModelType;
 import eu.pb4.polymer.blocks.api.PolymerBlockModel;
 import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
@@ -15,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class ActivatedPolymerBlock extends BasicPolymerBlock implements BedrockBlock {
+public class ActivatedPolymerBlock extends BasicPolymerBlock  {
     private final BlockState activatedState;
     public static final BooleanProperty ACTIVATED = BooleanProperty.of("activated");
 
@@ -47,10 +46,5 @@ public class ActivatedPolymerBlock extends BasicPolymerBlock implements BedrockB
         if (blockState.get(ACTIVATED) && activatedState != null)
             return activatedState;
         return super.getPolymerBlockState(blockState, packetContext);
-    }
-
-    @Override
-    public Identifier getIdentifier() {
-        return Extralent.of(getBlockName());
     }
 }

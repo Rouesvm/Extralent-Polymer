@@ -7,6 +7,7 @@ import com.rouesvm.extralent.item.custom.data.BasicData;
 import com.rouesvm.extralent.item.custom.data.InfoData;
 import com.rouesvm.extralent.visual.elements.InfoText;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -19,6 +20,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -32,9 +34,9 @@ public class InfoItem extends DoubleTexturedItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
         if (world != null && !world.isClient) {
-            if (!selected) return;
+            if (!((PlayerEntity) entity).isHolding(stack.getItem())) return;
             if (!Activated.showVisual(stack)) return;
 
             if (!Activated.showVisual(stack) && !InfoData.getVisual(stack)) return;

@@ -85,11 +85,11 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        NbtList nbtList = nbt.getList("filter", 10);
+        NbtList nbtList = nbt.getListOrEmpty("filter");
 
         for(int i = 0; i < nbtList.size(); ++i) {
-            NbtCompound nbtCompound = nbtList.getCompound(i);
-            Item item = Registries.ITEM.get(nbtCompound.getInt("id"));
+            NbtCompound nbtCompound = nbtList.getCompoundOrEmpty(i);
+            Item item = Registries.ITEM.get(nbtCompound.getInt("id", 0));
             itemList.add(item);
         }
     }

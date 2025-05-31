@@ -82,12 +82,12 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         if (this.inventory != null)
             Inventories.readNbt(nbt, this.inventory.getStacks(), registryLookup);
         if (this.energyStorage != null) {
-            if (nbt.contains("energy", NbtElement.LONG_TYPE)) {
-                this.energyStorage.amount = nbt.getLong("energy");
+            if (nbt.contains("energy")) {
+                this.energyStorage.amount = nbt.getLong("energy", 0);
             }
         }
 
-        this.progress = nbt.getInt("progress");
+        this.progress = nbt.getInt("progress", 0);
     }
 
     @Override

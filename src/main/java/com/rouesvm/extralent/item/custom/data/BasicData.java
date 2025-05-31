@@ -4,6 +4,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Uuids;
 
 import java.util.UUID;
 
@@ -16,36 +17,24 @@ public class BasicData {
         this.nbtCompound = getStackNbt();
     }
 
-    public UUID getUuid() {
-        UUID uuid = UUID.randomUUID();
-        if (getStackNbt().contains("uuid"))
-            uuid = getStackNbt().getUuid("uuid");
-        else {
-            nbtCompound.putUuid("uuid", uuid);
-            saveToStack();
-        }
-        return uuid;
-    }
-
     public static UUID getUuid(ItemStack stack) {
         UUID uuid = UUID.randomUUID();
         NbtCompound nbtCompound = getStackNbt(stack);
         if (nbtCompound.contains("uuid"))
-            uuid = nbtCompound.getUuid("uuid");
+            uuid = nbtCompound.get("uuid", Uuids.CODEC).get();
         else {
-            nbtCompound.putUuid("uuid", uuid);
+            nbtCompound.put("uuid", Uuids.CODEC, uuid);
             saveToStack(stack, nbtCompound);
         }
         return uuid;
     }
 
-    public ItemStack getStack() {
+    public ItemStack stack() {
         return stack;
     }
 
     public void removeFromNbt(String name) {
-        nbtCompound.remove(name);
-        saveToStack();
+        removeFromNbt(stack, name);
     }
 
     public static void removeFromNbt(ItemStack stack, String name) {

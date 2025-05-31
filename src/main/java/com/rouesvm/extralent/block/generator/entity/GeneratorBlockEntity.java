@@ -21,7 +21,8 @@ import team.reborn.energy.api.EnergyStorageUtil;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class GeneratorBlockEntity extends BasicMachineBlockEntity {
-    private int current_burn_time;
+    private int current_burn_time = 0;
+    private double energy_buffer = 0;
 
     public static final int INPUT_SLOT_INDEX = 0;
     public static final int CHARGING_SLOT_INDEX = 1;
@@ -84,11 +85,18 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
                 markDirty();
             }
 
-            if (this.progress++ < this.current_burn_time / 1.25) {
-               energyStorage.amount = (long) MathHelper.clamp(
-                        energyStorage.amount + (this.current_burn_time / 800.0),
-                        0, energyStorage.getCapacity()
-               );
+            if (this.progress++ < this.current_burn_time) {
+                energy_buffer += (double) 4000 / 1600;
+                
+                if (energy_buffer >= 1.0) {
+                    long energyToAdd = (long) energy_buffer;
+                    energy_buffer -= energyToAdd;
+
+                    energyStorage.amount = MathHelper.clamp(
+                            energyStorage.amount + energyToAdd,
+                            0, energyStorage.getCapacity()
+                    );
+                }
             } else {
                 if (this.progress != 0 || this.current_burn_time != 0) {
                     this.progress = 0;
@@ -153,7 +161,7 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        this.current_burn_time = nbt.getInt("burnTime");
+        this.current_burn_time = nbt.getInt("burnTime", 0);
     }
 
     @Override
