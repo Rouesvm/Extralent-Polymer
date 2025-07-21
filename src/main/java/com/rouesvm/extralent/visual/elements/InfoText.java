@@ -23,11 +23,10 @@ public class InfoText extends ElementHolder {
         this.machineBlockEntity = machineBlockEntity;
         this.display = new TextDisplayElement(machineBlockEntity.infoOnClicked());
         this.display.setViewRange(0.2f);
-        this.display.setShadow(false);
-        this.display.setBackground(1);
+        this.display.setShadow(true);
         this.display.setBrightness(new Brightness(10, 10));
         this.display.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
-        this.display.setScale(new Vector3f(0.5F));
+        this.display.setScale(new Vector3f(0F, 0.5f ,0F));
         this.display.setOverridePos(pos);
         this.display.setTeleportDuration(2);
         this.addElement(display);
@@ -40,6 +39,12 @@ public class InfoText extends ElementHolder {
             this.destroy = true;
         if (this.destroy)
             this.timer = 0;
+
+        if (this.timer == 199) {
+            this.display.setScale(new Vector3f(0.5f));
+            this.display.setInterpolationDuration(2);
+            this.display.startInterpolation();
+        }
 
         if (this.timer-- == 0) {
             this.destroy();

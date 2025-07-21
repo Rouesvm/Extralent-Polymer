@@ -34,8 +34,8 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     private static final long ENERGY_USED_PER_SECOND = 10; // ENERGY_USED * (SECONDS * 20)
     private static final double TIME_TO_BURN_IN_SECONDS = 0.5;
 
-    private boolean is_burning;
-    private SmeltingRecipe current_recipe;
+    private boolean is_burning = false;
+    private SmeltingRecipe current_recipe = null;
 
     private final InventoryStorage outputInventory;
     private final ServerRecipeManager.MatchGetter<SingleStackRecipeInput, SmeltingRecipe> matchGetter;
@@ -120,58 +120,68 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
     private ItemStack getOutputStack() {
         ItemStack stack = inventory.getStack(INPUT_SLOT_INDEX);
-        return getOutputStack(stack);
-    }
-
-    private ItemStack getOutputStack(ItemStack inputStack) {
-        return getOutputStack(current_recipe, inputStack);
+        return getOutputStack(current_recipe, stack);
     }
 
     private ItemStack getOutputStack(SmeltingRecipe recipe, ItemStack inputStack) {
+        if (recipe == null) return null;
         return recipe.craft(new SingleStackRecipeInput(inputStack), world.getRegistryManager());
     }
 
     private Optional<SmeltingRecipe> canSmelt(ItemStack input) {
         Optional<RecipeEntry<SmeltingRecipe>> stackRecipe = matchGetter
-                .getFirstMatch(new SingleStackRecipeInput(input), (ServerWorld) world).stream().findFirst();
-        if (stackRecipe.isPresent() && !getOutputStack(stackRecipe.get().value(), input).isEmpty())
-            return Optional.of(stackRecipe.get().value());
-        else return Optional.empty();
+                .getFirstMatch(
+                        new SingleStackRecipeInput(input),
+                        (ServerWorld) world
+                ).stream().findFirst();
+
+        if (stackRecipe.isPresent()) {
+            RecipeEntry<SmeltingRecipe> recipe = stackRecipe.get();
+            if (!getOutputStack(recipe.value(), input).isEmpty()
+            ) return Optional.of(recipe.value());
+        }
+
+        return Optional.empty();
     }
 
     private boolean validItem() {
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
-        if (!inputStack.isEmpty()) {
-            Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
+        if (inputStack.isEmpty()) return is_burning;
 
-            if (stackRecipe.isPresent() && canAcceptOutput()) {
-                current_recipe = stackRecipe.get();
-                is_burning = true;
-            }
-        }
-        return is_burning;
+        Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
+        if (stackRecipe.isEmpty()) return is_burning;
+
+        if (!canAcceptOutput(getOutputStack(stackRecipe.get(), inputStack))) return is_burning;
+
+        current_recipe = stackRecipe.get();
+        is_burning = true;
+        return true;
     }
 
-    private boolean canAcceptOutput() {
-        ItemStack recipeOutput = getOutputStack();
-        ItemStack stack = inventory.getStack(OUTPUT_SLOT_INDEX);
-        if (recipeOutput.isEmpty()) return false;
-        if (stack.getCount() > 64) return false;
-        if (stack.isEmpty()) return true;
-        return stack.getItem() == recipeOutput.getItem();
+    private boolean canAcceptOutput(ItemStack recipeOutput) {
+        if (recipeOutput == null || recipeOutput.isEmpty()) return true;
+
+        ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
+
+        if (outputStack.isEmpty()) return true;
+        if (!ItemStack.areItemsAndComponentsEqual(outputStack, recipeOutput)) return false;
+
+        return outputStack.getCount() < outputStack.getMaxCount();
     }
 
     private boolean outputItem() {
         if (current_recipe == null) return false;
-        if (inventory.getStack(INPUT_SLOT_INDEX).isEmpty()) return false;
-        if (!canAcceptOutput()) return false;
+
+        ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
+        if (inputStack.isEmpty()) return false;
+        if (canAcceptOutput(getOutputStack(current_recipe, inputStack))) return false;
 
         ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
         if (outputStack.getCount() >= outputStack.getMaxCount()) return false;
 
         ItemStack result = getOutputStack();
         inventory.insertStackTo(result.copy(), OUTPUT_SLOT_INDEX);
-        inventory.getStack(INPUT_SLOT_INDEX).decrement(1);
+        inputStack.decrement(1);
 
         is_burning = false;
         return true;

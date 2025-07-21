@@ -43,12 +43,12 @@ public class HighlightManager {
 
     public void addHighlightToMultiple(Connection connection, BlockPos pos) {
         BlockHighlights highlights = getMultipleHighlights(pos);
-        highlights.addConnection(connection);
+        if (highlights != null) highlights.addConnection(connection);
     }
 
     public void removeHighlightFromMultiple(Connection connection, BlockPos pos) {
         BlockHighlights highlights = getMultipleHighlights(pos);
-        highlights.removeConnection(connection);
+        if (highlights != null) highlights.removeConnection(connection);
     }
 
     public void replaceHighlightToMultiple(Connection connection, BlockPos pos) {

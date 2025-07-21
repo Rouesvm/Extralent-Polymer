@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.block.transport.entity;
 
+import com.mojang.serialization.Codec;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
@@ -16,6 +17,9 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -69,29 +73,24 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        NbtList itemListNbt = new NbtList();
+    protected void writeData(WriteView data) {
+        super.writeData(data);
+        WriteView.ListAppender<String> listAppender = data.getListAppender("Items", Codec.STRING);
+        itemList.stream()
+                .map(Item::toString)
+                .forEach(listAppender::add);
 
-        for (Item item : itemList) {
-            NbtCompound itemTag = new NbtCompound();
-            itemTag.putInt("id", Registries.ITEM.getRawId(item));
-            itemListNbt.add(itemTag);
-        }
-
-        nbt.put("filter", itemListNbt);
+        if (listAppender.isEmpty()) data.remove("Items");
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        NbtList nbtList = nbt.getListOrEmpty("filter");
+    protected void readData(ReadView data) {
+        super.readData(data);
 
-        for(int i = 0; i < nbtList.size(); ++i) {
-            NbtCompound nbtCompound = nbtList.getCompoundOrEmpty(i);
-            Item item = Registries.ITEM.get(nbtCompound.getInt("id", 0));
-            itemList.add(item);
-        }
+        ReadView.TypedListReadView<String> listReadView = data.getTypedListView("Items", Codec.STRING);
+        listReadView.stream()
+                .map((string -> Registries.ITEM.get(Identifier.tryParse(string))))
+                .forEach(itemList::add);
     }
 
     public boolean insertItem(Storage<ItemVariant> storage) {

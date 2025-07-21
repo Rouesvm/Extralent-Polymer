@@ -1,7 +1,6 @@
 package com.rouesvm.extralent.block.entity;
 
 import com.rouesvm.extralent.block.TickableBlockEntity;
-import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.item.custom.data.InfoData;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import com.rouesvm.extralent.block.entity.text.ProgressBarText;
@@ -12,9 +11,8 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -76,30 +74,30 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {}
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
+    protected void readData(ReadView data) {
+        super.readData(data);
 
         if (this.inventory != null)
-            Inventories.readNbt(nbt, this.inventory.getStacks(), registryLookup);
+            Inventories.readData(data, this.inventory.getStacks());
         if (this.energyStorage != null) {
-            if (nbt.contains("energy")) {
-                this.energyStorage.amount = nbt.getLong("energy", 0);
-            }
+            if (data.getOptionalLong("energy").isPresent()
+            ) this.energyStorage.amount = data.getLong("energy", 0);
+
         }
 
-        this.progress = nbt.getInt("progress", 0);
+        this.progress = data.getInt("progress", 0);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
+    protected void writeData(WriteView data) {
+        super.writeData(data);
 
-        if (this.inventory != null)
-            Inventories.writeNbt(nbt, this.inventory.getStacks(), registryLookup);
-        if (this.energyStorage != null)
-            nbt.putLong("energy", this.energyStorage.amount);
+        if (this.inventory != null
+        ) Inventories.writeData(data, this.inventory.getStacks());
+        if (this.energyStorage != null
+        ) data.putLong("energy", this.energyStorage.amount);
 
-        nbt.putInt("progress", this.progress);
+        data.putInt("progress", this.progress);
     }
 
     public void update() {

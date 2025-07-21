@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.util.Identifier;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -15,14 +16,14 @@ public class ModBlockTags extends FabricTagProvider.BlockTagProvider {
 
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
-        this.getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
-                .add(BlockRegistry.ELECTRIC_FURNACE)
-                .add(BlockRegistry.GENERATOR)
-                .add(BlockRegistry.TRANSMITTER)
-                .add(BlockRegistry.HARVESTER)
-                .add(BlockRegistry.QUARRY);
+        this.getTagBuilder(BlockTags.PICKAXE_MINEABLE)
+                .add(Identifier.tryParse(BlockRegistry.ELECTRIC_FURNACE.toString()))
+                .add(Identifier.tryParse(BlockRegistry.GENERATOR.toString()))
+                .add(Identifier.tryParse(BlockRegistry.TRANSMITTER.toString()))
+                .add(Identifier.tryParse(BlockRegistry.HARVESTER.toString()))
+                .add(Identifier.tryParse(BlockRegistry.QUARRY.toString()));
 
-        this.getOrCreateTagBuilder(BlockTags.AXE_MINEABLE)
-                .add(BlockRegistry.TRANSPORTER);
+        this.getTagBuilder(BlockTags.AXE_MINEABLE)
+                .add(Identifier.tryParse(BlockRegistry.TRANSPORTER.toString()));
     }
 }

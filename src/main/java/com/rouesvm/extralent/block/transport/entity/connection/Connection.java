@@ -1,13 +1,17 @@
 package com.rouesvm.extralent.block.transport.entity.connection;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
+import net.minecraft.util.ErrorReporter;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 public class Connection {
     private final BlockPos pos;
@@ -43,30 +47,40 @@ public class Connection {
         this.weight = weight;
     }
 
-    public static void writeNbt(NbtCompound nbt, HashSet<Connection> connections, RegistryWrapper.WrapperLookup registries) {
-        NbtList nbtList = new NbtList();
+    public static final Codec<Set<Connection>> CODEC =
+            Codec.list(NbtCompound.CODEC).xmap(
+                    list -> {
+                        Set<Connection> connections = new HashSet<>();
+                        for (NbtCompound entry : list) {
+                            int side = entry.getInt("side", 0);
+                            long pos = entry.getLong("pos", 0);
+                            int weight = entry.getInt("weight", 0);
+                            connections.add(of(BlockPos.fromLong(pos), weight, Direction.byIndex(side)));
+                        }
+                        return connections;
+                    },
+                    connections -> {
+                        List<NbtCompound> out = new ArrayList<>();
+                        for (Connection connection : connections) {
+                            NbtCompound compound = new NbtCompound();
+                            compound.putInt("side", connection.getSide().getIndex());
+                            compound.putInt("weight", connection.getWeight());
+                            compound.putLong("pos", connection.getPos().asLong());
+                            out.add(compound);
+                        }
+                        return out;
+                    }
+            );
 
-        connections.forEach(connection -> {
-            NbtCompound nbtCompound = new NbtCompound();
-            nbtCompound.putInt("side", connection.getSide().getIndex());
-            nbtCompound.putInt("weight", connection.getWeight());
-            nbtCompound.putLong("pos", connection.getPos().asLong());
-            nbtList.add(nbtCompound);
-        });
-
-        if (!nbtList.isEmpty()) nbt.put("storedBlocks", nbtList);
+    public static void write(WriteView data, HashSet<Connection> connections) {
+        WriteView.ListAppender<Set<Connection>> nbtList = data.getListAppender("storedBlocks", CODEC);
+        nbtList.add(connections);
     }
 
-    public static void readNbt(NbtCompound nbt, HashSet<Connection> connections, RegistryWrapper.WrapperLookup registries) {
-        NbtList nbtList = nbt.getListOrEmpty("storedBlocks");
-
-        for(int i = 0; i < nbtList.size(); ++i) {
-            NbtCompound nbtCompound = nbtList.getCompoundOrEmpty(i);
-            int side = nbtCompound.getInt("side", 0);
-            long pos = nbtCompound.getLong("pos", 0);
-            int weight = nbtCompound.getInt("weight", 0);
-            connections.add(of(BlockPos.fromLong(pos), weight, Direction.byIndex(side)));
-        }
+    public static void read(ReadView data, HashSet<Connection> connections) {
+        ReadView.TypedListReadView<Set<Connection>> nbtList = data.getTypedListView("storedBlocks", CODEC);
+        Optional<Set<Connection>> dataConnection = nbtList.stream().findFirst();
+        dataConnection.ifPresent((connections::addAll));
     }
 
     @Override

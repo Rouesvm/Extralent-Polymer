@@ -16,8 +16,12 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.storage.ReadView;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -145,7 +149,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
     public void spawnEntity(ItemStack stack, BlockPos pos, PlayerEntity player, World world) {
         NbtCompound tag = stack.getOrDefault(DataComponentTypes.ENTITY_DATA, NbtComponent.DEFAULT).copyNbt();
         if (tag.isEmpty()) return;
-        if (EntityType.getEntityFromNbt(tag, world, SpawnReason.EVENT).map((entity) -> {
+        if (EntityType.getEntityFromData(NbtReadView.create(ErrorReporter.EMPTY, world.getRegistryManager(), tag), world, SpawnReason.EVENT).map((entity) -> {
             entity.setPos((double) pos.getX() + 0.5D, pos.getY(), (double) pos.getZ() + 0.5D);
             entity.setVelocity(Vec3d.ZERO);
             world.spawnEntity(entity);
@@ -163,10 +167,10 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
     }
 
     public static NbtCompound saveEntity(Entity entity) {
-        NbtCompound compound = new NbtCompound();
+        NbtWriteView compound = NbtWriteView.create(ErrorReporter.EMPTY, entity.getWorld().getRegistryManager());
         compound.putString("id", EntityType.getId(entity.getType()).toString());
-        entity.saveNbt(compound);
-        return compound;
+        entity.saveData(compound);
+        return compound.getNbt();
     }
 
     @Override

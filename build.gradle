@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.10-SNAPSHOT'
+    id 'fabric-loom' version '1.11-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -45,8 +45,6 @@ dependencies {
     modImplementation ("eu.pb4:polymer-virtual-entity:${project.polymer}")
 
     modImplementation include("eu.pb4:sgui:${project.sgui}")
-
-    compileOnly('org.geysermc.geyser:api:2.7.1-SNAPSHOT')
 }
 
 processResources {

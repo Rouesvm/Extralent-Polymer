@@ -6,8 +6,8 @@ import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -72,6 +72,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
 
     public void removeConnections() {
         if (world == null) return;
+        if (connectedTo == null) return;
         if (connectedTo.isEmpty()) return;
         for (Connection connection : connectedTo) removeConnection(connection);
     }
@@ -149,19 +150,19 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        Connection.readNbt(nbt, this.blocks, registryLookup);
-        Connection.readNbt(nbt, this.connectedTo, registryLookup);
-        current_connections = nbt.getInt("connections", 0);
+    protected void readData(ReadView data) {
+        super.readData(data);
+        Connection.read(data, this.blocks);
+        Connection.read(data, this.connectedTo);
+        current_connections = data.getInt("connections", 0);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        Connection.writeNbt(nbt, this.blocks, registryLookup);
-        Connection.writeNbt(nbt, this.connectedTo, registryLookup);
-        nbt.putInt("connections", current_connections);
+    protected void writeData(WriteView data) {
+        super.writeData(data);
+        Connection.write(data, this.blocks);
+        Connection.write(data, this.connectedTo);
+        data.putInt("connections", current_connections);
     }
 
     public Set<Connection> getBlocks() {

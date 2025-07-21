@@ -17,6 +17,8 @@ import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -113,15 +115,15 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        this.mining_pos = BlockPos.fromLong(nbt.getLong("mining_pos", 0));
+    protected void readData(ReadView data) {
+        super.readData(data);
+        this.mining_pos = BlockPos.fromLong(data.getLong("mining_pos", 0));
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.putInt("progress", this.progress);
-        nbt.putLong("mining_pos", this.mining_pos.asLong());
+    protected void writeData(WriteView data) {
+        super.writeData(data);
+        data.putInt("progress", this.progress);
+        data.putLong("mining_pos", this.mining_pos.asLong());
     }
 }

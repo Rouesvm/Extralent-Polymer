@@ -12,6 +12,8 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -159,14 +161,14 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        this.current_burn_time = nbt.getInt("burnTime", 0);
+    protected void readData(ReadView data) {
+        super.readData(data);
+        this.current_burn_time = data.getInt("burnTime", 0);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.putInt("burnTime", this.current_burn_time);
+    protected void writeData(WriteView data) {
+        super.writeData(data);
+        data.putInt("burnTime", this.current_burn_time);
     }
 }
