@@ -1,12 +1,10 @@
 package com.rouesvm.extralent.block.machine.entity;
 
 import com.rouesvm.extralent.block.ActivatedPolymerBlock;
-import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
@@ -93,26 +91,34 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (world == null || world.isClient) return;
 
-        long energy_used = calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS);
-        if (energyStorage.amount < energy_used) return;
+        final long energyUsed = calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS);
+        if (energyStorage.amount < energyUsed) return;
 
-        if (!is_burning && validItem()) {
-            boolean isActivated = state.get(ActivatedPolymerBlock.ACTIVATED);
-            if (!isActivated) {
-                state.with(ActivatedPolymerBlock.ACTIVATED, true);
-                markDirty(world, pos, state);
-            }
+        boolean stateChanged = false;
 
-            if (progress++ >= TIME_TO_BURN_IN_SECONDS * 20) {
-                if (energyStorage.amount < energy_used) return;
-                if (outputItem()) {
-                    energyStorage.amount = MathHelper.clamp(energyStorage.amount - energy_used, 0, energyStorage.getCapacity());
+        if (is_burning) {
+            progress++;
+            if (progress < TIME_TO_BURN_IN_SECONDS * 20) return;
+            if (!outputItem()) return;
 
-                    state.with(ActivatedPolymerBlock.ACTIVATED, false);
-                    markDirty(world, pos, state);
-                }
-            }
-        } else if (!is_burning) progress = 0;
+            is_burning = false;
+            progress = 0;
+
+            energyStorage.amount = MathHelper.clamp(energyStorage.amount - energyUsed, 0, energyStorage.getCapacity());
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
+            stateChanged = true;
+        } else if (validItem()) {
+            is_burning = true;
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
+            stateChanged = true;
+        }
+
+        if (!is_burning) progress = 0;
+
+        if (stateChanged) {
+            world.setBlockState(pos, state, 3);
+            markDirty(world, pos, state);
+        }
     }
 
     private ItemStack getOutputStack() {
@@ -148,29 +154,30 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
         if (stackRecipe.isEmpty()) return false;
 
-        if (!canAcceptOutput(getOutputStack(stackRecipe.get(), inputStack))) return false;
+        if (isOutputInvalid(getOutputStack(stackRecipe.get(), inputStack))) return false;
 
         current_recipe = stackRecipe.get();
         return true;
     }
 
-    private boolean canAcceptOutput(ItemStack recipeOutput) {
-        if (recipeOutput == null || recipeOutput.isEmpty()) return true;
+    private boolean isOutputInvalid(ItemStack recipeOutput) {
+        if (recipeOutput == null || recipeOutput.isEmpty()) return false;
 
         ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
 
-        if (outputStack.isEmpty()) return true;
-        if (!ItemStack.areItemsAndComponentsEqual(outputStack, recipeOutput)) return false;
+        if (outputStack.isEmpty()) return false;
+        if (!ItemStack.areItemsAndComponentsEqual(outputStack, recipeOutput)) return true;
 
-        return outputStack.getCount() < outputStack.getMaxCount();
+        return outputStack.getCount() >= outputStack.getMaxCount();
     }
 
     private boolean outputItem() {
         if (current_recipe == null) return false;
 
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
+
         if (inputStack.isEmpty()) return false;
-        if (canAcceptOutput(getOutputStack(current_recipe, inputStack))) return false;
+        if (isOutputInvalid(getOutputStack(current_recipe, inputStack))) return false;
 
         ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
         if (outputStack.getCount() >= outputStack.getMaxCount()) return false;

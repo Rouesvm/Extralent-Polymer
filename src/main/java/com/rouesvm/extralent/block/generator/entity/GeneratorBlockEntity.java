@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.block.generator.entity;
 
+import com.rouesvm.extralent.block.ActivatedPolymerBlock;
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
@@ -23,6 +24,8 @@ import team.reborn.energy.api.EnergyStorageUtil;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class GeneratorBlockEntity extends BasicMachineBlockEntity {
+    public static final double base_energy_produced_per_tick = 2.5;
+
     private int current_burn_time = 0;
     private double energy_buffer = 0;
 
@@ -76,41 +79,45 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (this.world == null || this.world.isClient) return;
+        if (energyStorage.amount >= energyStorage.capacity) return;
 
-        if (energyStorage.amount < energyStorage.capacity) {
-            Block machineBlock = getCachedState().getBlock();
-            if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
+        boolean stateChanged = false;
 
-            if (this.current_burn_time == 0) {
-                machineBaseBlock.setState(true, world, pos);
-                validFuel();
-                markDirty();
-            }
+        if (current_burn_time == 0) {
+            validFuel();
 
-            if (this.progress++ < this.current_burn_time) {
-                energy_buffer += (double) 4000 / 1600;
-                
-                if (energy_buffer >= 1.0) {
-                    long energyToAdd = (long) energy_buffer;
-                    energy_buffer -= energyToAdd;
-
-                    energyStorage.amount = MathHelper.clamp(
-                            energyStorage.amount + energyToAdd,
-                            0, energyStorage.getCapacity()
-                    );
-                }
-            } else {
-                if (this.progress != 0 || this.current_burn_time != 0) {
-                    this.progress = 0;
-                    this.current_burn_time = 0;
-
-                    machineBaseBlock.setState(false, world, pos);
-                    markDirty();
-                }
+            if (current_burn_time > 0) {
+                state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
+                stateChanged = true;
             }
         }
 
+        if (progress < current_burn_time) {
+            progress++;
+            energy_buffer += base_energy_produced_per_tick;
+                
+            if (energy_buffer >= 1.0) {
+                final long energyToAdd = (long) energy_buffer;
+                energy_buffer -= energyToAdd;
+
+                energyStorage.amount = MathHelper.clamp(
+                        energyStorage.amount + energyToAdd,
+                        0, energyStorage.getCapacity()
+                );
+            }
+        } else if (progress != 0 || current_burn_time != 0) {
+            progress = 0;
+            current_burn_time = 0;
+
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
+            stateChanged = true;
+        }
+
         extractEnergy();
+        if (stateChanged) {
+            world.setBlockState(pos, state);
+            markDirty(world, pos, state);
+        }
     }
 
     private void extractEnergy() {
@@ -121,7 +128,7 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
             EnergyStorageUtil.move(
                     getEnergyProvider(null),
                     ContainerItemContext.ofSingleSlot(getInventoryProvider(null).getSlot(CHARGING_SLOT_INDEX)).find(EnergyStorage.ITEM),
-                    getEnergyStorage().maxExtract,
+                    this.energyStorage.maxExtract,
                     null
             );
         }
