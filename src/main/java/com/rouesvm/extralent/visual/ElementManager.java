@@ -23,7 +23,7 @@ public class ElementManager {
     public void removeElement(UUID uuid) {
         InfoText highlight = getElement(uuid);
         if (highlight != null) {
-            highlight.setDestroy(true);
+            highlight.setTimer(6);
             singularDisplay.remove(uuid);
         }
     }

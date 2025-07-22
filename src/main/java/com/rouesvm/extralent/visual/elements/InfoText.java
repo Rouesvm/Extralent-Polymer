@@ -63,6 +63,10 @@ public class InfoText extends ElementHolder {
         return model;
     }
 
+    public void setTimer(int timer) {
+        this.timer = timer;
+    }
+
     public void setDestroy(boolean destroy) {
         this.destroy = destroy;
     }
