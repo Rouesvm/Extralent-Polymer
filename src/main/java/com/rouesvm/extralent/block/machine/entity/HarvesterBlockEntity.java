@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.block.machine.entity;
 
+import com.rouesvm.extralent.block.ActivatedPolymerBlock;
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
@@ -95,13 +96,20 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (world == null || world.isClient) return;
-        Block machineBlock = getCachedState().getBlock();
-        if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
 
-        if (energyStorage.amount <= ENERGY_USED) {
-            machineBaseBlock.setState(false, world, pos);
-        } else {
-            machineBaseBlock.setState(true, world, pos);
+        boolean stateChanged = false;
+        boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
+
+        if (activated) {
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
+            stateChanged = true;
+        }
+
+        if (energyStorage.amount > ENERGY_USED) {
+            if (!activated) {
+                state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
+                stateChanged = true;
+            }
 
             progress++;
             if (progress % 6 == 0) {
@@ -115,8 +123,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             }
 
             if ((soilQueue.isEmpty() && toHarvestQueue.isEmpty())
-                    && progress % 80 == 0
-            ) {
+                    && progress % 80 == 0) {
                 scanArea(world);
                 energyStorage.amount = MathHelper.clamp(
                         energyStorage.amount - ENERGY_USED,
@@ -125,6 +132,11 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
                 markDirty();
             }
+        }
+
+        if (stateChanged) {
+            world.setBlockState(pos, state);
+            markDirty(world, pos, state);
         }
     }
 

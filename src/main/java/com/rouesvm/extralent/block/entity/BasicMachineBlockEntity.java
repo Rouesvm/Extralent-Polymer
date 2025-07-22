@@ -82,7 +82,6 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         if (this.energyStorage != null) {
             if (data.getOptionalLong("energy").isPresent()
             ) this.energyStorage.amount = data.getLong("energy", 0);
-
         }
 
         this.progress = data.getInt("progress", 0);

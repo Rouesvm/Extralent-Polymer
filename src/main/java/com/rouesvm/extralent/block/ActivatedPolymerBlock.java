@@ -9,9 +9,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 public class ActivatedPolymerBlock extends BasicPolymerBlock  {
@@ -31,20 +28,15 @@ public class ActivatedPolymerBlock extends BasicPolymerBlock  {
         } else this.activatedState = null;
     }
 
-    public void setState(boolean activated, World world, BlockPos pos) {
-        if (!hasCustomStates) return;
-        world.setBlockState(pos, world.getBlockState(pos).with(ACTIVATED, activated));
-    }
-
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(ACTIVATED);
     }
 
     @Override
-    public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
-        if (blockState.get(ACTIVATED) && activatedState != null)
+    public BlockState getPolymerBlockState(BlockState state, PacketContext packetContext) {
+        if (state.get(ACTIVATED) && activatedState != null)
             return activatedState;
-        return super.getPolymerBlockState(blockState, packetContext);
+        return super.getPolymerBlockState(state, packetContext);
     }
 }

@@ -1,5 +1,6 @@
 package com.rouesvm.extralent.block.machine.entity;
 
+import com.rouesvm.extralent.block.ActivatedPolymerBlock;
 import com.rouesvm.extralent.block.MachineBlock;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
@@ -10,6 +11,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameters;
@@ -47,16 +49,20 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (this.world == null || this.world.isClient) return;
 
-        Block machineBlock = getCachedState().getBlock();
-        if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
+        boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
 
-        if (energyStorage.amount < ENERGY_USED) {
-            machineBaseBlock.setState(false, world, pos);
-            return;
+        if (activated) {
+            state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
+            world.setBlockState(pos, state);
         }
 
+        if (energyStorage.amount < ENERGY_USED) return;
+
         if (this.progress++ % 10 == 0) {
-            machineBaseBlock.setState(true, world, pos);
+            if (!activated) {
+                state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
+                world.setBlockState(pos, state);
+            }
 
             if (this.mining_pos.getY() <= this.world.getBottomY()) {
                 this.mining_pos = this.pos.down();

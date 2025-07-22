@@ -21,17 +21,14 @@ public class MachineBlock extends ActivatedPolymerBlock implements BlockEntityPr
     @Override
     protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
         if (state.getBlock() != null) {
-            BlockEntity tileEntity = world.getBlockEntity(pos);
-            if (tileEntity instanceof BasicMachineBlockEntity basicMachineBlock) {
-                if (basicMachineBlock.getInventory() != null) {
-                    ItemScatterer.spawn(world, pos, basicMachineBlock.getInventory());
-                }
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (!(blockEntity instanceof BasicMachineBlockEntity basicMachineBlock)) return;
+            if (basicMachineBlock.getInventory() != null) {
+                ItemScatterer.spawn(world, pos, basicMachineBlock.getInventory());
             }
         }
 
-        if (state.hasBlockEntity()) {
-            world.removeBlockEntity(pos);
-        }
+        if (state.hasBlockEntity()) world.removeBlockEntity(pos);
     }
 
     @ApiStatus.OverrideOnly
