@@ -96,14 +96,11 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         long energy_used = calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS);
         if (energyStorage.amount < energy_used) return;
 
-        Block machineBlock = getCachedState().getBlock();
-        if (!(machineBlock instanceof MachineBlock machineBaseBlock)) return;
-
         if (!is_burning && validItem()) {
-            boolean isActivated = machineBlock.getDefaultState().get(ActivatedPolymerBlock.ACTIVATED);
+            boolean isActivated = state.get(ActivatedPolymerBlock.ACTIVATED);
             if (!isActivated) {
-                machineBaseBlock.setState(true, world, pos);
-                markDirty();
+                state.with(ActivatedPolymerBlock.ACTIVATED, true);
+                markDirty(world, pos, state);
             }
 
             if (progress++ >= TIME_TO_BURN_IN_SECONDS * 20) {
@@ -111,8 +108,8 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
                 if (outputItem()) {
                     energyStorage.amount = MathHelper.clamp(energyStorage.amount - energy_used, 0, energyStorage.getCapacity());
 
-                    machineBaseBlock.setState(false, world, pos);
-                    markDirty();
+                    state.with(ActivatedPolymerBlock.ACTIVATED, false);
+                    markDirty(world, pos, state);
                 }
             }
         } else if (!is_burning) progress = 0;
@@ -146,15 +143,14 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
     private boolean validItem() {
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
-        if (inputStack.isEmpty()) return is_burning;
+        if (inputStack.isEmpty()) return false;
 
         Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
-        if (stackRecipe.isEmpty()) return is_burning;
+        if (stackRecipe.isEmpty()) return false;
 
-        if (!canAcceptOutput(getOutputStack(stackRecipe.get(), inputStack))) return is_burning;
+        if (!canAcceptOutput(getOutputStack(stackRecipe.get(), inputStack))) return false;
 
         current_recipe = stackRecipe.get();
-        is_burning = true;
         return true;
     }
 
