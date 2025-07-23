@@ -75,6 +75,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     @Override
     protected void writeData(WriteView data) {
         super.writeData(data);
+
         WriteView.ListAppender<String> listAppender = data.getListAppender("Items", Codec.STRING);
         itemList.stream()
                 .map(Item::toString)

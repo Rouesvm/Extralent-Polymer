@@ -13,6 +13,8 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
@@ -93,6 +95,10 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
         }
 
         if (progress < current_burn_time) {
+            if (progress % 40 == 0) {
+                world.playSound(null, pos, SoundEvents.BLOCK_BLASTFURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS, 1.0F, 0.95F);
+            }
+
             progress++;
             energy_buffer += base_energy_produced_per_tick;
                 

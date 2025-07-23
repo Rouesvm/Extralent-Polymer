@@ -51,7 +51,12 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         this.outputInventory = InventoryStorage.of(inventory, Direction.UP);
         this.inventoryStorage = InventoryStorage.of(inventory, Direction.DOWN);
 
-        Vec3d startPos = new Vec3d(pos.getX() - (double) boxSize.getX() / 2, pos.getY() + 2, pos.getZ() - (double) boxSize.getZ() / 2);
+        Vec3d startPos = new Vec3d(
+                pos.getX() - (double) boxSize.getX() / 2,
+                pos.getY() + 2,
+                pos.getZ() - (double) boxSize.getZ() / 2
+        );
+
         Vec3d endPos = startPos.add(Vec3d.of(boxSize));
         this.box = new Box(startPos, endPos);
     }
@@ -112,26 +117,8 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             }
 
             progress++;
-            if (progress % 6 == 0) {
-                harvestAndPlant(world);
-                energyStorage.amount = MathHelper.clamp(
-                        energyStorage.amount - ENERGY_USED / (((long) boxSize.getX() * boxSize.getZ())/ 2),
-                        0,
-                        energyStorage.getCapacity());
-
-                markDirty();
-            }
-
-            if ((soilQueue.isEmpty() && toHarvestQueue.isEmpty())
-                    && progress % 80 == 0) {
-                scanArea(world);
-                energyStorage.amount = MathHelper.clamp(
-                        energyStorage.amount - ENERGY_USED,
-                        0,
-                        energyStorage.getCapacity());
-
-                markDirty();
-            }
+            if (progress % 6 == 0) harvestAndPlant(world);
+            if (progress % 80 == 0) scanArea(world);
         }
 
         if (stateChanged) {
@@ -152,20 +139,40 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             harvestTree(world, pos);
             toHarvestQueue.remove(pos);
         }
+
+        energyStorage.amount = MathHelper.clamp(
+                energyStorage.amount - ENERGY_USED / (((long) boxSize.getX() * boxSize.getZ())/ 2),
+                0,
+                energyStorage.getCapacity());
+
+        markDirty();
     }
 
     private void scanArea(World world) {
+        if (!soilQueue.isEmpty() && !toHarvestQueue.isEmpty()) return;
+
         for (BlockPos pos : getBlockPosInBox(box)) {
             if (isLoaded(pos)) {
                 BlockState state = world.getBlockState(pos);
 
+                System.out.println(state);
+
                 if (isBreakableBlock(state)) toHarvestPos.add(pos);
-                if (isGroundSuitable(state) && world.isAir(pos.up())) soilPos.add(pos);
+                if (isGroundSuitable(state) && !world.isAir(pos) && world.isAir(pos.up())) {
+                    soilPos.add(pos);
+                }
             }
         }
 
         if (toHarvestQueue.isEmpty()) toHarvestQueue.addAll(toHarvestPos);
         if (soilQueue.isEmpty()) soilQueue.addAll(soilPos);
+
+        energyStorage.amount = MathHelper.clamp(
+                energyStorage.amount - ENERGY_USED,
+                0,
+                energyStorage.getCapacity());
+
+        markDirty();
     }
 
     private void harvestTree(World world, BlockPos pos) {
@@ -186,7 +193,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
             }
 
             insertDrops(state, current);
-            world.setBlockState(current, Blocks.AIR.getDefaultState());
+            world.breakBlock(current, false, null, 1);
             for (Direction direction : Direction.values()) {
                 BlockPos neighbor = current.offset(direction);
                 if (isBreakableBlock(world.getBlockState(neighbor))) {
@@ -197,8 +204,12 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     }
 
     private void plantSapling(World world, BlockPos pos) {
-        if (world.isAir(pos) && !world.isAir(pos.up())) return;
         if (inventory.isEmpty()) return;
+
+        if (world.isAir(pos) || !world.isAir(pos.up())) {
+            soilPos.remove(pos);
+            return;
+        }
 
         Optional<Item> selectedSapling = inventory.hasTag(ItemTags.SAPLINGS);
 

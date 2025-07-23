@@ -29,8 +29,8 @@ public class LineDrawer {
     }
 
     public static void visualizeScanArea(BlockPos machinePos, ServerWorld world, Vec3i size) {
-        BlockPos start = machinePos.add(-size.getX() / 2, 0, -size.getZ() / 2); // Bottom-left front corner
-        BlockPos end = machinePos.add(size.getX() / 2, size.getY(), size.getZ() / 2); // Top-right back corner
+        BlockPos start = machinePos.add(-size.getX() / 2, 2, -size.getZ() / 2); // Bottom-left front corner
+        BlockPos end = machinePos.add(size.getX() / 2, size.getY() + 2, size.getZ() / 2); // Top-right back corner
 
         int i;
         for (i = 0; i < 4; i++) {

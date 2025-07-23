@@ -72,13 +72,13 @@ public class Connection {
                     }
             );
 
-    public static void write(WriteView data, HashSet<Connection> connections) {
-        WriteView.ListAppender<Set<Connection>> nbtList = data.getListAppender("storedBlocks", CODEC);
+    public static void write(WriteView data, String name, HashSet<Connection> connections) {
+        WriteView.ListAppender<Set<Connection>> nbtList = data.getListAppender(name, CODEC);
         nbtList.add(connections);
     }
 
-    public static void read(ReadView data, HashSet<Connection> connections) {
-        ReadView.TypedListReadView<Set<Connection>> nbtList = data.getTypedListView("storedBlocks", CODEC);
+    public static void read(ReadView data, String name, HashSet<Connection> connections) {
+        ReadView.TypedListReadView<Set<Connection>> nbtList = data.getTypedListView(name, CODEC);
         Optional<Set<Connection>> dataConnection = nbtList.stream().findFirst();
         dataConnection.ifPresent((connections::addAll));
     }

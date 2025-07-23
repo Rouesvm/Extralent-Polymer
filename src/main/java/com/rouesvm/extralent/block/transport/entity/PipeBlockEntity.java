@@ -152,16 +152,16 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void readData(ReadView data) {
         super.readData(data);
-        Connection.read(data, this.blocks);
-        Connection.read(data, this.connectedTo);
+        Connection.read(data, "connected", this.blocks);
+        Connection.read(data, "connected_to", this.connectedTo);
         current_connections = data.getInt("connections", 0);
     }
 
     @Override
     protected void writeData(WriteView data) {
         super.writeData(data);
-        Connection.write(data, this.blocks);
-        Connection.write(data, this.connectedTo);
+        Connection.write(data, "connected", this.blocks);
+        Connection.write(data, "connected_to", this.connectedTo);
         data.putInt("connections", current_connections);
     }
 

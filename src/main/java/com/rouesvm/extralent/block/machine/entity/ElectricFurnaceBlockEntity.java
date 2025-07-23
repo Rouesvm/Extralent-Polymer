@@ -14,6 +14,8 @@ import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -102,15 +104,19 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
             if (!outputItem()) return;
 
             is_burning = false;
-            progress = 0;
 
             energyStorage.amount = MathHelper.clamp(energyStorage.amount - energyUsed, 0, energyStorage.getCapacity());
             state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
             stateChanged = true;
-        } else if (validItem()) {
-            is_burning = true;
-            state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
-            stateChanged = true;
+        } else {
+            checkIfValid();
+
+            if (is_burning && !state.get(ActivatedPolymerBlock.ACTIVATED)) {
+                world.playSound(null, pos, SoundEvents.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS, 1.0F, 0.95F);
+
+                state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
+                stateChanged = true;
+            }
         }
 
         if (!is_burning) progress = 0;
@@ -147,17 +153,17 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         return Optional.empty();
     }
 
-    private boolean validItem() {
+    private void checkIfValid() {
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
-        if (inputStack.isEmpty()) return false;
+        if (inputStack.isEmpty()) return;
 
         Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
-        if (stackRecipe.isEmpty()) return false;
+        if (stackRecipe.isEmpty()) return;
 
-        if (isOutputInvalid(getOutputStack(stackRecipe.get(), inputStack))) return false;
+        if (isOutputInvalid(getOutputStack(stackRecipe.get(), inputStack))) return;
 
         current_recipe = stackRecipe.get();
-        return true;
+        is_burning = true;
     }
 
     private boolean isOutputInvalid(ItemStack recipeOutput) {
