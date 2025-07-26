@@ -109,7 +109,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
             state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
             stateChanged = true;
         } else {
-            checkIfValid();
+            isValid();
 
             if (is_burning && !state.get(ActivatedPolymerBlock.ACTIVATED)) {
                 world.playSound(null, pos, SoundEvents.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS, 1.0F, 0.95F);
@@ -153,28 +153,25 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         return Optional.empty();
     }
 
-    private void checkIfValid() {
+    private void isValid() {
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
         if (inputStack.isEmpty()) return;
 
         Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
         if (stackRecipe.isEmpty()) return;
 
-        if (isOutputInvalid(getOutputStack(stackRecipe.get(), inputStack))) return;
-
+        if (ifInsertInvalid(getOutputStack(stackRecipe.get(), inputStack))) return;
         current_recipe = stackRecipe.get();
         is_burning = true;
     }
 
-    private boolean isOutputInvalid(ItemStack recipeOutput) {
-        if (recipeOutput == null || recipeOutput.isEmpty()) return false;
+    private boolean ifInsertInvalid(ItemStack recipeOutput) {
+        if (recipeOutput == null || recipeOutput.isEmpty()) return true;
 
         ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
 
-        if (outputStack.isEmpty()) return false;
-        if (!ItemStack.areItemsAndComponentsEqual(outputStack, recipeOutput)) return true;
-
-        return outputStack.getCount() >= outputStack.getMaxCount();
+        if (outputStack.getCount() > outputStack.getMaxCount()) return true;
+        return !ItemStack.areItemsAndComponentsEqual(outputStack, recipeOutput);
     }
 
     private boolean outputItem() {
@@ -183,10 +180,10 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
 
         if (inputStack.isEmpty()) return false;
-        if (isOutputInvalid(getOutputStack(current_recipe, inputStack))) return false;
+        if (ifInsertInvalid(getOutputStack(current_recipe, inputStack))) return false;
 
         ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
-        if (outputStack.getCount() >= outputStack.getMaxCount()) return false;
+        if (outputStack.getCount() > outputStack.getMaxCount()) return false;
 
         ItemStack result = getOutputStack();
         inventory.insertStackTo(result.copy(), OUTPUT_SLOT_INDEX);

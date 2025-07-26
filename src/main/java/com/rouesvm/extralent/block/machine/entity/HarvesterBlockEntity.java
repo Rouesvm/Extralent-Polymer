@@ -43,7 +43,6 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private final HashSet<BlockPos> soilPos = new HashSet<>(boxSize.getX() * boxSize.getZ() / 2);
     private final Queue<BlockPos> soilQueue = new LinkedList<>();
 
-    private final HashSet<BlockPos> toHarvestPos = new HashSet<>(boxSize.getX() * boxSize.getZ() / 2);
     private final Queue<BlockPos> toHarvestQueue = new LinkedList<>();
 
     public HarvesterBlockEntity(BlockPos pos, BlockState state) {
@@ -102,89 +101,97 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (world == null || world.isClient) return;
 
-        boolean stateChanged = false;
         boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
+        boolean shouldActivate = energyStorage.amount > ENERGY_USED;
 
-        if (activated) {
-            state = state.with(ActivatedPolymerBlock.ACTIVATED, false);
-            stateChanged = true;
+        if (activated != shouldActivate) {
+            world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, shouldActivate));
+            markDirty(world, pos, state);
         }
 
         if (energyStorage.amount > ENERGY_USED) {
-            if (!activated) {
-                state = state.with(ActivatedPolymerBlock.ACTIVATED, true);
-                stateChanged = true;
-            }
-
             progress++;
-            if (progress % 6 == 0) harvestAndPlant(world);
-            if (progress % 80 == 0) scanArea(world);
-        }
 
-        if (stateChanged) {
-            world.setBlockState(pos, state);
-            markDirty(world, pos, state);
+            if (progress % 2 == 0) harvestAndPlant(world);
+            if (progress % 40 == 0) scanArea(world);
         }
     }
 
     private void harvestAndPlant(World world) {
+        boolean didWork = false;
+
         if (!soilQueue.isEmpty()) {
             BlockPos pos = soilQueue.poll();
             plantSapling(world, pos);
-            soilQueue.remove(pos);
+            didWork = true;
         }
 
         if (!toHarvestQueue.isEmpty()) {
             BlockPos pos = toHarvestQueue.poll();
             harvestTree(world, pos);
-            toHarvestQueue.remove(pos);
+            didWork = true;
         }
 
-        energyStorage.amount = MathHelper.clamp(
-                energyStorage.amount - ENERGY_USED / (((long) boxSize.getX() * boxSize.getZ())/ 2),
-                0,
-                energyStorage.getCapacity());
+        if (didWork) {
+            long boxArea = Math.max(1, ((long) boxSize.getX() * boxSize.getZ()) / 2);
+            long energyCost = ENERGY_USED / boxArea;
 
-        markDirty();
+            energyStorage.amount = MathHelper.clamp(
+                    energyStorage.amount - energyCost,
+                    0,
+                    energyStorage.getCapacity());
+
+            markDirty();
+        }
     }
 
     private void scanArea(World world) {
-        if (!soilQueue.isEmpty() && !toHarvestQueue.isEmpty()) return;
-
         for (BlockPos pos : getBlockPosInBox(box)) {
-            if (isLoaded(pos)) {
-                BlockState state = world.getBlockState(pos);
+            if (!isLoaded(pos)) continue;
 
-                System.out.println(state);
+            BlockState state = world.getBlockState(pos);
 
-                if (isBreakableBlock(state)) toHarvestPos.add(pos);
-                if (isGroundSuitable(state) && !world.isAir(pos) && world.isAir(pos.up())) {
-                    soilPos.add(pos);
-                }
+            if (isGroundSuitable(state) && !world.isAir(pos)) {
+                soilPos.add(pos);
             }
         }
 
-        if (toHarvestQueue.isEmpty()) toHarvestQueue.addAll(toHarvestPos);
         if (soilQueue.isEmpty()) soilQueue.addAll(soilPos);
 
-        energyStorage.amount = MathHelper.clamp(
-                energyStorage.amount - ENERGY_USED,
-                0,
-                energyStorage.getCapacity());
+        if (!soilQueue.isEmpty() && toHarvestQueue.isEmpty()) {
+            for (BlockPos pos : soilQueue) {
+                if (isBreakableBlock(world.getBlockState(pos.up()))
+                ) toHarvestQueue.add(pos.up());
+            }
+        }
 
-        markDirty();
+        if (!soilPos.isEmpty()) {
+            energyStorage.amount = MathHelper.clamp(
+                    energyStorage.amount - ENERGY_USED,
+                    0,
+                    energyStorage.getCapacity());
+            markDirty();
+        }
     }
 
     private void harvestTree(World world, BlockPos pos) {
         if (world.isAir(pos)) return;
 
-        Queue<BlockPos> toCheck = new LinkedList<>();
+        Queue<BlockPos> toCheck = new ArrayDeque<>();
+        Set<BlockPos> visited = new HashSet<>();
+
         toCheck.add(pos);
+        visited.add(pos);
 
         boolean playedSound = false;
-        while (!toCheck.isEmpty()) {
+        int blocksProcessed = 0;
+
+        final int MAX_BLOCKS_PER_TICK = 32;
+
+        while (!toCheck.isEmpty() && blocksProcessed < MAX_BLOCKS_PER_TICK) {
             BlockPos current = toCheck.poll();
             BlockState state = world.getBlockState(current);
+
             if (!isBreakableBlock(state)) continue;
 
             if (!playedSound) {
@@ -194,11 +201,21 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
             insertDrops(state, current);
             world.breakBlock(current, false, null, 1);
+            blocksProcessed++;
+
             for (Direction direction : Direction.values()) {
                 BlockPos neighbor = current.offset(direction);
-                if (isBreakableBlock(world.getBlockState(neighbor))) {
-                    toCheck.add(neighbor);
-                }
+
+                if (visited.add(neighbor)
+                        && isBreakableBlock(world.getBlockState(neighbor))
+                ) toCheck.add(neighbor);
+            }
+        }
+
+        if (!toCheck.isEmpty()) {
+            for (BlockPos remaining : toCheck) {
+                if (!toHarvestQueue.contains(remaining)
+                ) toHarvestQueue.add(remaining);
             }
         }
     }
@@ -230,11 +247,14 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
                         .add(LootContextParameters.ORIGIN, current.toCenterPos())
                         .addOptional(LootContextParameters.BLOCK_ENTITY, this));
 
-        drops.forEach(drop -> {
-            if (drop.isIn(ItemTags.SAPLINGS))
-                drop = inventory.insertStack(drop, INPUT_SLOTS_ARRAY);
-            inventory.insertStack(drop, OUTPUT_SLOTS_ARRAY);
-        });
+        for (ItemStack drop : drops) {
+            if (!drop.isEmpty()) {
+                if (drop.isIn(ItemTags.SAPLINGS)
+                ) drop = inventory.insertStack(drop, INPUT_SLOTS_ARRAY);
+                if (!drop.isEmpty()
+                ) inventory.insertStack(drop, OUTPUT_SLOTS_ARRAY);
+            }
+        }
     }
 
     private boolean isBreakableBlock(BlockState state) {
