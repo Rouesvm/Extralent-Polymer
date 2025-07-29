@@ -37,7 +37,6 @@ public class ModRecipeProvider extends FabricRecipeProvider {
         };
     }
 
-
     private void blockRecipes(RegistryEntryLookup<Item> itemWrap, RecipeExporter exporter) {
         ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.MISC, BlockRegistry.ELECTRIC_FURNACE, 1)
                 .pattern("rir").pattern("ifi").pattern("ccc")
@@ -56,7 +55,7 @@ public class ModRecipeProvider extends FabricRecipeProvider {
         ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.FOOD, BlockRegistry.HARVESTER, 1)
                 .pattern("rir").pattern("aea").pattern("rir")
                 .input('r', Items.COPPER_INGOT).input('e', BlockRegistry.TRANSPORTER)
-                .input('i', Items.REDSTONE).input('a', Items.DIAMOND_AXE)
+                .input('i', Items.ENDER_PEARL).input('a', Items.DIAMOND_AXE)
                 .criterion("get_generator", InventoryChangedCriterion.Conditions.items(BlockRegistry.GENERATOR))
                 .offerTo(exporter);
 
