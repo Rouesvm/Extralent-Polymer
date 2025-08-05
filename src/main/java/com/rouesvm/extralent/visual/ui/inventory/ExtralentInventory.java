@@ -72,9 +72,7 @@ public class ExtralentInventory implements MinimalSidedInventory {
 
     public ItemStack insertStack(ItemStack stack, int[] slots) {
         ItemStack returnedStack = ItemStack.EMPTY;
-        for (int slot : slots) {
-            returnedStack = insertStackTo(stack, slot);
-        }
+        for (int slot : slots) returnedStack = insertStackTo(stack, slot);
         return returnedStack;
     }
 

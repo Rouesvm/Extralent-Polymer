@@ -6,8 +6,6 @@ import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
 
-import java.util.Iterator;
-
 public interface MinimalSidedInventory extends SidedInventory {
     DefaultedList<ItemStack> getStacks();
 
