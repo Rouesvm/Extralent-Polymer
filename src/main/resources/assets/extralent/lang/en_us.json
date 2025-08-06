@@ -33,7 +33,7 @@
   "info.viewer.far_away": "Out of range.",
   "info.viewer.type_wrong": "Invalid type.",
   "info.viewer.weight_changed": "Priority updated to:",
-
+  "info.viewer.overflow": "Out of memory!",
 
   "info.machine.inventory_empty": "Empty.",
 

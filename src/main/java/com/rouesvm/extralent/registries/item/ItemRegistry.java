@@ -1,9 +1,9 @@
 package com.rouesvm.extralent.registries.item;
 
 import com.rouesvm.extralent.item.BasicPolymerItem;
-import com.rouesvm.extralent.item.custom.ConnectorItem;
+import com.rouesvm.extralent.item.custom.connector.ConnectorItem;
 import com.rouesvm.extralent.item.custom.FilterItem;
-import com.rouesvm.extralent.item.custom.InfoItem;
+import com.rouesvm.extralent.item.custom.info.InfoItem;
 import com.rouesvm.extralent.item.custom.VacuumItem;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.item.Item;

@@ -5,13 +5,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 
 public class InfoData extends BasicData {
-    private DISPLAY display = DISPLAY.FLOATING;
-    private CONTENT_DISPLAY content = CONTENT_DISPLAY.ENERGY;
-
-    private boolean visual = false;
-    private BlockPos pos;
-
-    public InfoData(ItemStack stack) {
+    protected InfoData(ItemStack stack) {
         super(stack);
     }
 
@@ -33,74 +27,37 @@ public class InfoData extends BasicData {
         return CONTENT_DISPLAY.valueOf(compound.getString("content_visual", CONTENT_DISPLAY.MACHINE.toString()));
     }
 
-    public static boolean getVisual(ItemStack stack) {
+    public static boolean setBlockPos(ItemStack stack, BlockPos pos) {
         NbtCompound compound = getStackNbt(stack);
-        return compound.getBoolean("visual", false);
-    }
 
-    public static void setVisual(ItemStack stack, boolean visual) {
-        NbtCompound compound = getStackNbt(stack);
-        compound.putBoolean("visual", visual);
-        saveToStack(stack, compound);
-    }
-
-    public boolean getVisual() {
-        if (getStackNbt().contains("visual"))
-            visual = nbtCompound.getBoolean("visual", false);
-        return visual;
-    }
-
-    public void setVisual(boolean visual) {
-        nbtCompound.putBoolean("visual", visual);
-        saveToStack();
-        this.visual = visual;
-    }
-
-    public BlockPos getBlockPos() {
-        if (getStackNbt().contains("blockPos")) {
-            long data = nbtCompound.getLong("blockPos", 0);
-            pos = BlockPos.fromLong(data);
-        } else pos = null;
-        return pos;
-    }
-
-    public boolean setBlockPos(BlockPos pos) {
         if (pos == null) {
-            removeFromNbt("blockPos");
+            removeFromNbt(stack, "blockPos");
             return false;
-        } else if (pos.asLong() == nbtCompound.getLong("blockPos", 0))
+        } else if (pos.asLong() == compound.getLong("blockPos", 0)) {
             return false;
+        }
 
-        nbtCompound.putLong("blockPos", pos.asLong());
-        saveToStack();
-        this.pos = pos;
+        compound.putLong("blockPos", pos.asLong());
+        saveToStack(stack, compound);
         return true;
     }
 
-    public DISPLAY getDisplay() {
-        return getDisplay(stack());
+    public static void setDisplay(ItemStack stack, DISPLAY display) {
+        NbtCompound compound = getStackNbt(stack);
+        compound.putString("display_visual", display.toString());
+        saveToStack(stack, compound);
     }
 
-    public void setDisplay(DISPLAY display) {
-        nbtCompound.putString("display_visual", display.toString());
-        saveToStack();
-        this.display = display;
-    }
-
-    public CONTENT_DISPLAY getContent() {
-        return getContent(stack());
-    }
-
-    public void nextContent() {
+    public static void nextContent(ItemStack stack) {
         CONTENT_DISPLAY[] contents = CONTENT_DISPLAY.values();
-        int nextIndex = (getContent().ordinal() + 1) % contents.length;
-        setContent(contents[nextIndex]);
+        int nextIndex = (getContent(stack).ordinal() + 1) % contents.length;
+        setContent(stack, contents[nextIndex]);
     }
 
-    public void setContent(CONTENT_DISPLAY content) {
-        nbtCompound.putString("content_visual", content.toString());
-        saveToStack();
-        this.content = content;
+    public static void setContent(ItemStack stack, CONTENT_DISPLAY content) {
+        NbtCompound compound = getStackNbt(stack);
+        compound.putString("content_visual", content.toString());
+        saveToStack(stack, compound);
     }
 
     public enum DISPLAY {

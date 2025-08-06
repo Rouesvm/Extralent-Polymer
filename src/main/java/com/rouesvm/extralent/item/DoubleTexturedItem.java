@@ -22,7 +22,7 @@ public class DoubleTexturedItem extends BasicPolymerItem {
         return super.getPolymerItemModel(stack, context);
     }
 
-    public void setTexture(ItemStack stack, boolean activated) {
+    public static void setTexture(ItemStack stack, boolean activated) {
         Activated.setVisual(stack, activated);
     }
 }
