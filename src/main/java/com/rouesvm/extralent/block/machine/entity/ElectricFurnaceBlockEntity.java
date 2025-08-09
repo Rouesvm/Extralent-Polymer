@@ -172,7 +172,6 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
         if (inputStack.isEmpty()) return false;
         if (canInsert(getOutputStack(current_recipe, inputStack))) {
-
             ItemStack result = getOutputStack();
             inventory.insertStackTo(result.copy(), OUTPUT_SLOT_INDEX);
             inputStack.decrement(1);

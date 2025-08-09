@@ -77,8 +77,8 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
     protected void readData(ReadView data) {
         super.readData(data);
 
-        if (this.inventory != null)
-            Inventories.readData(data, this.inventory.getStacks());
+        if (this.inventory != null
+        ) Inventories.readData(data, this.inventory.getStacks());
         if (this.energyStorage != null) {
             if (data.getOptionalLong("energy").isPresent()
             ) this.energyStorage.amount = data.getLong("energy", 0);

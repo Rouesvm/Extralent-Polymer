@@ -19,8 +19,7 @@ public class ConnectorLogic {
         BlockPos currentPos = data.getBlockPos();
         PipeBlockEntity currentEntity = data.getCurrentEntity(world);
 
-        if (currentPos != null)
-            HIGHLIGHT_MANAGER.createMultipleHighlights(currentPos, world, (ServerPlayerEntity) player);
+        if (currentPos != null) HIGHLIGHT_MANAGER.createMultipleHighlights(currentPos, world, (ServerPlayerEntity) player);
 
         if (currentEntity != null) {
             if (currentEntity.isRemoved()) data.setCurrentEntity(null);
@@ -37,15 +36,14 @@ public class ConnectorLogic {
             return ActionResult.PASS;
         }
 
-        if (currentPos == null)
-            HIGHLIGHT_MANAGER.createMultipleHighlights(pipeEntity.getPos(), world, (ServerPlayerEntity) player);
+        if (currentPos == null) HIGHLIGHT_MANAGER.createMultipleHighlights(pipeEntity.getPos(), world, (ServerPlayerEntity) player);
 
         data.setCurrentEntity(pipeEntity.getPos());
         pipeEntity.onUpdate();
 
         onConnectionChanged(data, world, player, true);
 
-        pipeEntity.getBlocks().parallelStream().forEach(blockConnection ->
+        pipeEntity.getBlocks().forEach(blockConnection ->
                 HIGHLIGHT_MANAGER.addHighlightToMultiple(blockConnection, data.getBlockPos()));
 
         return ActionResult.SUCCESS;

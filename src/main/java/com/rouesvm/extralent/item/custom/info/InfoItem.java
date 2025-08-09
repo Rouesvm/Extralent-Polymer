@@ -85,8 +85,8 @@ public class InfoItem extends DoubleTexturedItem {
                 }
 
                 if (machine.infoOnClicked() == null) return ActionResult.PASS;
-
                 InfoLogic.updateFloatingText(world, context.getBlockPos(), context.getSide(), machine, stack);
+
                 return ActionResult.SUCCESS;
             } else InfoData.setBlockPos(stack, null);
         }
