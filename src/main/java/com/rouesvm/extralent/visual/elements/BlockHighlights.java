@@ -17,7 +17,11 @@ import java.util.concurrent.*;
 import static com.rouesvm.extralent.visual.elements.BlockHighlight.*;
 
 public class BlockHighlights {
-    private final static ExecutorService executor = ForkJoinPool.commonPool();
+    private static final ExecutorService executor = Executors.newFixedThreadPool(2, r -> {
+        Thread t = new Thread(r, "BlockHighlights-Particles");
+        t.setDaemon(true);
+        return t;
+    });
 
     public static final Vector3f OUTPUT_BLOCK_COLOR = new Vector3f(1F, 0.5F, 0F);
     public static final Vector3f INPUT_BLOCK_COLOR = new Vector3f(0F, 0.75F, 1F);
@@ -62,6 +66,24 @@ public class BlockHighlights {
         this.player = player;
     }
 
+    private int particleBatchIndex = 0;
+
+    public void spawnHighlightParticles(ServerWorld world, DustParticleEffect effect, ServerPlayerEntity player, Vec3d[] positions) {
+        int n = positions.length;
+        if (n == 0) return;
+
+        int batches = Math.min(3, n);
+
+        for (int idx = particleBatchIndex; idx < n; idx += batches) {
+            Vec3d p = positions[idx];
+            world.spawnParticles(player, effect, true, true,
+                    p.x, p.y, p.z,
+                    1, 0, 0, 0, 0.01);
+        }
+
+        particleBatchIndex = (particleBatchIndex + 1) % batches;
+    }
+
     public void spawnParticles(Connection connection) {
         BlockPos pos = connection.getPos();
 
@@ -72,20 +94,14 @@ public class BlockHighlights {
             DustParticleEffect effect = dustParticleEffects.get(connection.getWeight());
 
             if (positions != null && effect != null) {
-                for (Vec3d pos3d : positions) {
-                    world.spawnParticles(player, effect, true, true,
-                            pos3d.x, pos3d.y, pos3d.z, 0, 0, 0, 0, 0.001);
-                }
+                spawnHighlightParticles(world, effect, player, positions);
             }
         }
 
         Vec3d[] xPositions = xParticlePositions.get(pos);
         if (xPositions != null) {
             DustParticleEffect effect = dustParticleEffects.get(connection.getWeight() + 2);
-            for (Vec3d pos3d : xPositions) {
-                world.spawnParticles(player, effect, true, true,
-                        pos3d.x, pos3d.y, pos3d.z, 0, 0, 0, 0, 0.001);
-            }
+            spawnHighlightParticles(world, effect, player, xPositions);
         }
     }
 

@@ -32,9 +32,12 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private static final Vec3i boxSize = new Vec3i(9, 2, 9);
 
     public static final long ENERGY_USED = 500;
+    private static final long ENERGY_PER_OPERATION = ENERGY_USED / Math.max(1, (boxSize.getX() * boxSize.getZ()) / 2);
 
     private static final int[] INPUT_SLOTS_ARRAY = {0, 1, 2};
     private static final int[] OUTPUT_SLOTS_ARRAY = {3, 4, 5, 6, 7, 8};
+
+    private static final List<BlockPos> BOX_POSITIONS = preCalculateBoxPositions();
 
     private final InventoryStorage outputInventory;
 
@@ -44,6 +47,18 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private final Queue<BlockPos> soilQueue = new LinkedList<>();
 
     private final Queue<BlockPos> toHarvestQueue = new LinkedList<>();
+
+    private static List<BlockPos> preCalculateBoxPositions() {
+        List<BlockPos> positions = new ArrayList<>();
+        for (int y = 0; y < boxSize.getY(); y++) {
+            for (int x = -boxSize.getX()/2; x < boxSize.getX()/2; x++) {
+                for (int z = -boxSize.getZ()/2; z < boxSize.getZ()/2; z++) {
+                    positions.add(new BlockPos(x, y + 2, z)); // Relative to harvester
+                }
+            }
+        }
+        return positions;
+    }
 
     public HarvesterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.HARVESTER_BLOCK_ENTITY, pos, state);
@@ -89,10 +104,11 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
             @Override
             public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-                if (dir == Direction.UP && slot == INPUT_SLOTS_ARRAY[slot])
-                    return true;
-                else return Arrays.stream(INPUT_SLOTS_ARRAY)
-                        .anyMatch(input -> slot != input);
+                if (dir == Direction.UP) {
+                    return Arrays.stream(INPUT_SLOTS_ARRAY).anyMatch(input -> slot == input);
+                } else {
+                    return Arrays.stream(OUTPUT_SLOTS_ARRAY).anyMatch(output -> slot == output);
+                }
             }
         };
     }
@@ -133,11 +149,8 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         }
 
         if (didWork) {
-            long boxArea = Math.max(1, ((long) boxSize.getX() * boxSize.getZ()) / 2);
-            long energyCost = ENERGY_USED / boxArea;
-
             energyStorage.amount = MathHelper.clamp(
-                    energyStorage.amount - energyCost,
+                    energyStorage.amount - ENERGY_PER_OPERATION,
                     0,
                     energyStorage.getCapacity());
 
@@ -146,13 +159,14 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     }
 
     private void scanArea(World world) {
-        for (BlockPos pos : getBlockPosInBox(box)) {
-            if (!isLoaded(pos)) continue;
+        for (BlockPos relativePos : BOX_POSITIONS) {
+            BlockPos worldPos = pos.add(relativePos);
+            if (!isLoaded(worldPos)) continue;
 
-            BlockState state = world.getBlockState(pos);
+            BlockState state = world.getBlockState(worldPos);
 
-            if (isGroundSuitable(state) && !world.isAir(pos)) {
-                soilPos.add(pos);
+            if (isGroundSuitable(state) && !world.isAir(worldPos)) {
+                soilPos.add(worldPos);
             }
         }
 
