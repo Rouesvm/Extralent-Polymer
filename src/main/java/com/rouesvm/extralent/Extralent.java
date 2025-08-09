@@ -6,10 +6,11 @@ import com.rouesvm.extralent.registries.data.DataComponentRegistry;
 import com.rouesvm.extralent.registries.item.ItemRegistry;
 import com.rouesvm.extralent.visual.ElementManager;
 import com.rouesvm.extralent.visual.HighlightManager;
+import com.rouesvm.extralent.visual.elements.BlockHighlights;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -58,6 +59,8 @@ public class Extralent implements ModInitializer {
 					entries.add(ItemRegistry.APPLE_JAM);
 					entries.add(ItemRegistry.APPLE_JAM_SANDWICH);
 				}).build());
+
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> BlockHighlights.shutdownThread());
 	}
 
 	public static Identifier of(String name) {
