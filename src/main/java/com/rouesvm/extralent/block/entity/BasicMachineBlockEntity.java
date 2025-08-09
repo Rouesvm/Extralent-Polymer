@@ -3,7 +3,7 @@ package com.rouesvm.extralent.block.entity;
 import com.rouesvm.extralent.block.TickableBlockEntity;
 import com.rouesvm.extralent.item.custom.info.InfoData;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
-import com.rouesvm.extralent.block.entity.text.ProgressBarText;
+import com.rouesvm.extralent.visual.text.ProgressBarText;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
