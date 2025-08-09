@@ -26,7 +26,8 @@ public class BlockHighlight {
     private final BlockPos[] corners;
 
     private final ServerWorld world;
-    private final ServerPlayerEntity player;
+
+    private ServerPlayerEntity player;
 
     private BlockHighlight(@NotNull ServerWorld world, @NotNull ServerPlayerEntity player,
                            @NotNull BlockPos position, @Nullable Direction side,
@@ -36,6 +37,16 @@ public class BlockHighlight {
 
         this.world = world;
         this.player = player;
+
+        this.corners = new BlockPos[] {
+                position.add(0, 0, 0), position.add(1, 0, 0), position.add(0, 0, 1), position.add(1, 0, 1),
+                position.add(0, 1, 0), position.add(1, 1, 0), position.add(0, 1, 1), position.add(1, 1, 1)
+        };
+    }
+
+    private BlockHighlight(@NotNull ServerWorld world, @NotNull BlockPos position, @NotNull Vector3f color) {
+        this.particleType = new DustParticleEffect(ColorHelper.fromFloats(0, color.x, color.y, color.z), 0.725F);
+        this.world = world;
 
         this.corners = new BlockPos[] {
                 position.add(0, 0, 0), position.add(1, 0, 0), position.add(0, 0, 1), position.add(1, 0, 1),
@@ -65,11 +76,19 @@ public class BlockHighlight {
             double y = start.getY() + i * dy;
             double z = start.getZ() + i * dz;
 
-            world.spawnParticles(player, particleType, true, true,
-                    x, y, z,
-                    0,
-                    0, 0, 0,
-                    0.001);
+            if (player == null) {
+                world.spawnParticles(particleType, true, true,
+                        x, y, z,
+                        0,
+                        0, 0, 0,
+                        0.001);
+            } else {
+                world.spawnParticles(player, particleType, true, true,
+                        x, y, z,
+                        0,
+                        0, 0, 0,
+                        0.001);
+            }
         }
     }
 
@@ -95,5 +114,9 @@ public class BlockHighlight {
 
     public static BlockHighlight createHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position) {
         return new BlockHighlight(world, player, position, null, CONNECTED_BLOCK_COLOR);
+    }
+
+    public static BlockHighlight createHighlight(ServerWorld world, BlockPos position) {
+        return new BlockHighlight(world, position, CONNECTED_BLOCK_COLOR);
     }
 }

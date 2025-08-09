@@ -1,5 +1,6 @@
-package com.rouesvm.extralent.item.custom.data;
+package com.rouesvm.extralent.item.custom.info;
 
+import com.rouesvm.extralent.item.custom.data.BasicData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;

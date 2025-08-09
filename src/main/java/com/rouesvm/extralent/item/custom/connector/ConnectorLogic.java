@@ -3,7 +3,6 @@ package com.rouesvm.extralent.item.custom.connector;
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
 import com.rouesvm.extralent.block.transport.entity.PipeState;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
-import com.rouesvm.extralent.item.custom.data.ConnectorData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;

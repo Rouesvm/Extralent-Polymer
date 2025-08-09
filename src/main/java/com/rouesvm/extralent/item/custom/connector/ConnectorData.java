@@ -1,6 +1,7 @@
-package com.rouesvm.extralent.item.custom.data;
+package com.rouesvm.extralent.item.custom.connector;
 
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
+import com.rouesvm.extralent.item.custom.data.BasicData;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;

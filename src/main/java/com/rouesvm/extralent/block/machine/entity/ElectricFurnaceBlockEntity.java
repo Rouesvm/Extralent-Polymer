@@ -96,14 +96,18 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
         boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
 
-        if (is_burning && (progress < (TIME_TO_BURN_IN_SECONDS * 20))) {
+        if (is_burning) {
             if (!activated) world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, true));
-            progress++;
-        }
 
-        if (progress == (TIME_TO_BURN_IN_SECONDS * 20) && canOutputItem()) {
-            this.energyStorage.amount = MathHelper.clamp(this.energyStorage.amount - energyUsed, 0, this.energyStorage.capacity);
-            progress = 0;
+            if (progress < (TIME_TO_BURN_IN_SECONDS * 20)) {
+                progress++;
+            } else if (canOutputItem() && isValid()) {
+                energyStorage.amount = MathHelper.clamp(energyStorage.amount - energyUsed, 0, energyStorage.capacity);
+                progress = 0;
+                is_burning = false;
+                current_recipe = null;
+                world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, false));
+            }
         } else if (progress == 0) {
             if (activated) world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, false));
             isValid();
@@ -136,18 +140,20 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         return Optional.empty();
     }
 
-    private void isValid() {
+    private boolean isValid() {
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
 
         if (!inputStack.isEmpty()) {
             Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
-            if (stackRecipe.isEmpty()) return;
+            if (stackRecipe.isEmpty()) return false;
 
             if (canInsert(getOutputStack(stackRecipe.get(), inputStack))) {
                 current_recipe = stackRecipe.get();
                 is_burning = true;
+                return true;
             }
         }
+        return false;
     }
 
     private boolean canInsert(ItemStack recipeOutput) {

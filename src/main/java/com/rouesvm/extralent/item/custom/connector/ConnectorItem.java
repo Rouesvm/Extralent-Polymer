@@ -1,11 +1,9 @@
 package com.rouesvm.extralent.item.custom.connector;
 
 import com.rouesvm.extralent.block.transport.entity.PipeBlockEntity;
-import com.rouesvm.extralent.block.transport.entity.PipeState;
 import com.rouesvm.extralent.item.custom.BasicEnergyItem;
 import com.rouesvm.extralent.item.custom.data.Activated;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
-import com.rouesvm.extralent.item.custom.data.ConnectorData;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -13,7 +11,6 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -30,7 +27,6 @@ import xyz.nucleoid.packettweaker.PacketContext;
 import java.util.List;
 
 import static com.rouesvm.extralent.Extralent.HIGHLIGHT_MANAGER;
-import static com.rouesvm.extralent.item.custom.connector.ConnectorLogic.handlePipeBlockInteraction;
 import static com.rouesvm.extralent.item.custom.connector.ConnectorLogic.onConnectionChanged;
 
 public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem {

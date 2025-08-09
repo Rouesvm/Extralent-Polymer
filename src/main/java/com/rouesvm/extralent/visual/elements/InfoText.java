@@ -13,7 +13,9 @@ import org.joml.Vector3f;
 public class InfoText extends ElementHolder {
     private int timer;
 
+    private BlockHighlight highlight;
     private final BasicMachineBlockEntity machineBlockEntity;
+
     private final TextDisplayElement display;
     private boolean destroy;
 
@@ -30,15 +32,17 @@ public class InfoText extends ElementHolder {
         this.display.setOverridePos(pos);
         this.display.setTeleportDuration(2);
         this.addElement(display);
+
+        this.highlight = BlockHighlight.createHighlight((ServerWorld) machineBlockEntity.getWorld(), machineBlockEntity.getPos());
+        this.destroy = false;
     }
 
     @Override
     protected void onTick() {
-        super.onTick();
-        if (this.machineBlockEntity.isRemoved())
-            this.destroy = true;
-        if (this.destroy)
-            this.timer = 0;
+        this.highlight.tick();
+
+        if (this.machineBlockEntity.isRemoved()) this.destroy = true;
+        if (this.destroy && this.timer > 10) this.timer = 6;
 
         if (this.timer == 199) {
             this.display.setScale(new Vector3f(0.5f));
@@ -46,25 +50,35 @@ public class InfoText extends ElementHolder {
             this.display.startInterpolation();
         }
 
-        if (this.timer-- == 0) {
-            this.destroy();
-        } else if (this.timer == 5) {
-            this.display.setScale(new Vector3f(0));
-            this.display.setInterpolationDuration(5);
-            this.display.startInterpolation();
+        System.out.println(this.timer);
+
+        if (this.destroy || this.timer > 150) {
+            this.timer--;
         }
 
+        if (this.destroy) {
+            if (this.timer == 5) {
+                this.display.setScale(new Vector3f(0));
+                this.display.setInterpolationDuration(5);
+                this.display.startInterpolation();
+            }
+        }
+
+        if (this.timer <= 0) this.destroy();
+
         this.display.setText(machineBlockEntity.infoOnClicked());
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        this.highlight = null;
     }
 
     public static InfoText createText(Vec3d pos, BasicMachineBlockEntity basicPoweredEntity, ServerWorld world) {
         var model = new InfoText(basicPoweredEntity, pos);
         ChunkAttachment.ofTicking(model, world, pos);
         return model;
-    }
-
-    public void setTimer(int timer) {
-        this.timer = timer;
     }
 
     public void setDestroy(boolean destroy) {

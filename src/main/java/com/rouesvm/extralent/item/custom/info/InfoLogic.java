@@ -3,7 +3,6 @@ package com.rouesvm.extralent.item.custom.info;
 import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.item.custom.data.Activated;
 import com.rouesvm.extralent.item.custom.data.BasicData;
-import com.rouesvm.extralent.item.custom.data.InfoData;
 import com.rouesvm.extralent.visual.elements.InfoText;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -26,7 +25,7 @@ public class InfoLogic {
         if (!Activated.showVisual(stack)) return false;
 
         BlockPos pos = InfoData.getBlockPos(stack);
-        if (pos == null || !entity.getBlockPos().isWithinDistance(pos, 5)) {
+        if (pos == null || !entity.getBlockPos().isWithinDistance(pos, 10)) {
             removeVisuals(stack);
             return false;
         }
@@ -47,10 +46,7 @@ public class InfoLogic {
 
     public static boolean removeVisuals(@NotNull ItemStack stack) {
         UUID uuid = BasicData.getUuid(stack);
-
-        if (ELEMENT_MANAGER.getElement(uuid) != null) {
-            ELEMENT_MANAGER.removeElement(uuid);
-        }
+        ELEMENT_MANAGER.removeElement(uuid);
 
         if (Activated.showVisual(stack)) {
             Activated.setVisual(stack, false);
@@ -64,7 +60,7 @@ public class InfoLogic {
         UUID uuid = BasicData.getUuid(stack);
         Vec3d displayPos = pos.toCenterPos().offset(face, 1).add(0, 0.275, 0);
 
-        if (ELEMENT_MANAGER.getElement(uuid) != null) ELEMENT_MANAGER.removeElement(uuid);
+        ELEMENT_MANAGER.removeElement(uuid);
         ELEMENT_MANAGER.createElement(uuid, InfoText.createText(displayPos, machine, world));
     }
 

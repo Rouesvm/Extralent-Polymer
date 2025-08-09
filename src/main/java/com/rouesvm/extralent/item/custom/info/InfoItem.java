@@ -4,7 +4,6 @@ import com.rouesvm.extralent.block.entity.BasicMachineBlockEntity;
 import com.rouesvm.extralent.item.DoubleTexturedItem;
 import com.rouesvm.extralent.item.custom.connector.ConnectorItem;
 import com.rouesvm.extralent.item.custom.data.Activated;
-import com.rouesvm.extralent.item.custom.data.InfoData;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -34,12 +33,6 @@ public class InfoItem extends DoubleTexturedItem {
             if (!player.isHolding(stack.getItem())) return;
 
             if (!InfoLogic.canTick(stack, entity)) return;
-
-            BlockPos pos = InfoData.getBlockPos(stack);
-
-            if (world.getTime() % 60 == 0)
-                HIGHLIGHT_MANAGER.clearAllHighlights(pos);
-            else HIGHLIGHT_MANAGER.tickHighlights(pos);
 
             if (InfoData.getDisplay(stack) == InfoData.DISPLAY.UI) {
                 InfoLogic.showUIMessage(world, player, stack);
@@ -82,12 +75,12 @@ public class InfoItem extends DoubleTexturedItem {
 
             if (blockEntity instanceof BasicMachineBlockEntity machine) {
                 ConnectorItem.playSoundConnection(context.getPlayer(), 2F);
-                HIGHLIGHT_MANAGER.createSingularHighlight(world, (ServerPlayerEntity) context.getPlayer(), context.getBlockPos());
-
                 Activated.setVisual(stack, true);
 
+                InfoData.setBlockPos(stack, machine.getPos());
+
                 if (InfoData.getDisplay(stack) != InfoData.DISPLAY.FLOATING) {
-                    if (!InfoData.setBlockPos(stack, machine.getPos())) InfoLogic.setContent(stack, world);
+                    InfoLogic.setContent(stack, world);
                     return ActionResult.PASS;
                 }
 
