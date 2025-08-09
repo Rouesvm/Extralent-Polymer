@@ -5,12 +5,16 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static com.rouesvm.extralent.visual.elements.BlockHighlights.calculateEdgeParticles;
 
 public class BlockHighlight {
     public static final Vector3f CONNECTED_BLOCK_COLOR = new Vector3f(0.25F, 1F, 0.25F);
@@ -21,73 +25,43 @@ public class BlockHighlight {
             {4, 5}, {4, 6}, {5, 7}, {6, 7}
     };
 
-    private final DustParticleEffect particleType;
-
-    private final BlockPos[] corners;
-
+    private final ServerPlayerEntity player;
     private final ServerWorld world;
 
-    private ServerPlayerEntity player;
+    private final DustParticleEffect particleType;
+    private final Map<Integer, Vec3d[]> edgeParticlePositions = new ConcurrentHashMap<>();
 
-    private BlockHighlight(@NotNull ServerWorld world, @NotNull ServerPlayerEntity player,
-                           @NotNull BlockPos position, @Nullable Direction side,
-                           @NotNull Vector3f color
-    ) {
+    private BlockHighlight(@NotNull ServerWorld world, @Nullable ServerPlayerEntity player, @NotNull BlockPos position, @NotNull Vector3f color) {
         this.particleType = new DustParticleEffect(ColorHelper.fromFloats(0, color.x, color.y, color.z), 0.725F);
 
         this.world = world;
         this.player = player;
 
-        this.corners = new BlockPos[] {
+        BlockPos[] corners = new BlockPos[] {
                 position.add(0, 0, 0), position.add(1, 0, 0), position.add(0, 0, 1), position.add(1, 0, 1),
                 position.add(0, 1, 0), position.add(1, 1, 0), position.add(0, 1, 1), position.add(1, 1, 1)
         };
+
+        for (int edgeIndex = 0; edgeIndex < BLOCK_EDGES.length; edgeIndex++) {
+            int[] edge = BLOCK_EDGES[edgeIndex];
+            Vec3d start = Vec3d.of(corners[edge[0]]);
+            Vec3d end = Vec3d.of(corners[edge[1]]);
+            this.edgeParticlePositions.put(edgeIndex, calculateEdgeParticles(start, end));
+        }
     }
 
-    private BlockHighlight(@NotNull ServerWorld world, @NotNull BlockPos position, @NotNull Vector3f color) {
-        this.particleType = new DustParticleEffect(ColorHelper.fromFloats(0, color.x, color.y, color.z), 0.725F);
-        this.world = world;
+    public void tick() {
+        if (this.world != null && !this.world.isClient) {
+            int randomEdge = ThreadLocalRandom.current().nextInt(BLOCK_EDGES.length);
+            Vec3d[] positions = edgeParticlePositions.get(randomEdge);
 
-        this.corners = new BlockPos[] {
-                position.add(0, 0, 0), position.add(1, 0, 0), position.add(0, 0, 1), position.add(1, 0, 1),
-                position.add(0, 1, 0), position.add(1, 1, 0), position.add(0, 1, 1), position.add(1, 1, 1)
-        };
-    }
-
-    public void spawnEdgeParticles() {
-        int randomEdge = ThreadLocalRandom.current().nextInt(BLOCK_EDGES.length);
-
-        int[] assignedPos = BLOCK_EDGES[randomEdge];
-        BlockPos start = corners[assignedPos[0]];
-        BlockPos end = corners[assignedPos[1]];
-
-        spawnParticlesAlongEdge(start, end);
-    }
-
-    public void spawnParticlesAlongEdge(BlockPos start, BlockPos end) {
-        double steps = 4.5;
-
-        double dx = (end.getX() - start.getX()) / steps;
-        double dy = (end.getY() - start.getY()) / steps;
-        double dz = (end.getZ() - start.getZ()) / steps;
-
-        for (int i = 0; i <= steps; i++) {
-            double x = start.getX() + i * dx;
-            double y = start.getY() + i * dy;
-            double z = start.getZ() + i * dz;
-
-            if (player == null) {
-                world.spawnParticles(particleType, true, true,
-                        x, y, z,
-                        0,
-                        0, 0, 0,
-                        0.001);
-            } else {
-                world.spawnParticles(player, particleType, true, true,
-                        x, y, z,
-                        0,
-                        0, 0, 0,
-                        0.001);
+            if (positions != null && particleType != null) {
+                for (Vec3d pos3d : positions) {
+                    if (player == null) world.spawnParticles(particleType, true, true,
+                            pos3d.x, pos3d.y, pos3d.z, 0, 0, 0, 0, 0.001);
+                    else world.spawnParticles(player, particleType, true, true,
+                            pos3d.x, pos3d.y, pos3d.z, 0, 0, 0, 0, 0.001);
+                }
             }
         }
     }
@@ -108,15 +82,11 @@ public class BlockHighlight {
         return new Vector3f(newR, newG, newB);
     }
 
-    public void tick() {
-        if (this.world != null && !this.world.isClient) spawnEdgeParticles();
-    }
-
     public static BlockHighlight createHighlight(ServerWorld world, ServerPlayerEntity player, BlockPos position) {
-        return new BlockHighlight(world, player, position, null, CONNECTED_BLOCK_COLOR);
+        return new BlockHighlight(world, player, position, CONNECTED_BLOCK_COLOR);
     }
 
     public static BlockHighlight createHighlight(ServerWorld world, BlockPos position) {
-        return new BlockHighlight(world, position, CONNECTED_BLOCK_COLOR);
+        return createHighlight(world, null, position);
     }
 }

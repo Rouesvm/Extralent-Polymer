@@ -1,4 +1,4 @@
-package com.rouesvm.extralent.block.entity.text;
+package com.rouesvm.extralent.visual.text;
 
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;

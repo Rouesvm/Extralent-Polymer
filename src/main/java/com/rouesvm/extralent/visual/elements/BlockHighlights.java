@@ -11,26 +11,45 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static com.rouesvm.extralent.visual.elements.BlockHighlight.*;
 
 public class BlockHighlights {
-    private final static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    private final static ExecutorService executor = ForkJoinPool.commonPool();
 
     public static final Vector3f OUTPUT_BLOCK_COLOR = new Vector3f(1F, 0.5F, 0F);
     public static final Vector3f INPUT_BLOCK_COLOR = new Vector3f(0F, 0.75F, 1F);
 
+    private static final float PARTICLE_SIZE = 0.725F;
+    private static final double PARTICLE_STEPS = 4.5;
+    private static final double X_STEP = 0.25;
+    private static final double X_MIN = -0.4, X_MAX = 0.4;
+
+    private static final Map<Integer, DustParticleEffect> dustParticleEffects = new ConcurrentHashMap<>();
+    static {
+        Vector3f desaturatedOutputColor = desaturateColor(OUTPUT_BLOCK_COLOR, 0.8F);
+        Vector3f desaturatedInputColor = desaturateColor(INPUT_BLOCK_COLOR, 0.8F);
+
+        dustParticleEffects.put(0, new DustParticleEffect(
+                ColorHelper.fromFloats(0, OUTPUT_BLOCK_COLOR.x, OUTPUT_BLOCK_COLOR.y, OUTPUT_BLOCK_COLOR.z),
+                PARTICLE_SIZE));
+        dustParticleEffects.put(1, new DustParticleEffect(
+                ColorHelper.fromFloats(0, INPUT_BLOCK_COLOR.x, INPUT_BLOCK_COLOR.y, INPUT_BLOCK_COLOR.z),
+                PARTICLE_SIZE));
+        dustParticleEffects.put(2, new DustParticleEffect(
+                ColorHelper.fromFloats(0, desaturatedOutputColor.x, desaturatedOutputColor.y, desaturatedOutputColor.z),
+                PARTICLE_SIZE));
+        dustParticleEffects.put(3, new DustParticleEffect(
+                ColorHelper.fromFloats(0, desaturatedInputColor.x, desaturatedInputColor.y, desaturatedInputColor.z),
+                PARTICLE_SIZE));
+    }
+
     public final Set<Connection> connections = ConcurrentHashMap.newKeySet();
 
-    public Map<BlockPos, DustParticleEffect> dustParticleEffects = new ConcurrentHashMap<>();
-    public Map<BlockPos, DustParticleEffect> dustParticleEffectXs = new ConcurrentHashMap<>();
-    public Map<BlockPos, BlockPos[]> corners = new ConcurrentHashMap<>();
+    private final Map<BlockPos, Map<Integer, Vec3d[]>> edgeParticlePositions = new ConcurrentHashMap<>();
+    private final Map<BlockPos, Vec3d[]> xParticlePositions = new ConcurrentHashMap<>();
 
     private final ServerWorld world;
     private final ServerPlayerEntity player;
@@ -45,116 +64,142 @@ public class BlockHighlights {
 
     public void spawnParticles(Connection connection) {
         BlockPos pos = connection.getPos();
-        BlockPos[] blockCorners = corners.get(pos);
-        if (blockCorners == null) return;
 
-        int randomEdge = ThreadLocalRandom.current().nextInt(BLOCK_EDGES.length);
-        int[] assignedPos = BLOCK_EDGES[randomEdge];
+        Map<Integer, Vec3d[]> edges = edgeParticlePositions.get(pos);
+        if (edges != null) {
+            int randomEdge = ThreadLocalRandom.current().nextInt(BLOCK_EDGES.length);
+            Vec3d[] positions = edges.get(randomEdge);
+            DustParticleEffect effect = dustParticleEffects.get(connection.getWeight());
 
-        BlockPos start = blockCorners[assignedPos[0]];
-        BlockPos end = blockCorners[assignedPos[1]];
-
-        DustParticleEffect edgeParticle = dustParticleEffects.get(pos);
-        if (edgeParticle != null) {
-            spawnParticlesAlongEdge(edgeParticle, start, end);
+            if (positions != null && effect != null) {
+                for (Vec3d pos3d : positions) {
+                    world.spawnParticles(player, effect, true, true,
+                            pos3d.x, pos3d.y, pos3d.z, 0, 0, 0, 0, 0.001);
+                }
+            }
         }
 
-        DustParticleEffect sideParticle = dustParticleEffectXs.get(pos);
-        if (sideParticle != null) {
-            drawXOnBlockSide(pos.toCenterPos(), connection.getSide(), sideParticle);
-        }
-    }
-
-    public void spawnParticlesAlongEdge(DustParticleEffect dustParticleEffect, BlockPos start, BlockPos end) {
-        double steps = 4.5;
-        double dx = (end.getX() - start.getX()) / steps;
-        double dy = (end.getY() - start.getY()) / steps;
-        double dz = (end.getZ() - start.getZ()) / steps;
-
-        for (int i = 0; i <= steps; i++) {
-            double x = start.getX() + i * dx;
-            double y = start.getY() + i * dy;
-            double z = start.getZ() + i * dz;
-            world.spawnParticles(player, dustParticleEffect, true,true,
-                    x, y, z,
-                    0, 0, 0, 0,
-                    0.001);
+        Vec3d[] xPositions = xParticlePositions.get(pos);
+        if (xPositions != null) {
+            DustParticleEffect effect = dustParticleEffects.get(connection.getWeight() + 2);
+            for (Vec3d pos3d : xPositions) {
+                world.spawnParticles(player, effect, true, true,
+                        pos3d.x, pos3d.y, pos3d.z, 0, 0, 0, 0, 0.001);
+            }
         }
     }
 
-    public void drawXOnBlockSide(Vec3d sidePos, Direction blockSide, DustParticleEffect sideParticleType) {
-        if (blockSide == null) return;
-
-        double step = 0.25;
-        double min = -0.4, max = 0.4;
-
-        for (double t = 0; t <= 1; t += step) {
-            double offset1 = min + (max - min) * t;
-            spawnParticleOnSide(sidePos, blockSide, world, player, sideParticleType, offset1, offset1);
-            double offset2 = max - (max - min) * t;
-            spawnParticleOnSide(sidePos, blockSide, world, player, sideParticleType, offset1, offset2);
-        }
+    public void removeConnection(Connection connection) {
+        BlockPos position = connection.getPos();
+        connections.remove(connection);
+        edgeParticlePositions.remove(position);
+        xParticlePositions.remove(position);
     }
 
-    private void spawnParticleOnSide(Vec3d sidePos, Direction blockSide, ServerWorld world, ServerPlayerEntity player, DustParticleEffect particleType, double offsetA, double offsetB) {
-        double x = sidePos.getX();
-        double y = sidePos.getY();
-        double z = sidePos.getZ();
+    public void addConnection(Connection connection) {
+        connections.add(connection);
 
-        switch (blockSide) {
+        BlockPos position = connection.getPos();
+        Vec3d[] worldCornerPositions = calculateCorners(position, Map.of(position, new BlockPos[]{
+                position.add(0, 0, 0), position.add(1, 0, 0), position.add(0, 0, 1), position.add(1, 0, 1),
+                position.add(0, 1, 0), position.add(1, 1, 0), position.add(0, 1, 1), position.add(1, 1, 1)
+        }));
+
+        edgeParticlePositions.put(position, calculateAllEdgeParticles(worldCornerPositions));
+        xParticlePositions.put(position, calculateXParticles(position.toCenterPos(), connection.getSide()));
+    }
+
+    private static Vec3d[] calculateCorners(BlockPos position, Map<BlockPos, BlockPos[]> blockPos) {
+        Vec3d[] worldCornerPositions = new Vec3d[8];
+        for (int i = 0; i < 8; i++) {
+            BlockPos corner = blockPos.get(position)[i];
+            worldCornerPositions[i] = new Vec3d(corner.getX(), corner.getY(), corner.getZ());
+        }
+        return worldCornerPositions;
+    }
+
+    private static Map<Integer, Vec3d[]> calculateAllEdgeParticles(Vec3d[] corners) {
+        Map<Integer, Vec3d[]> edgePositions = new HashMap<>();
+
+        for (int edgeIndex = 0; edgeIndex < BLOCK_EDGES.length; edgeIndex++) {
+            int[] edge = BLOCK_EDGES[edgeIndex];
+            Vec3d start = corners[edge[0]];
+            Vec3d end = corners[edge[1]];
+            edgePositions.put(edgeIndex, calculateEdgeParticles(start, end));
+        }
+
+        return edgePositions;
+    }
+
+    public static Vec3d[] calculateXParticles(Vec3d center, Direction side) {
+        List<Vec3d> positions = new ArrayList<>();
+        for (double t = 0; t <= 1; t += X_STEP) {
+            double offset1 = X_MIN + (X_MAX - X_MIN) * t;
+            double offset2 = X_MAX - (X_MAX - X_MIN) * t;
+
+            positions.add(calculateSidePosition(center, side, offset1, offset1));
+            positions.add(calculateSidePosition(center, side, offset1, offset2));
+        }
+
+        return positions.toArray(new Vec3d[0]);
+    }
+
+    public static Vec3d[] calculateEdgeParticles(Vec3d start, Vec3d end) {
+        Vec3d[] positions = new Vec3d[(int)PARTICLE_STEPS + 1];
+
+        double dx = (end.x - start.x) / PARTICLE_STEPS;
+        double dy = (end.y - start.y) / PARTICLE_STEPS;
+        double dz = (end.z - start.z) / PARTICLE_STEPS;
+
+        for (int i = 0; i <= PARTICLE_STEPS; i++) {
+            positions[i] = new Vec3d(
+                    start.x + i * dx,
+                    start.y + i * dy,
+                    start.z + i * dz
+            );
+        }
+        return positions;
+    }
+
+    public static Vec3d calculateSidePosition(Vec3d center, Direction side, double offsetA, double offsetB) {
+        double x = center.getX();
+        double y = center.getY();
+        double z = center.getZ();
+
+        switch (side) {
             case UP:
             case DOWN:
                 x += offsetA;
                 z += offsetB;
-                y += blockSide == Direction.UP ? 0.5 : -0.5;
+                y += side == Direction.UP ? 0.5 : -0.5;
                 break;
             case NORTH:
             case SOUTH:
                 x += offsetA;
                 y += offsetB;
-                z += blockSide == Direction.SOUTH ? 0.5 : -0.5;
+                z += side == Direction.SOUTH ? 0.5 : -0.5;
                 break;
             case EAST:
             case WEST:
                 z += offsetA;
                 y += offsetB;
-                x += blockSide == Direction.EAST ? 0.5 : -0.5;
+                x += side == Direction.EAST ? 0.5 : -0.5;
                 break;
             case null:
                 break;
         }
 
-        world.spawnParticles(player, particleType, true, true, x, y, z, 0, 0, 0, 0, 0.001);
-    }
-
-    public void removeConnection(Connection connection) {
-        BlockPos position = connection.getPos();
-        corners.remove(position);
-        dustParticleEffects.remove(position);
-        dustParticleEffectXs.remove(position);
-        connections.remove(connection);
-    }
-
-    public void addConnection(Connection connection) {
-        connections.add(connection);
-        BlockPos position = connection.getPos();
-
-        Vector3f color = connection.getWeight() == 0 ? OUTPUT_BLOCK_COLOR : INPUT_BLOCK_COLOR;
-        DustParticleEffect dustParticleEffect = new DustParticleEffect(ColorHelper.fromFloats(0, color.x, color.y, color.z), 0.725F);
-        dustParticleEffects.put(position, dustParticleEffect);
-
-        Vector3f desaturatedColor = desaturateColor(color, 0.8F);
-        DustParticleEffect dustParticleEffectX = new DustParticleEffect(ColorHelper.fromFloats(0, desaturatedColor.x, desaturatedColor.y, desaturatedColor.z), 0.725F);
-        dustParticleEffectXs.put(position, dustParticleEffectX);
-
-        corners.put(position, new BlockPos[]{
-                position.add(0, 0, 0), position.add(1, 0, 0), position.add(0, 0, 1), position.add(1, 0, 1),
-                position.add(0, 1, 0), position.add(1, 1, 0), position.add(0, 1, 1), position.add(1, 1, 1)
-        });
+        return new Vec3d(x, y, z);
     }
 
     public void tick() {
         if (!this.emit) return;
-        for (Connection connection : connections) executor.submit(() -> spawnParticles(connection));
+        for (Connection connection : connections) {
+            executor.submit(() -> spawnParticles(connection));
+        }
+    }
+
+    public static void shutdownThread() {
+        executor.shutdown();
     }
 }
