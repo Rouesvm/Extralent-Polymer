@@ -50,8 +50,6 @@ public class InfoText extends ElementHolder {
             this.display.startInterpolation();
         }
 
-        System.out.println(this.timer);
-
         if (this.destroy || this.timer > 150) {
             this.timer--;
         }
