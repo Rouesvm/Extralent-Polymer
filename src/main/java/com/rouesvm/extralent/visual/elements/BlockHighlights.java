@@ -74,8 +74,8 @@ public class BlockHighlights {
 
         int batches = Math.min(3, n);
 
-        for (int idx = particleBatchIndex; idx < n; idx += batches) {
-            Vec3d p = positions[idx];
+        for (int index = particleBatchIndex; index < n; index += batches) {
+            Vec3d p = positions[index];
             world.spawnParticles(player, effect, true, true,
                     p.x, p.y, p.z,
                     1, 0, 0, 0, 0.01);
