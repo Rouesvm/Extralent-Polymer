@@ -31,7 +31,6 @@ public class ProgressBarText {
     private static final int MAX_PERCENTAGE_SIZE = 40;
 
     private static final Text[] CACHE = new Text[MAX_PERCENTAGE_SIZE + 1];
-
     static {
         for (int i = 0; i <= MAX_PERCENTAGE_SIZE; i++) {
             CACHE[i] = Text.literal(getEnergyUnicode(i))
