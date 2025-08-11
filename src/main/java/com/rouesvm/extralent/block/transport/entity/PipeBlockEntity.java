@@ -9,6 +9,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -26,25 +27,28 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         super(type, pos, state);
     }
 
+    private int tick = 0;
+
+    @Override
+    public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
+        if (this.getWorld() == null || this.getWorld().isClient) return;
+        if (!canTick()) return;
+        if (tick++ % getTickDelay() == 0) return;
+        onUpdate();
+    }
+
     public void onUpdate() {
         if (connected_to.isEmpty()) return;
-
-        if (queued_connections.isEmpty()) {
-            queued_connections = new ArrayList<>(connected_to);
-        }
+        if (queued_connections.isEmpty()) queued_connections.addAll(connected_to);
 
         Set<Connection> posToRemove = new HashSet<>();
         Iterator<Connection> iterator = queued_connections.iterator();
 
-        while (iterator.hasNext()) {
+        if (iterator.hasNext()) {
             Connection connection = iterator.next();
 
             if (blockExists(connection.getPos())) {
-                if (blockLogic(connection)) {
-                    iterator.remove();
-                    queued_connections.add(connection);
-                    break;
-                }
+                if (blockLogic(connection)) iterator.remove();
             } else posToRemove.add(connection);
         }
 
@@ -69,14 +73,6 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         }
     }
 
-    public void removeConnections() {
-        if (world == null || connected_from.isEmpty()) return;
-        List<Connection> copy = new ArrayList<>(connected_from);
-        for (Connection connections : copy) {
-            removeConnected(connections);
-        }
-    }
-
     public void putConnected(Connection connection) {
         if (world == null || world.isClient) return;
         if (connected_from.contains(connection)) return;
@@ -86,6 +82,15 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         connected_from.add(connection);
         markDirty();
     }
+
+    public void removeOtherConnections() {
+        if (world == null || connected_from.isEmpty()) return;
+        List<Connection> copy = new ArrayList<>(connected_from);
+        for (Connection connections : copy) {
+            removeConnected(connections);
+        }
+    }
+
     public boolean removeConnection(Connection connection) {
         if (connected_to.remove(connection)) {
             if (current_connections > 0) current_connections--;
@@ -131,12 +136,20 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         queued_connections = new ArrayList<>(connected_to);
     }
 
+    public int getTickDelay() {
+        return 5;
+    }
+
     public int getMaxDistance() {
         return 5;
     }
 
     public int getMaxConnections() {
         return 125;
+    }
+
+    public boolean canTick() {
+        return true;
     }
 
     @ApiStatus.OverrideOnly

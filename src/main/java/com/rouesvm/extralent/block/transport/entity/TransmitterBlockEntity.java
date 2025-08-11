@@ -22,14 +22,6 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
-        if (this.getWorld() == null || this.getWorld().isClient) return;
-        if (this.energyStorage.getCapacity() <= 0) return;
-
-        super.onUpdate();
-    }
-
-    @Override
     public boolean correctBlock(BlockPos blockPos) {
         EnergyStorage storage = EnergyStorage.SIDED.find(this.world, blockPos, null);
         return storage != null && storage.supportsInsertion();
@@ -50,6 +42,11 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean canTick() {
+        return this.energyStorage.getCapacity() > 0;
     }
 
     @Override

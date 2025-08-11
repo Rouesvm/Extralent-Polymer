@@ -45,12 +45,6 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
-        if (this.getWorld() == null || this.getWorld().isClient) return;
-        super.onUpdate();
-    }
-
-    @Override
     public boolean correctBlock(BlockPos blockPos) {
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, blockPos, null);
         return storage != null && storage.supportsInsertion();
