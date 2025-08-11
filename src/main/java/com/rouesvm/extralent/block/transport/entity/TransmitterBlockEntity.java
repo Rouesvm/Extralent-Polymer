@@ -11,6 +11,7 @@ import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class TransmitterBlockEntity extends PipeBlockEntity {
+
     public TransmitterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSMITTER_BLOCK_ENTITY, pos, state);
     }
@@ -24,7 +25,6 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (this.getWorld() == null || this.getWorld().isClient) return;
         if (this.energyStorage.getCapacity() <= 0) return;
-        if (this.getWorld().getTime() % 4 != 0) return;
 
         super.onUpdate();
     }

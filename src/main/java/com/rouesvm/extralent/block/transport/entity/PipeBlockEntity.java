@@ -17,24 +17,24 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     private boolean connected;
     private int current_connections = 0;
 
+    public final List<Connection> connected_from = new ArrayList<>(10);
+    public final List<Connection> connected_to = new ArrayList<>(10);
+
+    private List<Connection> queued_connections = new ArrayList<>(10);
+
     public PipeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
-    public final HashSet<Connection> connectedTo = new HashSet<>(10);
-    public final HashSet<Connection> blocks = new HashSet<>(10);
-
-    private LinkedHashSet<Connection> orderedConnections = new LinkedHashSet<>(10);
-
     public void onUpdate() {
-        if (blocks.isEmpty()) return;
+        if (connected_to.isEmpty()) return;
 
-        if (!orderedConnections.equals(blocks)) {
-            orderedConnections = new LinkedHashSet<>(blocks);
+        if (queued_connections.isEmpty()) {
+            queued_connections = new ArrayList<>(connected_to);
         }
 
         Set<Connection> posToRemove = new HashSet<>();
-        Iterator<Connection> iterator = orderedConnections.iterator();
+        Iterator<Connection> iterator = queued_connections.iterator();
 
         while (iterator.hasNext()) {
             Connection connection = iterator.next();
@@ -42,7 +42,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
             if (blockExists(connection.getPos())) {
                 if (blockLogic(connection)) {
                     iterator.remove();
-                    orderedConnections.add(connection);
+                    queued_connections.add(connection);
                     break;
                 }
             } else posToRemove.add(connection);
@@ -50,85 +50,85 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
 
         if (!posToRemove.isEmpty()) {
             current_connections -= posToRemove.size();
-            blocks.removeAll(posToRemove);
-            orderedConnections.removeAll(posToRemove);
+            connected_to.removeAll(posToRemove);
+            queued_connections.removeAll(posToRemove);
         }
     }
 
-    // To be removed from this block's connected from list.
-    public void removeConnection(Connection connection) {
-        if (connectedTo.contains(connection)) {
+    public void removeConnected(Connection connection) {
+        if (connected_from.contains(connection)) {
             PipeBlockEntity entity = (PipeBlockEntity) world.getBlockEntity(connection.getPos());
             if (entity != null) {
                 Connection newConnection = Connection.of(pos);
-                entity.removeBlock(newConnection);
+                entity.removeConnected(newConnection);
                 Extralent.HIGHLIGHT_MANAGER.removeHighlightFromMultiple(newConnection, connection.getPos());
             }
 
-            connectedTo.remove(connection);
+            connected_from.remove(connection);
             this.markDirty();
         }
     }
 
     public void removeConnections() {
-        if (world == null) return;
-        if (connectedTo == null) return;
-        if (connectedTo.isEmpty()) return;
-        for (Connection connection : connectedTo) removeConnection(connection);
-    }
-
-    // To be added from this block's connected from list.
-    public void putConnection(Connection connection) {
-        if (this.world == null || this.world.isClient) return;
-        if (connectedTo.contains(connection)) return;
-        if (!(world.getBlockEntity(connection.getPos()) instanceof PipeBlockEntity)) return;
-
-        if (correctBlock(connection.getPos())) {
-            connectedTo.add(connection);
-            this.markDirty();
+        if (world == null || connected_from.isEmpty()) return;
+        List<Connection> copy = new ArrayList<>(connected_from);
+        for (Connection connections : copy) {
+            removeConnected(connections);
         }
     }
 
-    // To be removed from this block's connected to list.
-    public boolean removeBlock(Connection connection) {
-        if (blocks.contains(connection)) {
-            if (current_connections > 0) current_connections -= 1;
-            blocks.remove(connection);
-            orderedConnections = new LinkedHashSet<>(blocks);
-            this.markDirty();
+    public void putConnected(Connection connection) {
+        if (world == null || world.isClient) return;
+        if (connected_from.contains(connection)) return;
+        if (!(getPipeAt(connection.getPos()) instanceof PipeBlockEntity)) return;
+        if (!correctBlock(connection.getPos())) return;
+
+        connected_from.add(connection);
+        markDirty();
+    }
+    public boolean removeConnection(Connection connection) {
+        if (connected_to.remove(connection)) {
+            if (current_connections > 0) current_connections--;
+            refreshOrderedConnections();
+            markDirty();
             return true;
         }
         return false;
     }
 
-    // To be added from this block's connected to list.
-    public PipeState putBlock(Connection connection) {
-        if (this.world == null || this.world.isClient) return PipeState.FAIL;
-        if (blocks.contains(connection)) return PipeState.IDENTICAL;
-        if (!blocks.contains(connection) && current_connections > getMaxConnections() - 1) return PipeState.OVERFLOW;
+    public PipeState putConnection(Connection connection) {
+        if (world == null || world.isClient) return PipeState.FAIL;
+        if (connected_to.contains(connection)) return PipeState.IDENTICAL;
+        if (current_connections >= getMaxConnections()) return PipeState.OVERFLOW;
 
-        if (getMaxDistance() == 0
-                || connection.getPos().isWithinDistance(this.pos, getMaxDistance())
-        ) {
-            if (correctBlock(connection.getPos())) {
-                putConnection(connection);
-                current_connections += 1;
-                blocks.add(connection);
-                orderedConnections = new LinkedHashSet<>(blocks);
-                this.markDirty();
-                return PipeState.SUCCESS;
-            } else return PipeState.TYPE_ERROR;
-        } else return PipeState.FAR;
+        if (!isWithinRange(connection.getPos())) return PipeState.FAR;
+        if (!correctBlock(connection.getPos())) return PipeState.TYPE_ERROR;
+
+        putConnected(connection);
+        current_connections++;
+        connected_to.add(connection);
+        refreshOrderedConnections();
+        markDirty();
+        return PipeState.SUCCESS;
     }
 
-    public boolean blockExists(BlockPos blockPos) {
-        if (this.world != null && !this.world.isClient) {
-            BlockEntity block = this.world.getBlockEntity(blockPos);
-            if (block != null && block.isRemoved())
-                return false;
-            return block != null;
-        }
-        return false;
+    public boolean blockExists(BlockPos pos) {
+        if (world == null || world.isClient) return false;
+        BlockEntity block = world.getBlockEntity(pos);
+        return block != null && !block.isRemoved();
+    }
+
+    private PipeBlockEntity getPipeAt(BlockPos pos) {
+        BlockEntity be = world.getBlockEntity(pos);
+        return (be instanceof PipeBlockEntity) ? (PipeBlockEntity) be : null;
+    }
+
+    private boolean isWithinRange(BlockPos pos) {
+        return getMaxDistance() == 0 || pos.isWithinDistance(this.pos, getMaxDistance());
+    }
+
+    private void refreshOrderedConnections() {
+        queued_connections = new ArrayList<>(connected_to);
     }
 
     public int getMaxDistance() {
@@ -152,21 +152,21 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     @Override
     protected void readData(ReadView data) {
         super.readData(data);
-        Connection.read(data, "connected", this.blocks);
-        Connection.read(data, "connected_to", this.connectedTo);
+        Connection.read(data, "connected", this.connected_to);
+        Connection.read(data, "connected_to", this.connected_from);
         current_connections = data.getInt("connections", 0);
     }
 
     @Override
     protected void writeData(WriteView data) {
         super.writeData(data);
-        Connection.write(data, "connected", this.blocks);
-        Connection.write(data, "connected_to", this.connectedTo);
+        Connection.write(data, "connected", this.connected_to);
+        Connection.write(data, "connected_to", this.connected_from);
         data.putInt("connections", current_connections);
     }
 
-    public Set<Connection> getBlocks() {
-        return blocks;
+    public List<Connection> getConnections() {
+        return connected_to;
     }
 
     public void setConnected(boolean connected) {

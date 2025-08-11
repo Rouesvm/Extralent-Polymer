@@ -23,7 +23,10 @@ public class Extralent implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		PolymerResourcePackUtils.addModAssets(MOD_ID);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(BlockHighlights::shutdownThread));
+
+        PolymerResourcePackUtils.addModAssets(MOD_ID);
 		PolymerResourcePackUtils.markAsRequired();
 
 		DataComponentRegistry.initialize();
@@ -59,8 +62,6 @@ public class Extralent implements ModInitializer {
 					entries.add(ItemRegistry.APPLE_JAM);
 					entries.add(ItemRegistry.APPLE_JAM_SANDWICH);
 				}).build());
-
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> BlockHighlights.shutdownThread());
 	}
 
 	public static Identifier of(String name) {

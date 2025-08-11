@@ -58,7 +58,7 @@ public class HighlightManager {
     }
 
     public void removeAllHighlightsFromMultiple(BlockPos pos) {
-        multipleHighlights.replace(pos.asLong(), null);
+        multipleHighlights.remove(pos.asLong());
     }
 
     public void tickHighlights(BlockPos uuid) {

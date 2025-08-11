@@ -11,6 +11,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -123,13 +124,15 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
         PipeBlockEntity currentEntity = data.getCurrentEntity(world);
         Connection connection = Connection.of(clickedPos, data.getWeight(), context.getSide());
 
-        if (currentEntity != null && currentEntity.isRemoved()) {
+        if ((currentEntity != null && currentEntity.isRemoved())) {
             ConnectorLogic.onConnectionChanged(data, world, player, false);
         }
 
         if (shouldPass(data.stack(), player, true)) {
             return ActionResult.PASS;
         }
+
+        if (HIGHLIGHT_MANAGER.getMultipleHighlights(clickedPos) == null) HIGHLIGHT_MANAGER.createMultipleHighlights(clickedPos, world, (ServerPlayerEntity) player);
 
         if (blockEntity instanceof PipeBlockEntity pipeEntity) {
             return ConnectorLogic.handlePipeBlockInteraction(data, world, player, pipeEntity, connection);

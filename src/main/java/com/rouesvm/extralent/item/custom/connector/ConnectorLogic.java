@@ -43,7 +43,7 @@ public class ConnectorLogic {
 
         onConnectionChanged(data, world, player, true);
 
-        pipeEntity.getBlocks().forEach(blockConnection ->
+        pipeEntity.getConnections().forEach(blockConnection ->
                 HIGHLIGHT_MANAGER.addHighlightToMultiple(blockConnection, data.getBlockPos()));
 
         return ActionResult.SUCCESS;
@@ -73,10 +73,10 @@ public class ConnectorLogic {
         PipeBlockEntity entity = data.getCurrentEntity(world);
         BlockPos base = data.getBlockPos();
 
-        boolean alreadyConnected = entity.getBlocks().contains(connection);
+        boolean alreadyConnected = entity.getConnections().contains(connection);
 
         if (player.isSneaking() && alreadyConnected) {
-            boolean removed = entity.removeBlock(connection);
+            boolean removed = entity.removeConnection(connection);
             if (removed) {
                 player.sendMessage(Text.translatable("info.viewer.unbound"), true);
                 ConnectorItem.playSound(player, -2f);
@@ -86,7 +86,7 @@ public class ConnectorLogic {
             return;
         }
 
-        PipeState result = entity.putBlock(connection);
+        PipeState result = entity.putConnection(connection);
         switch (result) {
             case SUCCESS -> {
                 ((ConnectorItem) data.stack().getItem()).decreaseEnergy(data.stack());
@@ -95,10 +95,10 @@ public class ConnectorLogic {
                 HIGHLIGHT_MANAGER.replaceHighlightToMultiple(connection, base);
             }
             case IDENTICAL -> {
-                boolean removed = entity.removeBlock(connection);
+                boolean removed = entity.removeConnection(connection);
                 if (removed && tryChangeWeight(data, player, world)) {
                     connection.setWeight(data.getWeight());
-                    entity.putBlock(connection);
+                    entity.putConnection(connection);
                     ConnectorItem.playSoundChanged(player, 3f);
                     HIGHLIGHT_MANAGER.replaceHighlightToMultiple(connection, base);
                 }

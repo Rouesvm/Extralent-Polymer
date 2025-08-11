@@ -19,12 +19,15 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.NbtReadView;
 import net.minecraft.storage.NbtWriteView;
 import net.minecraft.storage.ReadView;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ErrorReporter;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
@@ -41,7 +44,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
 
     @Override
     public long getEnergyCapacity(ItemStack stack) {
-        return 2_500;
+        return 2_000;
     }
 
     @Override
@@ -56,42 +59,53 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
 
     @Override
     public long getEnergyCost() {
-        return 24;
+        return 25;
     }
 
     @Override
     public void modifyClientTooltip(List<Text> tooltip, ItemStack stack, PacketContext context) {
-        addEnergyTooltip(tooltip, stack);
+        tooltip.add(Text.translatable("general.info.stored_energy")
+                .append(" ")
+                .append(String.valueOf(getStoredEnergy(stack)))
+                .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
     }
 
     @Override
     public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
         if (world != null && !world.isClient) {
             if (!(entity instanceof PlayerEntity player)) return;
-            if (shouldPass(stack, player, false)) {
+            if (!Activated.showVisual(stack)) return;
+            if (shouldPass(stack, player, true)) {
+                stack.remove(DataComponentRegistry.LAST_UPDATE_TYPE);
                 spawnEntity(stack, entity.getBlockPos(), player, world);
                 return;
             }
-            if (!Activated.showVisual(stack)) return;
-
-            deductEnergy(world, stack, 45);
+            deductEnergy(world, stack, 50);
         }
     }
 
     private void deductEnergy(World world, ItemStack stack, int intervalTicks) {
-        long lastUpdateTime = stack.getOrDefault(DataComponentRegistry.LAST_UPDATE_TYPE, -1L);
         long currentTime = world.getTime();
+        long lastUpdateTime = stack.getOrDefault(DataComponentRegistry.LAST_UPDATE_TYPE, -1L);
 
-        if (currentTime - lastUpdateTime >= intervalTicks) {
+        if (lastUpdateTime < 0) {
+            stack.set(DataComponentRegistry.LAST_UPDATE_TYPE, currentTime);
+            return;
+        }
+
+        long elapsedTicks = currentTime - lastUpdateTime;
+        if (elapsedTicks >= intervalTicks) {
             long currentEnergy = getStoredEnergy(stack);
 
-            if (currentEnergy >= getEnergyCost()) {
-                setStoredEnergy(stack, currentEnergy - getEnergyCost());
+            float energyCostPerTick = (float) getEnergyCost() / 20;
+            long energyCostOverall = (long) (energyCostPerTick * elapsedTicks);
+
+            if (currentEnergy >= energyCostOverall) {
+                setStoredEnergy(stack, Math.max(currentEnergy - energyCostOverall, 0));
                 stack.set(DataComponentRegistry.LAST_UPDATE_TYPE, currentTime);
-            }
+            } else setStoredEnergy(stack, 0);
         }
     }
-
     @Override
     public ActionResult useOnEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (player instanceof ServerPlayerEntity) {
@@ -175,6 +189,6 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
 
     @Override
     public void onLowEnergy(ItemStack stack, PlayerEntity player) {
-        this.setTexture(stack, false);
+        setTexture(stack, false);
     }
 }

@@ -13,10 +13,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
@@ -25,10 +22,11 @@ import net.minecraft.world.World;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
     private static final int ITEM_TRANSFER_RATE = 2;
-    public HashSet<Item> itemList = new HashSet<>();
+    public Set<Item> itemList = new HashSet<>();
 
     public TransporterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSPORTER_BLOCK_ENTITY, pos, state);
@@ -49,8 +47,6 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (this.getWorld() == null || this.getWorld().isClient) return;
-        if (this.getWorld().getTime() % 5 != 0) return;
-
         super.onUpdate();
     }
 

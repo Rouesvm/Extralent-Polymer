@@ -47,10 +47,10 @@ public class Connection {
         this.weight = weight;
     }
 
-    public static final Codec<Set<Connection>> CODEC =
+    public static final Codec<List<Connection>> CODEC =
             Codec.list(NbtCompound.CODEC).xmap(
                     list -> {
-                        Set<Connection> connections = new HashSet<>();
+                        List<Connection> connections = new ArrayList<>();
                         for (NbtCompound entry : list) {
                             int side = entry.getInt("side", 0);
                             long pos = entry.getLong("pos", 0);
@@ -72,14 +72,14 @@ public class Connection {
                     }
             );
 
-    public static void write(WriteView data, String name, HashSet<Connection> connections) {
-        WriteView.ListAppender<Set<Connection>> nbtList = data.getListAppender(name, CODEC);
+    public static void write(WriteView data, String name, List<Connection> connections) {
+        WriteView.ListAppender<List<Connection>> nbtList = data.getListAppender(name, CODEC);
         nbtList.add(connections);
     }
 
-    public static void read(ReadView data, String name, HashSet<Connection> connections) {
-        ReadView.TypedListReadView<Set<Connection>> nbtList = data.getTypedListView(name, CODEC);
-        Optional<Set<Connection>> dataConnection = nbtList.stream().findFirst();
+    public static void read(ReadView data, String name, List<Connection> connections) {
+        ReadView.TypedListReadView<List<Connection>> nbtList = data.getTypedListView(name, CODEC);
+        Optional<List<Connection>> dataConnection = nbtList.stream().findFirst();
         dataConnection.ifPresent((connections::addAll));
     }
 

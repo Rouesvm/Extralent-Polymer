@@ -225,6 +225,6 @@ public class BlockHighlights {
     }
 
     public static void shutdownThread() {
-        executor.shutdownNow();
+        executor.shutdown();
     }
 }

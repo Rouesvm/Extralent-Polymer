@@ -19,7 +19,7 @@ public interface BasicEnergyItem extends SimpleEnergyItem {
     }
 
     default boolean shouldPass(@NotNull ItemStack stack, PlayerEntity player, boolean showMessage) {
-        if (getStoredEnergy(stack) < getEnergyCost()) {
+        if (getStoredEnergy(stack) < getEnergyCost() || getStoredEnergy(stack) <= 0) {
             if (showMessage) player.sendMessage(Text.translatable("general.info.out_of_energy")
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)), true);
             onLowEnergy(stack, player);
