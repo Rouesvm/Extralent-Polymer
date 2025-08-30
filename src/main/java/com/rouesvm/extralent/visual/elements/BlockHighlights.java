@@ -23,12 +23,16 @@ public class BlockHighlights {
     public static final Vector3f OUTPUT_BLOCK_COLOR = new Vector3f(1F, 0.5F, 0F);
     public static final Vector3f INPUT_BLOCK_COLOR = new Vector3f(0F, 0.75F, 1F);
 
+    private static final int DESATURATED_COLOR_OFFSET = 2;
+
     private static final int PARTICLE_BATCHES = 3;
     private static final int PARTICLE_STEPS = 3;
     private static final float PARTICLE_SIZE = 0.75F;
 
-    private static final float X_STEP = 0.25F;
+    private static final float X_STEP = 0.5F;
     private static final float X_MIN = -0.4F, X_MAX = 0.4F;
+
+    private static final float HALF_BLOCK_OFFSET = 0.5F;
 
     private static final DustParticleEffect[] dustParticleEffects = new DustParticleEffect[4];
     static {
@@ -133,7 +137,7 @@ public class BlockHighlights {
 
         Vector3f[] xPositions = xParticlePositions.get(pos);
         if (xPositions != null) {
-            DustParticleEffect effect = dustParticleEffects[connection.getWeight() + 2];
+            DustParticleEffect effect = dustParticleEffects[connection.getWeight() + DESATURATED_COLOR_OFFSET];
             spawnParticlesOvertime(world, effect, player, xPositions, currentTime);
         }
     }
@@ -198,30 +202,23 @@ public class BlockHighlights {
         float y = center.y();
         float z = center.z();
 
-        final float halfBlockOffset = 0.5F;
-
-        switch (side) {
-            case UP:
-            case DOWN:
-                x += offsetA;
-                z += offsetB;
-                y += (side == Direction.UP ? halfBlockOffset : -halfBlockOffset);
-                break;
-            case NORTH:
-            case SOUTH:
-                x += offsetA;
-                y += offsetB;
-                z += side == Direction.SOUTH ? halfBlockOffset : -halfBlockOffset;
-                break;
-            case EAST:
-            case WEST:
-                z += offsetA;
-                y += offsetB;
-                x += side == Direction.EAST ? halfBlockOffset : -halfBlockOffset;
-                break;
-        }
-
-        return new Vector3f(x, y, z);
+        return switch (side) {
+            case UP, DOWN -> new Vector3f(
+                    x + offsetA,
+                    y + (side == Direction.UP ?
+                            HALF_BLOCK_OFFSET : -HALF_BLOCK_OFFSET
+                    ), z + offsetB);
+            case NORTH, SOUTH -> new Vector3f(
+                    x + offsetA, y + offsetB,
+                    z + (side == Direction.SOUTH ?
+                            HALF_BLOCK_OFFSET : -HALF_BLOCK_OFFSET
+                    ));
+            case EAST, WEST -> new Vector3f(
+                    x + (side == Direction.EAST ?
+                            HALF_BLOCK_OFFSET : -HALF_BLOCK_OFFSET
+                    ), y + offsetB, z + offsetA
+            );
+        };
     }
 
     public static void shutdownThread() {

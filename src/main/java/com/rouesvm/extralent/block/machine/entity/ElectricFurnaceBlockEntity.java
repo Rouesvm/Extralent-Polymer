@@ -32,6 +32,8 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     private static final long ENERGY_USED_PER_SECOND = 10; // ENERGY_USED * (SECONDS * 20)
     private static final double TIME_TO_BURN_IN_SECONDS = 0.5;
 
+    private static final double BURN_TIME_TICKS = TIME_TO_BURN_IN_SECONDS * 20;
+
     private boolean is_burning = false;
     private SmeltingRecipe current_recipe = null;
 
@@ -73,8 +75,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
             @Override
             public boolean canInsert(int slot, ItemStack stack, Direction dir) {
-                if (canSmelt(stack).isEmpty())
-                    return false;
+                if (canSmelt(stack).isEmpty()) return false;
                 return slot == INPUT_SLOT_INDEX;
             }
 
@@ -87,27 +88,43 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         };
     }
 
+    private void reset(BlockState state) {
+        if (world != null) {
+            progress = 0;
+            is_burning = false;
+
+            boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
+            if (!activated) world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, true));
+        }
+    }
+
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (world == null || world.isClient) return;
 
         final long energyUsed = calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS);
-        if (energyStorage.amount < energyUsed) return;
+        if (energyStorage.amount < energyUsed) {
+            reset(state);
+            return;
+        }
+
+        if (inventory.isEmpty()) {
+            reset(state);
+            return;
+        }
 
         boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
 
         if (is_burning) {
             if (!activated) world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, true));
-
-            if (progress < (TIME_TO_BURN_IN_SECONDS * 20)) {
-                progress++;
-            } else if (canOutputItem() && isValid()) {
+            if (progress >= BURN_TIME_TICKS
+                    && canOutputItem()
+                    && isValid()
+            ) {
                 energyStorage.amount = MathHelper.clamp(energyStorage.amount - energyUsed, 0, energyStorage.capacity);
-                progress = 0;
-                is_burning = false;
                 current_recipe = null;
-                world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, false));
-            }
+                reset(state);
+            } else progress++;
         } else if (progress == 0) {
             if (activated) world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, false));
             isValid();
@@ -120,8 +137,10 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
     }
 
     private ItemStack getOutputStack(SmeltingRecipe recipe, ItemStack inputStack) {
-        if (recipe == null) return null;
-        return recipe.craft(new SingleStackRecipeInput(inputStack), world.getRegistryManager());
+        if (world != null) {
+            if (recipe == null) return null;
+            return recipe.craft(new SingleStackRecipeInput(inputStack), world.getRegistryManager());
+        } else return null;
     }
 
     private Optional<SmeltingRecipe> canSmelt(ItemStack input) {
@@ -133,7 +152,8 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
         if (stackRecipe.isPresent()) {
             RecipeEntry<SmeltingRecipe> recipe = stackRecipe.get();
-            if (!getOutputStack(recipe.value(), input).isEmpty()
+            ItemStack stack = getOutputStack(recipe.value(), input);
+            if (stack != null && !stack.isEmpty()
             ) return Optional.of(recipe.value());
         }
 
@@ -153,6 +173,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
                 return true;
             }
         }
+
         return false;
     }
 
