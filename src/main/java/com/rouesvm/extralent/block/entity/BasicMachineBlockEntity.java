@@ -3,7 +3,7 @@ package com.rouesvm.extralent.block.entity;
 import com.rouesvm.extralent.block.TickableBlockEntity;
 import com.rouesvm.extralent.item.custom.info.InfoData;
 import com.rouesvm.extralent.visual.ui.inventory.ExtralentInventory;
-import com.rouesvm.extralent.visual.text.ProgressBarText;
+import com.rouesvm.extralent.visual.text.ProgressBarBuilder;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -24,9 +24,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BasicMachineBlockEntity extends BlockEntity implements TickableBlockEntity {
-    public final ExtralentInventory inventory;
+
     public InventoryStorage inventoryStorage;
 
+    public final ExtralentInventory inventory;
     public final SimpleEnergyStorage energyStorage;
 
     public int progress;
@@ -183,7 +184,7 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
                     .append(String.valueOf(this.energyStorage.getCapacity()));
 
             if (!isUI) {
-                text = text.copy().append("\n\n").append(ProgressBarText.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity()));
+                text = text.copy().append("\n\n").append(ProgressBarBuilder.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity()));
                 text = text.copy().append(Text.literal("\n")
                         .append(energyAmount.copy())
                         .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID)));
