@@ -83,7 +83,7 @@
         },
         {
             "type": "bitmap",
-            "file": "extralent:gui/righthalfhalf.png",
+            "file": "extralent:gui/righthalfquarter.png",
             "ascent": 16,
             "height": 16,
             "chars":  [
@@ -92,7 +92,7 @@
         },
         {
             "type": "bitmap",
-            "file": "extralent:gui/lefthalfhalf.png",
+            "file": "extralent:gui/lefthalfquarter.png",
             "ascent": 16,
             "height": 16,
             "chars":  [
@@ -101,7 +101,7 @@
         },
         {
             "type": "bitmap",
-            "file": "extralent:gui/middlehalfhalf.png",
+            "file": "extralent:gui/middlehalfquarter.png",
             "ascent": 16,
             "height": 16,
             "chars":  [
@@ -110,7 +110,7 @@
         },
         {
             "type": "bitmap",
-            "file": "extralent:gui/rightfullhalfhalf.png",
+            "file": "extralent:gui/rightfullquarter.png",
             "ascent": 16,
             "height": 16,
             "chars":  [
@@ -119,7 +119,7 @@
         },
         {
             "type": "bitmap",
-            "file": "extralent:gui/leftfullhalfhalf.png",
+            "file": "extralent:gui/leftfullquarter.png",
             "ascent": 16,
             "height": 16,
             "chars":  [
@@ -128,7 +128,7 @@
         },
         {
             "type": "bitmap",
-            "file": "extralent:gui/middlefullhalfhalf.png",
+            "file": "extralent:gui/middlefullquarter.png",
             "ascent": 16,
             "height": 16,
             "chars":  [
