@@ -41,8 +41,6 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
     private final InventoryStorage outputInventory;
 
-    private final Box box;
-
     private final HashSet<BlockPos> soilPos = new HashSet<>(boxSize.getX() * boxSize.getZ() / 2);
     private final Queue<BlockPos> soilQueue = new LinkedList<>();
 
@@ -53,7 +51,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         for (int y = 0; y < boxSize.getY(); y++) {
             for (int x = -boxSize.getX()/2; x < boxSize.getX()/2; x++) {
                 for (int z = -boxSize.getZ()/2; z < boxSize.getZ()/2; z++) {
-                    positions.add(new BlockPos(x, y + 2, z)); // Relative to harvester
+                    positions.add(new BlockPos(x, y + 2, z));
                 }
             }
         }
@@ -64,15 +62,6 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
         super(BlockEntityRegistry.HARVESTER_BLOCK_ENTITY, pos, state);
         this.outputInventory = InventoryStorage.of(inventory, Direction.UP);
         this.inventoryStorage = InventoryStorage.of(inventory, Direction.DOWN);
-
-        Vec3d startPos = new Vec3d(
-                pos.getX() - (double) boxSize.getX() / 2,
-                pos.getY() + 2,
-                pos.getZ() - (double) boxSize.getZ() / 2
-        );
-
-        Vec3d endPos = startPos.add(Vec3d.of(boxSize));
-        this.box = new Box(startPos, endPos);
     }
 
     @Override
@@ -282,18 +271,6 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
     private boolean isLoaded(BlockPos pos) {
         if (world == null) return false;
         return world.isChunkLoaded(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()));
-    }
-
-    private static List<BlockPos> getBlockPosInBox(Box axisAlignedBox) {
-        List<BlockPos> blocks = new ArrayList<>();
-        for (double y = axisAlignedBox.minY; y < axisAlignedBox.maxY; ++y) {
-            for (double x = axisAlignedBox.minX; x < axisAlignedBox.maxX; ++x) {
-                for (double z = axisAlignedBox.minZ; z < axisAlignedBox.maxZ; ++z) {
-                    blocks.add(new BlockPos((int) x, (int) y, (int) z));
-                }
-            }
-        }
-        return blocks;
     }
 
     @Override
