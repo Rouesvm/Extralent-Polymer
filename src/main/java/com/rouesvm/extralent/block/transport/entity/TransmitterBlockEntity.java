@@ -4,9 +4,7 @@ import com.rouesvm.extralent.registries.block.BlockEntityRegistry;
 import com.rouesvm.extralent.block.transport.entity.connection.Connection;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
@@ -22,9 +20,9 @@ public class TransmitterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public boolean correctBlock(BlockPos blockPos) {
+    public boolean incorrectBlock(BlockPos blockPos) {
         EnergyStorage storage = EnergyStorage.SIDED.find(this.world, blockPos, null);
-        return storage != null && storage.supportsInsertion();
+        return storage == null || !storage.supportsInsertion();
     }
 
     @Override

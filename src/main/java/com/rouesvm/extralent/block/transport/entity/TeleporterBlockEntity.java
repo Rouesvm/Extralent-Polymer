@@ -77,8 +77,8 @@ public class TeleporterBlockEntity extends PipeBlockEntity {
     }
 
     @Override
-    public boolean correctBlock(BlockPos pos) {
-        return super.correctBlock(pos);
+    public boolean incorrectBlock(BlockPos pos) {
+        return super.incorrectBlock(pos);
     }
 
     @Override

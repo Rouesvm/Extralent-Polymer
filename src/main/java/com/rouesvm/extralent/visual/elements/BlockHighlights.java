@@ -29,7 +29,7 @@ public class BlockHighlights {
     private static final int PARTICLE_STEPS = 3;
     private static final float PARTICLE_SIZE = 0.75F;
 
-    private static final float X_STEP = 0.5F;
+    private static final float X_STEP = 0.25F;
     private static final float X_MIN = -0.4F, X_MAX = 0.4F;
 
     private static final float HALF_BLOCK_OFFSET = 0.5F;
@@ -118,7 +118,7 @@ public class BlockHighlights {
             Vector3f p = positions[index];
             world.spawnParticles(player, effect, true, true,
                     p.x, p.y, p.z,
-                    1, 0, 0, 0, 0.01);
+                    2, 0, 0, 0, 0.01);
         }
     }
 

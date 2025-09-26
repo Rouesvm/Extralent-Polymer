@@ -13,6 +13,7 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -138,68 +139,89 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
         };
     }
 
-    // set weight logic
-    public int setWeight(int prevWeight) {
-        return prevWeight == 1 ? 0 : 1;
-    }
-
-    // UI only.
-    private Text getCustomInfo() {
-        return getEnergyInfo(null, true); // Default.
-    }
-
-    private Text getInventoryInfo(Text text, boolean isUI) {
-        if (text == null) text = Text.empty();
-        if (getInventory() != null) {
-            int empty = 0;
-
-            Map<String, Integer> itemCounts = new HashMap<>();
-            for (ItemStack stack : this.inventory.getStacks()) {
-                if (stack.isEmpty()) {
-                    empty++;
-                    continue;
-                }
-
-                String itemName = stack.getName().getString();
-                itemCounts.put(itemName, itemCounts.getOrDefault(itemName, 0) + stack.getCount());
-            }
-
-            if (empty == this.inventory.size()) {
-                text = Text.translatable("info.machine.inventory_empty");
-                return text;
-            }
-
-            String toAppend = isUI ? " " : "\n";
-            for (Map.Entry<String, Integer> entry : itemCounts.entrySet())
-                text = text.copy().append(toAppend).append(String.valueOf(entry.getValue())).append(" ").append(entry.getKey());
-        }
-        return text;
-    }
-
-    private Text getEnergyInfo(Text text, boolean isUI) {
-        if (text == null) text = Text.empty();
-        if (getEnergyStorage() != null) {
-            Text energyAmount = Text.literal(String.valueOf(this.energyStorage.getAmount()))
-                    .append("/")
-                    .append(String.valueOf(this.energyStorage.getCapacity()));
-
-            if (!isUI) {
-                text = text.copy().append("\n\n").append(ProgressBarBuilder.getProgressBar(this.energyStorage.getAmount(), this.energyStorage.getCapacity()));
-                text = text.copy().append(Text.literal("\n")
-                        .append(energyAmount.copy())
-                        .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID)));
-                return text;
-            }
-
-            text = text.copy().append(energyAmount.copy());
-        }
-        return text;
-    }
-
     private Text getFormattedInfo() {
         Text text = null;
         text = getInventoryInfo(text, false);
         text = getEnergyInfo(text, false);
         return text;
+    }
+
+    private Text getCustomInfo() {
+        return getEnergyInfo(null, true);
+    }
+
+    public int setWeight(int prevWeight) {
+        return prevWeight == 1 ? 0 : 1;
+    }
+
+    private Text ensureTextNotNull(Text text) {
+        return text != null ? text : Text.empty();
+    }
+
+    private Text getInventoryInfo(Text text, boolean isUI) {
+        text = ensureTextNotNull(text);
+        if (getInventory() == null) return text;
+
+        Map<String, Integer> itemCounts = getItemCounts();
+
+        if (itemCounts.isEmpty()) return Text.translatable("info.machine.inventory_empty");
+        return appendItemCounts(text, itemCounts, isUI);
+    }
+
+    private Text getEnergyInfo(Text text, boolean isUI) {
+        text = ensureTextNotNull(text);
+        if (getEnergyStorage() == null) return text;
+
+        Text energyAmount = createEnergyAmountText();
+
+        if (isUI) return text.copy().append(energyAmount.copy());
+        return appendEnergyInfoWithProgressBar(text, energyAmount);
+    }
+
+    private Map<String, Integer> getItemCounts() {
+        Map<String, Integer> itemCounts = new HashMap<>();
+
+        for (ItemStack stack : this.inventory.getStacks()) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            String itemName = stack.getName().getString();
+            itemCounts.merge(itemName, stack.getCount(), Integer::sum);
+        }
+
+        return itemCounts;
+    }
+
+    private Text appendItemCounts(Text text, Map<String, Integer> itemCounts, boolean isUI) {
+        String separator = isUI ? " " : "\n";
+        MutableText result = text.copy();
+
+        for (Map.Entry<String, Integer> entry : itemCounts.entrySet()) {
+            result = result.append(separator)
+                    .append(String.valueOf(entry.getValue()))
+                    .append(" ")
+                    .append(entry.getKey());
+        }
+
+        return result;
+    }
+
+    private Text createEnergyAmountText() {
+        return Text.literal(String.valueOf(this.energyStorage.getAmount()))
+                .append("/")
+                .append(String.valueOf(this.energyStorage.getCapacity()));
+    }
+
+    private Text appendEnergyInfoWithProgressBar(Text text, Text energyAmount) {
+        MutableText result = text.copy()
+                .append("\n\n")
+                .append(ProgressBarBuilder.getProgressBar(
+                        this.energyStorage.getAmount(),
+                        this.energyStorage.getCapacity()));
+
+        return result.append(Text.literal("\n")
+                .append(energyAmount.copy())
+                .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID)));
     }
 }

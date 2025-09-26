@@ -33,15 +33,18 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
         if (this.getWorld() == null || this.getWorld().isClient) return;
         if (!canTick()) return;
-        if (tick++ % getTickDelay() == 0) return;
+        if (tick++ % getTickDelay() != 0) return;
         onUpdate();
     }
 
     public void onUpdate() {
         if (connected_to.isEmpty()) return;
-        if (queued_connections.isEmpty()) queued_connections.addAll(connected_to);
 
-        Set<Connection> posToRemove = new HashSet<>();
+        if (queued_connections.isEmpty()) {
+            queued_connections.addAll(connected_to);
+        }
+
+        Set<Connection> toRemove = new HashSet<>();
         Iterator<Connection> iterator = queued_connections.iterator();
 
         if (iterator.hasNext()) {
@@ -49,13 +52,13 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
 
             if (blockExists(connection.getPos())) {
                 if (blockLogic(connection)) iterator.remove();
-            } else posToRemove.add(connection);
+            } else toRemove.add(connection);
         }
 
-        if (!posToRemove.isEmpty()) {
-            current_connections -= posToRemove.size();
-            connected_to.removeAll(posToRemove);
-            queued_connections.removeAll(posToRemove);
+        if (!toRemove.isEmpty()) {
+            current_connections -= toRemove.size();
+            connected_to.removeAll(toRemove);
+            queued_connections.removeAll(toRemove);
         }
     }
 
@@ -64,7 +67,6 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
             PipeBlockEntity entity = (PipeBlockEntity) world.getBlockEntity(connection.getPos());
             if (entity != null) {
                 Connection newConnection = Connection.of(pos);
-                entity.removeConnected(newConnection);
                 Extralent.HIGHLIGHT_MANAGER.removeHighlightFromMultiple(newConnection, connection.getPos());
             }
 
@@ -77,7 +79,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         if (world == null || world.isClient) return;
         if (connected_from.contains(connection)) return;
         if (!(getPipeAt(connection.getPos()) instanceof PipeBlockEntity)) return;
-        if (!correctBlock(connection.getPos())) return;
+        if (incorrectBlock(connection.getPos())) return;
 
         connected_from.add(connection);
         markDirty();
@@ -86,8 +88,8 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     public void removeOtherConnections() {
         if (world == null || connected_from.isEmpty()) return;
         List<Connection> copy = new ArrayList<>(connected_from);
-        for (Connection connections : copy) {
-            removeConnected(connections);
+        for (Connection connection : copy) {
+            removeConnected(connection);
         }
     }
 
@@ -107,7 +109,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
         if (current_connections >= getMaxConnections()) return PipeState.OVERFLOW;
 
         if (!isWithinRange(connection.getPos())) return PipeState.FAR;
-        if (!correctBlock(connection.getPos())) return PipeState.TYPE_ERROR;
+        if (incorrectBlock(connection.getPos())) return PipeState.TYPE_ERROR;
 
         putConnected(connection);
         current_connections++;
@@ -158,8 +160,8 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     }
 
     @ApiStatus.OverrideOnly
-    public boolean correctBlock(BlockPos pos) {
-        return true;
+    public boolean incorrectBlock(BlockPos pos) {
+        return false;
     }
 
     @Override

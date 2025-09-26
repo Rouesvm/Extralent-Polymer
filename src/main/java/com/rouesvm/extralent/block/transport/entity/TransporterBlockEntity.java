@@ -10,22 +10,21 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
-    private static final int ITEM_TRANSFER_RATE = 2;
+    private static final int ITEM_TRANSFER_RATE = 5;
     public Set<Item> itemList = new HashSet<>();
 
     public TransporterBlockEntity(BlockPos pos, BlockState state) {
@@ -38,16 +37,15 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     }
 
     public void setItemList(List<ItemStack> inventory) {
-        itemList = new HashSet<>();
+        itemList.clear();
         if (inventory.isEmpty()) return;
-
         inventory.forEach(stack -> itemList.add(stack.getItem()));
     }
 
     @Override
-    public boolean correctBlock(BlockPos blockPos) {
+    public boolean incorrectBlock(BlockPos blockPos) {
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, blockPos, null);
-        return storage != null && storage.supportsInsertion();
+        return storage == null || !storage.supportsInsertion();
     }
 
     @Override
@@ -66,64 +64,58 @@ public class TransporterBlockEntity extends PipeBlockEntity {
     protected void writeData(WriteView data) {
         super.writeData(data);
 
-        WriteView.ListAppender<String> listAppender = data.getListAppender("Items", Codec.STRING);
+        WriteView.ListAppender<String> listAppender = data.getListAppender("filter", Codec.STRING);
         itemList.stream()
-                .map(Item::toString)
+                .map(item -> Registries.ITEM.getId(item).toString())
                 .forEach(listAppender::add);
 
-        if (listAppender.isEmpty()) data.remove("Items");
+        if (listAppender.isEmpty()) data.remove("filter");
     }
 
     @Override
     protected void readData(ReadView data) {
         super.readData(data);
 
-        ReadView.TypedListReadView<String> listReadView = data.getTypedListView("Items", Codec.STRING);
-        listReadView.stream()
-                .map((string -> Registries.ITEM.get(Identifier.tryParse(string))))
+        ReadView.TypedListReadView<String> listReadView = data.getTypedListView("filter", Codec.STRING);
+        listReadView.stream().map(id -> id != null ? Registries.ITEM.get(Identifier.of(id)) : null)
+                .filter(item -> item != null && item != Items.AIR)
                 .forEach(itemList::add);
     }
 
     public boolean insertItem(Storage<ItemVariant> storage) {
-        for (StorageView<ItemVariant> storageView : this.inventoryStorage) {
-            if (isValidStorageView(storageView)) {
-                Transaction transaction = Transaction.openOuter();
-                ItemVariant resource = storageView.getResource();
-                long extracted = this.inventoryStorage.extract(resource, ITEM_TRANSFER_RATE, transaction);
-                if (extracted > 0) {
-                    long inserted = storage.insert(resource, extracted, transaction);
-                    if (inserted > 0) {
-                        transaction.commit();
-                        return true;
-                    }
-                }
-
-                transaction.close();
-            }
-        }
-        return false;
+        return transferItems(this.inventoryStorage, storage, false);
     }
 
     public boolean extractItem(Storage<ItemVariant> storage) {
-        for (StorageView<ItemVariant> storageView : storage) {
-            if (isValidStorageView(storageView)) {
-                ItemVariant resource = storageView.getResource();
-                Transaction transaction = Transaction.openOuter();
-                long extracted = storage.extract(resource, ITEM_TRANSFER_RATE, transaction);
+        return transferItems(storage, this.inventoryStorage, true);
+    }
 
-                if (isInvalidResource(resource) || extracted == 0)  {
-                    transaction.close();
-                    continue;
+    private boolean transferItems(Storage<ItemVariant> source, Storage<ItemVariant> target, boolean filterSource) {
+        long remains = ITEM_TRANSFER_RATE;
+        boolean transferred = false;
+
+        for (StorageView<ItemVariant> storageView : source) {
+            if (!isValidStorageView(storageView)) continue;
+
+            ItemVariant resource = storageView.getResource();
+            if (filterSource && isInvalidResource(resource)) continue;
+
+            try (Transaction transaction = Transaction.openOuter()) {
+                long extracted = source.extract(resource, remains, transaction);
+                if (extracted > 0) {
+                    long inserted = target.insert(resource, extracted, transaction);
+                    if (inserted > 0) {
+                        transaction.commit();
+                        transferred = true;
+
+                        remains -= inserted;
+                        if (remains <= 0) break;
+                    }
                 }
-
-                long inserted = this.inventoryStorage.insert(resource, extracted, transaction);
-                if (inserted > 0) {
-                    transaction.commit();
-                    return true;
-                } else transaction.close();
             }
         }
-        return false;
+
+        return transferred;
     }
 
     private boolean isValidStorageView(StorageView<ItemVariant> storageView) {
