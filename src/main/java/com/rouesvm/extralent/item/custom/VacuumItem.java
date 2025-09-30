@@ -110,6 +110,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
     public ActionResult useOnEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (player instanceof ServerPlayerEntity) {
             if (shouldPass(stack, player, true)) return ActionResult.PASS;
+            stack.remove(DataComponentRegistry.LAST_UPDATE_TYPE);
 
             ItemStack newStack = player.getStackInHand(hand);
 

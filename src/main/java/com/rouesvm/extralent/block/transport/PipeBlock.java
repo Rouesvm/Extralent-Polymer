@@ -11,11 +11,4 @@ public class PipeBlock extends MachineBlock {
     public PipeBlock(String name, Settings settings, boolean hasCustomStates) {
         super(name, settings, hasCustomStates);
     }
-
-    @Override
-    public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-        PipeBlockEntity blockEntity = (PipeBlockEntity) world.getBlockEntity(pos);
-        if (blockEntity != null) blockEntity.removeOtherConnections();
-        return super.onBreak(world, pos, state, player);
-    }
 }

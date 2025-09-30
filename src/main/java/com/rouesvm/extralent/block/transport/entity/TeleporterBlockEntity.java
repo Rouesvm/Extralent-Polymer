@@ -30,7 +30,7 @@ public class TeleporterBlockEntity extends PipeBlockEntity {
         }
 
         if (blockEntity != null && world.getBlockEntity(blockEntity.getPos()) == null) blockEntity = null;
-        if (blockEntity == null) for (Connection connection : getConnections()) {
+        if (blockEntity == null) for (Connection connection : getOutgoingConnections()) {
                 blockEntity = connection;
         }
 

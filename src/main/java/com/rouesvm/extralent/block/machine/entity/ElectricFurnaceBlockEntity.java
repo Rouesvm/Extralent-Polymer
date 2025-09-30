@@ -75,15 +75,14 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
             @Override
             public boolean canInsert(int slot, ItemStack stack, Direction dir) {
-                if (canSmelt(stack).isEmpty()) return false;
-                return slot == INPUT_SLOT_INDEX;
+                return slot == INPUT_SLOT_INDEX && canSmelt(stack).isPresent();
             }
 
             @Override
             public boolean canExtract(int slot, ItemStack stack, Direction dir) {
                 if (dir == Direction.UP && slot == INPUT_SLOT_INDEX)
                     return true;
-                else return slot != INPUT_SLOT_INDEX;
+                else return slot == OUTPUT_SLOT_INDEX;
             }
         };
     }
@@ -92,9 +91,8 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         if (world != null) {
             progress = 0;
             is_burning = false;
-
-            boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
-            if (!activated) world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, true));
+            if (state.get(ActivatedPolymerBlock.ACTIVATED))
+                world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, false));
         }
     }
 
@@ -103,88 +101,77 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         if (world == null || world.isClient) return;
 
         final long energyUsed = calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS);
-        if (energyStorage.amount < energyUsed) {
+        ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
+
+        if (inputStack.isEmpty() || energyStorage.amount < energyUsed) {
             reset(state);
             return;
         }
 
-        if (inventory.isEmpty()) {
-            reset(state);
-            return;
-        }
-
-        boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
-
-        if (is_burning) {
-            if (!activated) world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, true));
-            if (progress >= BURN_TIME_TICKS
-                    && canOutputItem()
-                    && isValid()
-            ) {
-                energyStorage.amount = MathHelper.clamp(energyStorage.amount - energyUsed, 0, energyStorage.capacity);
-                current_recipe = null;
+        if (!is_burning) {
+            Optional<SmeltingRecipe> recipe = canSmelt(inputStack);
+            if (recipe.isPresent() && canInsertResult(getOutputStack(recipe.get(), inputStack))) {
+                current_recipe = recipe.get();
+                is_burning = true;
+                progress = 0;
+                world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, true));
+            } else {
                 reset(state);
-            } else progress++;
-        } else if (progress == 0) {
-            if (activated) world.setBlockState(pos, state.with(ActivatedPolymerBlock.ACTIVATED, false));
-            isValid();
+            }
+            return;
         }
-    }
 
-    private ItemStack getOutputStack() {
-        ItemStack stack = inventory.getStack(INPUT_SLOT_INDEX);
-        return getOutputStack(current_recipe, stack);
+        progress++;
+        if (progress >= BURN_TIME_TICKS) {
+            if (current_recipe != null && canOutputItem()) {
+                energyStorage.amount = MathHelper.clamp(
+                        energyStorage.amount - energyUsed, 0, energyStorage.capacity
+                );
+            }
+            reset(state);
+        }
     }
 
     private ItemStack getOutputStack(SmeltingRecipe recipe, ItemStack inputStack) {
-        if (world != null) {
-            if (recipe == null) return null;
-            return recipe.craft(new SingleStackRecipeInput(inputStack), world.getRegistryManager());
-        } else return null;
+        if (world == null) return ItemStack.EMPTY;
+        return recipe.craft(new SingleStackRecipeInput(inputStack), world.getRegistryManager());
     }
 
     private Optional<SmeltingRecipe> canSmelt(ItemStack input) {
         Optional<RecipeEntry<SmeltingRecipe>> stackRecipe = matchGetter
-                .getFirstMatch(
-                        new SingleStackRecipeInput(input),
-                        (ServerWorld) world
-                ).stream().findFirst();
+                .getFirstMatch(new SingleStackRecipeInput(input), (ServerWorld) world)
+                .stream().findFirst();
 
         if (stackRecipe.isPresent()) {
-            RecipeEntry<SmeltingRecipe> recipe = stackRecipe.get();
-            ItemStack stack = getOutputStack(recipe.value(), input);
-            if (stack != null && !stack.isEmpty()
-            ) return Optional.of(recipe.value());
+            SmeltingRecipe recipe = stackRecipe.get().value();
+            ItemStack stack = getOutputStack(recipe, input);
+            if (!stack.isEmpty()) return Optional.of(recipe);
         }
 
         return Optional.empty();
     }
 
-    private boolean isValid() {
-        ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
+    private boolean canInsertResult(ItemStack result) {
+        if (result.isEmpty()) return false;
+        ItemStack output = inventory.getStack(OUTPUT_SLOT_INDEX);
 
-        if (!inputStack.isEmpty()) {
-            Optional<SmeltingRecipe> stackRecipe = canSmelt(inputStack);
-            if (stackRecipe.isEmpty()) return false;
-
-            if (canInsert(getOutputStack(stackRecipe.get(), inputStack))) {
-                current_recipe = stackRecipe.get();
-                is_burning = true;
-                return true;
-            }
-        }
-
-        return false;
+        if (output.isEmpty()) return true;
+        if (!ItemStack.areItemsAndComponentsEqual(output, result)) return false;
+        return output.getCount() + result.getCount() <= output.getMaxCount();
     }
 
-    private boolean canInsert(ItemStack recipeOutput) {
-        if (recipeOutput == null || recipeOutput.isEmpty()) return false;
+    private boolean insertResult(ItemStack result) {
+        if (result.isEmpty()) return false;
+        ItemStack output = inventory.getStack(OUTPUT_SLOT_INDEX);
 
-        ItemStack outputStack = inventory.getStack(OUTPUT_SLOT_INDEX);
-
-        if (outputStack.isEmpty()) return true;
-        if (outputStack.getCount() >= outputStack.getMaxCount()) return false;
-        return ItemStack.areItemsAndComponentsEqual(outputStack, recipeOutput);
+        if (output.isEmpty()) {
+            inventory.setStack(OUTPUT_SLOT_INDEX, result.copy());
+            return true;
+        } else if (ItemStack.areItemsAndComponentsEqual(output, result)) {
+            output.increment(result.getCount());
+            return true;
+        }
+        return false;
     }
 
     private boolean canOutputItem() {
@@ -192,14 +179,14 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);
 
         if (inputStack.isEmpty()) return false;
-        if (canInsert(getOutputStack(current_recipe, inputStack))) {
-            ItemStack result = getOutputStack();
-            inventory.insertStackTo(result.copy(), OUTPUT_SLOT_INDEX);
-            inputStack.decrement(1);
 
+        ItemStack result = getOutputStack(current_recipe, inputStack);
+        if (insertResult(result)) {
+            inputStack.decrement(1);
             is_burning = false;
             return true;
-        } else return false;
+        }
+        return false;
     }
 
     @Override

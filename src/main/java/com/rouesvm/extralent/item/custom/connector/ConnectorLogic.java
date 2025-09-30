@@ -39,11 +39,10 @@ public class ConnectorLogic {
         if (currentPos == null) HIGHLIGHT_MANAGER.createMultipleHighlights(pipeEntity.getPos(), world, (ServerPlayerEntity) player);
 
         data.setCurrentEntity(pipeEntity.getPos());
-        pipeEntity.onUpdate();
 
         onConnectionChanged(data, world, player, true);
 
-        pipeEntity.getConnections().forEach(blockConnection ->
+        pipeEntity.getOutgoingConnections().forEach(blockConnection ->
                 HIGHLIGHT_MANAGER.addHighlightToMultiple(blockConnection, data.getBlockPos()));
 
         return ActionResult.SUCCESS;
@@ -73,7 +72,7 @@ public class ConnectorLogic {
         PipeBlockEntity entity = data.getCurrentEntity(world);
         BlockPos base = data.getBlockPos();
 
-        boolean alreadyConnected = entity.getConnections().contains(connection);
+        boolean alreadyConnected = entity.getOutgoingConnections().contains(connection);
 
         if (player.isSneaking() && alreadyConnected) {
             boolean removed = entity.removeConnection(connection);
@@ -86,7 +85,7 @@ public class ConnectorLogic {
             return;
         }
 
-        PipeState result = entity.putConnection(connection);
+        PipeState result = entity.addConnection(connection);
         switch (result) {
             case SUCCESS -> {
                 ((ConnectorItem) data.stack().getItem()).decreaseEnergy(data.stack());
@@ -98,7 +97,7 @@ public class ConnectorLogic {
                 boolean removed = entity.removeConnection(connection);
                 if (removed && tryChangeWeight(data, player, world)) {
                     connection.setWeight(data.getWeight());
-                    entity.putConnection(connection);
+                    entity.addConnection(connection);
                     ConnectorItem.playSoundChanged(player, 3f);
                     HIGHLIGHT_MANAGER.replaceHighlightToMultiple(connection, base);
                 }

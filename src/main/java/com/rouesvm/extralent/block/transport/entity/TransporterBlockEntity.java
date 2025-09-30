@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -18,14 +19,15 @@ import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TransporterBlockEntity extends PipeBlockEntity {
     private static final int ITEM_TRANSFER_RATE = 5;
-    public Set<Item> itemList = new HashSet<>();
+
+    private final Set<Item> itemFilter = new HashSet<>();
 
     public TransporterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityRegistry.TRANSPORTER_BLOCK_ENTITY, pos, state);
@@ -36,28 +38,58 @@ public class TransporterBlockEntity extends PipeBlockEntity {
         return super.createInventory(1);
     }
 
-    public void setItemList(List<ItemStack> inventory) {
-        itemList.clear();
-        if (inventory.isEmpty()) return;
-        inventory.forEach(stack -> itemList.add(stack.getItem()));
+    public void setItemFilter(List<ItemStack> inventory) {
+        itemFilter.clear();
+        if (inventory == null || inventory.isEmpty()) return;
+
+        inventory.stream()
+                .filter(stack -> stack != null && !stack.isEmpty())
+                .map(ItemStack::getItem)
+                .filter(item -> item != null && item != Items.AIR)
+                .forEach(itemFilter::add);
+    }
+
+    public Set<Item> getItemFilter() {
+        return new HashSet<>(itemFilter);
+    }
+
+    public boolean hasFilter() {
+        return !itemFilter.isEmpty();
     }
 
     @Override
     public boolean incorrectBlock(BlockPos blockPos) {
-        Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, blockPos, null);
-        return storage == null || !storage.supportsInsertion();
+        if (world == null || world.isClient) return true;
+        Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, blockPos, null);
+
+        if (storage == null) {
+            for (Direction direction : Direction.values()) {
+                storage = ItemStorage.SIDED.find(world, blockPos, direction);
+                if (storage != null) break;
+            }
+        }
+
+        boolean test = storage == null || (!storage.supportsInsertion() && !storage.supportsExtraction());
+        System.out.println(test);
+        return test;
     }
 
     @Override
     public boolean blockLogic(Connection connection) {
-        Storage<ItemVariant> storage = ItemStorage.SIDED.find(this.world, connection.getPos(), connection.getSide());
-        if (storage != null) {
-            if (connection.getWeight() == 1 && storage.supportsInsertion())
-                return insertItem(storage);
-            if (storage.supportsExtraction())
-                return extractItem(storage);
+        if (world == null || world.isClient) return false;
+
+        Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, connection.getPos(), connection.getSide());
+        if (storage == null) return false;
+
+        boolean success = false;
+
+        if (connection.getWeight() == 1 && storage.supportsInsertion()) {
+            success = insertItem(storage);
+        } else if (storage.supportsExtraction()) {
+            success = extractItem(storage);
         }
-        return false;
+
+        return success;
     }
 
     @Override
@@ -65,64 +97,101 @@ public class TransporterBlockEntity extends PipeBlockEntity {
         super.writeData(data);
 
         WriteView.ListAppender<String> listAppender = data.getListAppender("filter", Codec.STRING);
-        itemList.stream()
+        itemFilter.stream()
                 .map(item -> Registries.ITEM.getId(item).toString())
                 .forEach(listAppender::add);
 
-        if (listAppender.isEmpty()) data.remove("filter");
+        if (listAppender.isEmpty()) {
+            data.remove("filter");
+        }
     }
 
     @Override
     protected void readData(ReadView data) {
         super.readData(data);
 
+        itemFilter.clear();
         ReadView.TypedListReadView<String> listReadView = data.getTypedListView("filter", Codec.STRING);
-        listReadView.stream().map(id -> id != null ? Registries.ITEM.get(Identifier.of(id)) : null)
+        listReadView.stream()
+                .filter(Objects::nonNull)
+                .map(id -> {
+                    try {
+                        return Registries.ITEM.get(Identifier.of(id));
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
                 .filter(item -> item != null && item != Items.AIR)
-                .forEach(itemList::add);
+                .forEach(itemFilter::add);
     }
 
     public boolean insertItem(Storage<ItemVariant> storage) {
+        if (storage == null || !storage.supportsInsertion()) return false;
         return transferItems(this.inventoryStorage, storage, false);
     }
 
     public boolean extractItem(Storage<ItemVariant> storage) {
+        if (storage == null || !storage.supportsExtraction()) return false;
         return transferItems(storage, this.inventoryStorage, true);
     }
 
-    private boolean transferItems(Storage<ItemVariant> source, Storage<ItemVariant> target, boolean filterSource) {
-        long remains = ITEM_TRANSFER_RATE;
-        boolean transferred = false;
+    private boolean transferItems(Storage<ItemVariant> source, Storage<ItemVariant> target, boolean applyFilter) {
+        if (source == null || target == null) return false;
 
-        for (StorageView<ItemVariant> storageView : source) {
-            if (!isValidStorageView(storageView)) continue;
+        long remainingTransferCapacity = ITEM_TRANSFER_RATE;
+        boolean anyTransferred = false;
 
-            ItemVariant resource = storageView.getResource();
-            if (filterSource && isInvalidResource(resource)) continue;
+        try (Transaction transaction = Transaction.openOuter()) {
+            for (StorageView<ItemVariant> storageView : source) {
+                if (remainingTransferCapacity <= 0) break;
+                if (!isValidStorageView(storageView)) continue;
 
-            try (Transaction transaction = Transaction.openOuter()) {
-                long extracted = source.extract(resource, remains, transaction);
-                if (extracted > 0) {
-                    long inserted = target.insert(resource, extracted, transaction);
-                    if (inserted > 0) {
-                        transaction.commit();
-                        transferred = true;
+                ItemVariant resource = storageView.getResource();
+                if (applyFilter && !passesFilter(resource)) continue;
 
-                        remains -= inserted;
-                        if (remains <= 0) break;
-                    }
+                long availableAmount = storageView.getAmount();
+                long maxTransferable = Math.min(remainingTransferCapacity, availableAmount);
+
+                if (maxTransferable <= 0) continue;
+
+                long actualExtracted = source.extract(resource, maxTransferable, transaction);
+                if (actualExtracted <= 0) continue;
+
+                long actualInserted = target.insert(resource, actualExtracted, transaction);
+
+                if (actualInserted > 0) {
+                    remainingTransferCapacity -= actualInserted;
+                    anyTransferred = true;
                 }
+
+                if (actualInserted < actualExtracted) {
+                    long remainder = actualExtracted - actualInserted;
+                    source.insert(resource, remainder, transaction);
+                }
+            }
+
+            if (anyTransferred) {
+                transaction.commit();
             }
         }
 
-        return transferred;
+        return anyTransferred;
     }
 
     private boolean isValidStorageView(StorageView<ItemVariant> storageView) {
-        return storageView != null && !storageView.isResourceBlank() && storageView.getAmount() > 0;
+        return storageView != null
+                && !storageView.isResourceBlank()
+                && storageView.getAmount() > 0;
     }
 
-    private boolean isInvalidResource(ItemVariant resource) {
-        return !itemList.isEmpty() && !itemList.contains(resource.getItem());
+    private boolean passesFilter(ItemVariant resource) {
+        if (itemFilter.isEmpty()) return true;
+        return resource != null && itemFilter.contains(resource.getItem());
+    }
+
+    @Override
+    public void markRemoved() {
+        itemFilter.clear();
+        super.markRemoved();
     }
 }

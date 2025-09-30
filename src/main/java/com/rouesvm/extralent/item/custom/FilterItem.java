@@ -34,7 +34,7 @@ public class FilterItem extends BasicPolymerItem {
                 List<ItemStack> itemStackList = component.stream().toList();
                 if (itemStackList.isEmpty()) return ActionResult.PASS;
 
-                transporterBlockEntity.setItemList(itemStackList);
+                transporterBlockEntity.setItemFilter(itemStackList);
                 stack.copyAndEmpty();
                 return ActionResult.SUCCESS;
             }
