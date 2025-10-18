@@ -31,7 +31,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
-        if (this.getWorld() == null || this.getWorld().isClient) return;
+        if (this.getWorld() == null || this.getWorld().isClient()) return;
         if (!canTick()) return;
         if (tick++ % getTickDelay() != 0) return;
         onUpdate();
@@ -58,7 +58,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     public void removeIncomingConnection(Connection connection) {
         if (!incomingConnections.contains(connection)) return;
 
-        if (world != null && !world.isClient) {
+        if (world != null && !world.isClient()) {
             PipeBlockEntity sourceEntity = getPipeAt(connection.getPos());
             if (sourceEntity != null) {
                 Connection reverseConnection = Connection.of(this.pos);
@@ -76,7 +76,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     }
 
     public void addIncomingConnection(Connection connection) {
-        if (world == null || world.isClient) return;
+        if (world == null || world.isClient()) return;
         if (incomingConnections.contains(connection)) return;
 
         PipeBlockEntity sourceEntity = getPipeAt(connection.getPos());
@@ -121,7 +121,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     }
 
     public PipeState addConnection(Connection connection) {
-        if (world == null || world.isClient) return PipeState.FAIL;
+        if (world == null || world.isClient()) return PipeState.FAIL;
         if (outgoingConnections.contains(connection)) return PipeState.IDENTICAL;
         if (current_connections >= getMaxConnections()) return PipeState.OVERFLOW;
 
@@ -143,7 +143,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
     }
 
     public boolean blockExists(BlockPos pos) {
-        if (world == null || world.isClient) return false;
+        if (world == null || world.isClient()) return false;
         BlockEntity block = world.getBlockEntity(pos);
         return block != null && !block.isRemoved();
     }

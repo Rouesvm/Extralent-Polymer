@@ -27,7 +27,7 @@ public class GeneratorBlock extends MachineBlock {
 
     @Override
     protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world == null || world.isClient) return ActionResult.FAIL;
+        if (world == null || world.isClient()) return ActionResult.FAIL;
 
         Optional<GeneratorBlockEntity> blockEntity = world.getBlockEntity(pos, BlockEntityRegistry.GENERATOR_BLOCK_ENTITY);
         if (blockEntity.isEmpty()) return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;

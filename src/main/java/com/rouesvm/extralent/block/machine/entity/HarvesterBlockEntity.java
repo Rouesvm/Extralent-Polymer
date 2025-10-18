@@ -104,7 +104,7 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
-        if (world == null || world.isClient) return;
+        if (world == null || world.isClient()) return;
 
         boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
         boolean shouldActivate = energyStorage.amount > ENERGY_USED;

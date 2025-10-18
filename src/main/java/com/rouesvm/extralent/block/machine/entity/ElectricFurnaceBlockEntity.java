@@ -98,7 +98,7 @@ public class ElectricFurnaceBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
-        if (world == null || world.isClient) return;
+        if (world == null || world.isClient()) return;
 
         final long energyUsed = calculateEnergyUsed(ENERGY_USED_PER_SECOND, TIME_TO_BURN_IN_SECONDS);
         ItemStack inputStack = inventory.getStack(INPUT_SLOT_INDEX);

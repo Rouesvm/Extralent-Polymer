@@ -32,7 +32,7 @@ public class PolymerBlockItem extends BlockItem implements PolymerItem, PolymerK
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        if (context.getWorld() == null || context.getWorld().isClient) return ActionResult.FAIL;
+        if (context.getWorld() == null || context.getWorld().isClient()) return ActionResult.FAIL;
         ServerPlayerEntity player = (ServerPlayerEntity) context.getPlayer();
         if (player != null) {
             player.playSoundToPlayer(SoundEvents.BLOCK_WOOD_PLACE, SoundCategory.BLOCKS, 1, 0.5F * context.getWorld().getRandom().nextFloat() * 0.8F);

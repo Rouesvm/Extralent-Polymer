@@ -47,7 +47,7 @@ public class QuarryBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
-        if (this.world == null || this.world.isClient) return;
+        if (this.world == null || this.world.isClient()) return;
 
         boolean activated = state.get(ActivatedPolymerBlock.ACTIVATED);
 

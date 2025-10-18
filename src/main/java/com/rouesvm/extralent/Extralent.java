@@ -10,7 +10,6 @@ import com.rouesvm.extralent.visual.elements.BlockHighlights;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -40,7 +39,9 @@ public class Extralent implements ModInitializer {
 				.icon(() -> new ItemStack(ItemRegistry.CONNECTOR))
 				.displayName(Text.translatable("item.extralent.extralent_group"))
 				.entries((displayContext, entries) -> {
-					entries.add(ItemRegistry.INFO);
+                    entries.add(ItemRegistry.PORTABLE_DRILL);
+
+                    entries.add(ItemRegistry.INFO);
 					entries.add(ItemRegistry.CONNECTOR);
 					entries.add(ItemRegistry.VACUUM);
 					entries.add(ItemRegistry.FILTER);
@@ -54,7 +55,8 @@ public class Extralent implements ModInitializer {
 					entries.add(BlockRegistry.TRANSMITTER);
 					entries.add(BlockRegistry.TRANSPORTER);
 
-					entries.add(ItemRegistry.MACHINE_BASE);
+                    entries.add(ItemRegistry.DRILL_HEAD);
+                    entries.add(ItemRegistry.MACHINE_BASE);
 					entries.add(ItemRegistry.COPPER_ROD);
 					entries.add(ItemRegistry.ANTENNA);
 

@@ -18,7 +18,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.NbtReadView;
 import net.minecraft.storage.NbtWriteView;
-import net.minecraft.storage.ReadView;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -27,7 +26,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
@@ -72,7 +70,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
 
     @Override
     public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
-        if (world != null && !world.isClient) {
+        if (world != null && !world.isClient()) {
             if (!(entity instanceof PlayerEntity player)) return;
             if (!Activated.showVisual(stack)) return;
             if (shouldPass(stack, player, true)) {
@@ -126,7 +124,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
             setTexture(newStack, true);
 
             NbtCompound compound = saveEntity(entity);
-            newStack.set(DataComponentTypes.ENTITY_DATA, NbtComponent.of(compound));
+            newStack.set(DataComponentTypes.BUCKET_ENTITY_DATA, NbtComponent.of(compound));
             entity.stopRiding();
             entity.discard();
 
@@ -138,11 +136,11 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        if (context.getWorld() == null || context.getWorld().isClient) return ActionResult.FAIL;
+        if (context.getWorld() == null || context.getWorld().isClient()) return ActionResult.FAIL;
 
         if (this.hasStoredEntity(context.getStack())) {
             World world = context.getWorld();
-            if (world.isClient) {
+            if (world.isClient()) {
                 return ActionResult.PASS;
             } else {
                 ItemStack itemInHand = context.getStack();
@@ -162,7 +160,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
     }
 
     public void spawnEntity(ItemStack stack, BlockPos pos, PlayerEntity player, World world) {
-        NbtCompound tag = stack.getOrDefault(DataComponentTypes.ENTITY_DATA, NbtComponent.DEFAULT).copyNbt();
+        NbtCompound tag = stack.getOrDefault(DataComponentTypes.BUCKET_ENTITY_DATA, NbtComponent.DEFAULT).copyNbt();
         if (tag.isEmpty()) return;
         if (EntityType.getEntityFromData(NbtReadView.create(ErrorReporter.EMPTY, world.getRegistryManager(), tag), world, SpawnReason.EVENT).map((entity) -> {
             entity.setPos((double) pos.getX() + 0.5D, pos.getY(), (double) pos.getZ() + 0.5D);
@@ -178,11 +176,14 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
     }
 
     public boolean hasStoredEntity(ItemStack itemStack) {
-        return !itemStack.getOrDefault(DataComponentTypes.ENTITY_DATA, NbtComponent.DEFAULT).isEmpty();
+        var entity_data = itemStack.get(DataComponentTypes.BUCKET_ENTITY_DATA);
+        if (entity_data != null)
+            return entity_data.isEmpty();
+        else return false;
     }
 
     public static NbtCompound saveEntity(Entity entity) {
-        NbtWriteView compound = NbtWriteView.create(ErrorReporter.EMPTY, entity.getWorld().getRegistryManager());
+        NbtWriteView compound = NbtWriteView.create(ErrorReporter.EMPTY, entity.getEntityWorld().getRegistryManager());
         compound.putString("id", EntityType.getId(entity.getType()).toString());
         entity.saveData(compound);
         return compound.getNbt();

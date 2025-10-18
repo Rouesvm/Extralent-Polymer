@@ -80,7 +80,7 @@ public class GeneratorBlockEntity extends BasicMachineBlockEntity {
 
     @Override
     public void tick(World world, BlockPos pos, BlockState state, BlockEntity entity) {
-        if (this.world == null || this.world.isClient) return;
+        if (this.world == null || this.world.isClient()) return;
         if (energyStorage.amount >= energyStorage.capacity) return;
 
         boolean stateChanged = false;

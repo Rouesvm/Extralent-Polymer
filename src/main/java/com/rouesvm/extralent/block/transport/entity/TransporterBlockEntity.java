@@ -59,7 +59,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
 
     @Override
     public boolean incorrectBlock(BlockPos blockPos) {
-        if (world == null || world.isClient) return true;
+        if (world == null || world.isClient()) return true;
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, blockPos, null);
 
         if (storage == null) {
@@ -76,7 +76,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
 
     @Override
     public boolean blockLogic(Connection connection) {
-        if (world == null || world.isClient) return false;
+        if (world == null || world.isClient()) return false;
 
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, connection.getPos(), connection.getSide());
         if (storage == null) return false;

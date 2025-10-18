@@ -222,6 +222,6 @@ public class BasicMachineBlockEntity extends BlockEntity implements TickableBloc
 
         return result.append(Text.literal("\n")
                 .append(energyAmount.copy())
-                .setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID)));
+                .setStyle(Style.EMPTY));
     }
 }

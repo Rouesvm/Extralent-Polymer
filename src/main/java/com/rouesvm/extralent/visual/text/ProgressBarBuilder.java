@@ -1,6 +1,7 @@
 package com.rouesvm.extralent.visual.text;
 
 import net.minecraft.text.Style;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -15,7 +16,7 @@ public class ProgressBarBuilder {
 
     private static final int SPACING_MULTIPLIER = 2;
 
-    private static final Style EXTRALENT_FONT = Style.EMPTY.withFont(Identifier.of("extralent", "energy_bar"));
+    private static final Style EXTRALENT_FONT = Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("extralent", "energy_bar")));
 
     private static final Text[] CACHE = new Text[MAX_PERCENTAGE_SIZE + 1];
     static {

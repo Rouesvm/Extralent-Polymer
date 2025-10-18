@@ -49,7 +49,7 @@ public class BlockHighlight {
     }
 
     public void tick() {
-        if (!this.world.isClient) {
+        if (!this.world.isClient()) {
             int randomEdge = ThreadLocalRandom.current().nextInt(EDGES_AMOUNT);
             Vector3f[] positions = edgeParticlePositions[randomEdge];
 

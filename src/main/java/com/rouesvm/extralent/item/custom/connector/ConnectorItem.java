@@ -63,7 +63,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
     @Override
     public void onItemEntityDestroyed(ItemEntity entity) {
         ConnectorData connectorData = new ConnectorData(entity.getStack());
-        PipeBlockEntity currentBlockEntity = connectorData.getCurrentEntity((ServerWorld) entity.getWorld());
+        PipeBlockEntity currentBlockEntity = connectorData.getCurrentEntity((ServerWorld) entity.getEntityWorld());
 
         currentBlockEntity.setConnected(false);
         HIGHLIGHT_MANAGER.clearAllHighlights(connectorData.getBlockPos());
@@ -71,7 +71,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
 
     @Override
     public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
-        if (world != null && !world.isClient) {
+        if (world != null && !world.isClient()) {
             if (!(entity instanceof PlayerEntity player)) return;
 
             if (!Activated.showVisual(stack)) return;
@@ -92,7 +92,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
 
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        if (world != null && !world.isClient) {
+        if (world != null && !world.isClient()) {
             ItemStack stack = user.getStackInHand(hand);
             if (shouldPass(stack, user, true)) return ActionResult.PASS;
 
@@ -112,7 +112,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
 
     @Override
     public ActionResult useOnBlock(@NotNull ItemUsageContext context) {
-        if (context.getWorld().isClient || context.getPlayer() == null) return ActionResult.PASS;
+        if (context.getWorld().isClient() || context.getPlayer() == null) return ActionResult.PASS;
 
         ServerWorld world = (ServerWorld) context.getWorld();
         PlayerEntity player = context.getPlayer();
@@ -152,7 +152,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
 
     @Override
     public void onLowEnergy(ItemStack stack, PlayerEntity player) {
-        onConnectionChanged(new ConnectorData(stack), (ServerWorld) player.getWorld(), player, false);
+        onConnectionChanged(new ConnectorData(stack), (ServerWorld) player.getEntityWorld(), player, false);
     }
 
     public void decreaseEnergy(ItemStack stack) {
@@ -161,14 +161,14 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
     }
 
     public static void playSound(@NotNull PlayerEntity player, float pitch) {
-        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
+        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), SoundCategory.BLOCKS, 1f, pitch + player.getEntityWorld().getRandom().nextFloat() * 0.4F);
     }
 
     public static void playSoundConnection(@NotNull PlayerEntity player, float pitch) {
-        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_SNARE.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
+        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_SNARE.value(), SoundCategory.BLOCKS, 1f, pitch + player.getEntityWorld().getRandom().nextFloat() * 0.4F);
     }
 
     public static void playSoundChanged(@NotNull PlayerEntity player, float pitch) {
-        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_BANJO.value(), SoundCategory.BLOCKS, 1f, pitch + player.getWorld().getRandom().nextFloat() * 0.4F);
+        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_BANJO.value(), SoundCategory.BLOCKS, 1f, pitch + player.getEntityWorld().getRandom().nextFloat() * 0.4F);
     }
 }

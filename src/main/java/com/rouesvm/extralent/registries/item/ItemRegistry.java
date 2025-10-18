@@ -18,8 +18,11 @@ public class ItemRegistry {
     public static final VacuumItem VACUUM = register(new VacuumItem(new Item.Settings().maxCount(1)));
     public static final FilterItem FILTER = register(new FilterItem(new Item.Settings().maxCount(1)));
 
+    public static final BasicPolymerItem PORTABLE_DRILL = register(new BasicPolymerItem("portable_drill", new Item.Settings(), Items.COAL));
+
     // Materials
     public static final BasicPolymerItem MACHINE_BASE = register(new BasicPolymerItem("machine_base", new Item.Settings(), Items.POPPED_CHORUS_FRUIT));
+    public static final BasicPolymerItem DRILL_HEAD = register(new BasicPolymerItem("drill_head", new Item.Settings(), Items.POPPED_CHORUS_FRUIT));
 
     public static final BasicPolymerItem COPPER_ROD = register(new BasicPolymerItem("copper_rod", new Item.Settings(), Items.CHORUS_FRUIT));
     public static final BasicPolymerItem ANTENNA = register(new BasicPolymerItem("antenna", new Item.Settings().maxCount(16), Items.CHORUS_FRUIT));

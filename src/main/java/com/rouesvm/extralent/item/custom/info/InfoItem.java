@@ -29,7 +29,7 @@ public class InfoItem extends DoubleTexturedItem {
 
     @Override
     public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
-        if (!world.isClient && entity instanceof PlayerEntity player) {
+        if (!world.isClient() && entity instanceof PlayerEntity player) {
             if (!player.isHolding(stack.getItem())) return;
 
             if (!InfoLogic.canTick(stack, entity)) return;
@@ -42,7 +42,7 @@ public class InfoItem extends DoubleTexturedItem {
 
     @Override
     public ActionResult use(World world, PlayerEntity player, Hand hand) {
-        if (!world.isClient) {
+        if (!world.isClient()) {
             ItemStack stack = player.getStackInHand(hand);
 
             if (player.isSneaking()) {
@@ -67,7 +67,7 @@ public class InfoItem extends DoubleTexturedItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        if (context.getPlayer() != null && !context.getWorld().isClient) {
+        if (context.getPlayer() != null && !context.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) context.getWorld();
 
             BlockEntity blockEntity = world.getBlockEntity(context.getBlockPos());

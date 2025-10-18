@@ -24,7 +24,7 @@ public class FilterItem extends BasicPolymerItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        if (context.getWorld() != null && !context.getWorld().isClient) {
+        if (context.getWorld() != null && !context.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) context.getWorld();
             var blockEntityResult = world.getBlockEntity(context.getBlockPos());
 
@@ -45,7 +45,7 @@ public class FilterItem extends BasicPolymerItem {
 
     @Override
     public ActionResult use(World world, PlayerEntity player, Hand hand) {
-        if (world == null || world.isClient) return ActionResult.PASS;
+        if (world == null || world.isClient()) return ActionResult.PASS;
         ItemStack stack = player.getStackInHand(hand);
 
         player.swingHand(hand, true);
