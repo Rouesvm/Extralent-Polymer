@@ -70,7 +70,6 @@ public class TransporterBlockEntity extends PipeBlockEntity {
         }
 
         boolean test = storage == null || (!storage.supportsInsertion() && !storage.supportsExtraction());
-        System.out.println(test);
         return test;
     }
 
@@ -81,15 +80,11 @@ public class TransporterBlockEntity extends PipeBlockEntity {
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, connection.getPos(), connection.getSide());
         if (storage == null) return false;
 
-        boolean success = false;
-
-        if (connection.getWeight() == 1 && storage.supportsInsertion()) {
-            success = insertItem(storage);
-        } else if (storage.supportsExtraction()) {
-            success = extractItem(storage);
-        }
-
-        return success;
+        if (connection.getWeight() == 1 && storage.supportsInsertion()
+        ) return insertItem(storage);
+        else if (storage.supportsExtraction()
+        ) return extractItem(storage);
+        else return false;
     }
 
     @Override
@@ -101,9 +96,7 @@ public class TransporterBlockEntity extends PipeBlockEntity {
                 .map(item -> Registries.ITEM.getId(item).toString())
                 .forEach(listAppender::add);
 
-        if (listAppender.isEmpty()) {
-            data.remove("filter");
-        }
+        if (listAppender.isEmpty()) data.remove("filter");
     }
 
     @Override

@@ -52,7 +52,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
             return;
         }
 
-        if (!blockLogic(connection)) queued_connections.offer(connection);
+        if (!blockLogic(connection)) queued_connections.remove(connection);
     }
 
     public void removeIncomingConnection(Connection connection) {

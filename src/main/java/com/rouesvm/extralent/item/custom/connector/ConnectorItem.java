@@ -75,7 +75,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             if (!(entity instanceof PlayerEntity player)) return;
 
             if (!Activated.showVisual(stack)) return;
-            if (shouldPass(stack, player, false)) return;
+            if (isLowEnergy(stack, player, false)) return;
 
             HIGHLIGHT_MANAGER.tickHighlights(ConnectorData.getBlockPos(stack));
 
@@ -94,7 +94,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (world != null && !world.isClient()) {
             ItemStack stack = user.getStackInHand(hand);
-            if (shouldPass(stack, user, true)) return ActionResult.PASS;
+            if (isLowEnergy(stack, user, true)) return ActionResult.PASS;
 
             var cast = user.raycast(5, 0, false);
             if (cast.getType() == HitResult.Type.ENTITY)
@@ -128,7 +128,7 @@ public class ConnectorItem extends DoubleTexturedItem implements BasicEnergyItem
             ConnectorLogic.onConnectionChanged(data, world, player, false);
         }
 
-        if (shouldPass(data.stack(), player, true)) {
+        if (isLowEnergy(data.stack(), player, true)) {
             return ActionResult.PASS;
         }
 

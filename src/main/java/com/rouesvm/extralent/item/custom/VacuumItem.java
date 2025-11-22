@@ -24,6 +24,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -73,16 +74,16 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
         if (world != null && !world.isClient()) {
             if (!(entity instanceof PlayerEntity player)) return;
             if (!Activated.showVisual(stack)) return;
-            if (shouldPass(stack, player, true)) {
+            if (isLowEnergy(stack, player, true)) {
                 stack.remove(DataComponentRegistry.LAST_UPDATE_TYPE);
                 spawnEntity(stack, entity.getBlockPos(), player, world);
                 return;
             }
-            deductEnergy(world, stack, 50);
+            deductEnergy(world, stack);
         }
     }
 
-    private void deductEnergy(World world, ItemStack stack, int intervalTicks) {
+    private void deductEnergy(World world, ItemStack stack) {
         long currentTime = world.getTime();
         long lastUpdateTime = stack.getOrDefault(DataComponentRegistry.LAST_UPDATE_TYPE, -1L);
 
@@ -92,7 +93,7 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
         }
 
         long elapsedTicks = currentTime - lastUpdateTime;
-        if (elapsedTicks >= intervalTicks) {
+        if (elapsedTicks >= 50) {
             long currentEnergy = getStoredEnergy(stack);
 
             float energyCostPerTick = (float) getEnergyCost() / 20;
@@ -104,15 +105,26 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
             } else setStoredEnergy(stack, 0);
         }
     }
+
+    @Override
+    public ActionResult use(World world, PlayerEntity player, Hand hand) {
+        var cast = player.raycast(5,0,false);
+        if (!(player instanceof ServerPlayerEntity serverPlayer)
+        ) return ActionResult.PASS;
+
+        if (cast.getType() == HitResult.Type.BLOCK
+        ) return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
+
+        return super.use(world, serverPlayer, hand);
+    }
+
     @Override
     public ActionResult useOnEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (player instanceof ServerPlayerEntity) {
-            if (shouldPass(stack, player, true)) return ActionResult.PASS;
+            if (isLowEnergy(stack, player, true)) return ActionResult.PASS;
             stack.remove(DataComponentRegistry.LAST_UPDATE_TYPE);
 
             ItemStack newStack = player.getStackInHand(hand);
-
-            if (!entity.isAlive()) return ActionResult.PASS;
 
             if (entity instanceof PlayerEntity
                     || entity instanceof EnderDragonEntity
@@ -136,32 +148,30 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        if (context.getWorld() == null || context.getWorld().isClient()) return ActionResult.FAIL;
+        World world = context.getWorld();
+        ItemStack itemInHand = context.getStack();
+        if (hasStoredEntity(itemInHand)) {
+            BlockPos blockPos = context.getBlockPos();
+            Direction direction = context.getSide();
+            BlockState blockState = world.getBlockState(blockPos);
 
-        if (this.hasStoredEntity(context.getStack())) {
-            World world = context.getWorld();
-            if (world.isClient()) {
-                return ActionResult.PASS;
-            } else {
-                ItemStack itemInHand = context.getStack();
-                BlockPos blockPos = context.getBlockPos();
-                Direction direction = context.getSide();
-                BlockState blockState = world.getBlockState(blockPos);
+            BlockPos releasePos;
+            if (blockState.getCollisionShape(world, blockPos).isEmpty())
+                releasePos = blockPos;
+            else releasePos = blockPos.offset(direction);
 
-                BlockPos releasePos;
-                if (blockState.getCollisionShape(world, blockPos).isEmpty())
-                    releasePos = blockPos;
-                else releasePos = blockPos.offset(direction);
-
-                spawnEntity(itemInHand, releasePos, context.getPlayer(), world);
-                return ActionResult.SUCCESS;
-            }
+            spawnEntity(itemInHand, releasePos, context.getPlayer(), world);
+            return ActionResult.SUCCESS;
         } else return ActionResult.PASS;
     }
 
     public void spawnEntity(ItemStack stack, BlockPos pos, PlayerEntity player, World world) {
         NbtCompound tag = stack.getOrDefault(DataComponentTypes.BUCKET_ENTITY_DATA, NbtComponent.DEFAULT).copyNbt();
-        if (tag.isEmpty()) return;
+        if (tag.isEmpty()) {
+            stack.remove(DataComponentTypes.BUCKET_ENTITY_DATA);
+            return;
+        }
+
         if (EntityType.getEntityFromData(NbtReadView.create(ErrorReporter.EMPTY, world.getRegistryManager(), tag), world, SpawnReason.EVENT).map((entity) -> {
             entity.setPos((double) pos.getX() + 0.5D, pos.getY(), (double) pos.getZ() + 0.5D);
             entity.setVelocity(Vec3d.ZERO);
@@ -170,16 +180,15 @@ public class VacuumItem extends DoubleTexturedItem implements BasicEnergyItem {
             return entity;
         }).isPresent()) {
             world.emitGameEvent(player, GameEvent.ENTITY_PLACE, pos);
-            stack.remove(DataComponentTypes.ENTITY_DATA);
             setTexture(stack, false);
         }
+
+        stack.remove(DataComponentTypes.BUCKET_ENTITY_DATA);
     }
 
     public boolean hasStoredEntity(ItemStack itemStack) {
         var entity_data = itemStack.get(DataComponentTypes.BUCKET_ENTITY_DATA);
-        if (entity_data != null)
-            return entity_data.isEmpty();
-        else return false;
+        return entity_data != null;
     }
 
     public static NbtCompound saveEntity(Entity entity) {

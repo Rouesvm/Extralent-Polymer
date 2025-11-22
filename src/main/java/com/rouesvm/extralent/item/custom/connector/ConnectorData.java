@@ -10,7 +10,6 @@ import net.minecraft.util.math.BlockPos;
 
 public class ConnectorData extends BasicData {
     private int weight = 0;
-    private BlockPos currentEntity;
 
     public ConnectorData(ItemStack stack) {
         super(stack);
@@ -78,7 +77,6 @@ public class ConnectorData extends BasicData {
         }
         nbtCompound.putLong("blockPos", currentEntity.asLong());
         saveToStack();
-        this.currentEntity = currentEntity;
     }
 
     public void setWeight(int weight) {
