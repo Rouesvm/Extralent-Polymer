@@ -150,6 +150,7 @@ public class PipeBlockEntity extends BasicMachineBlockEntity {
 
     private PipeBlockEntity getPipeAt(BlockPos pos) {
         if (world == null) return null;
+        if (!world.isPosLoaded(pos)) return null;
         BlockEntity be = world.getBlockEntity(pos);
         return (be instanceof PipeBlockEntity) ? (PipeBlockEntity) be : null;
     }

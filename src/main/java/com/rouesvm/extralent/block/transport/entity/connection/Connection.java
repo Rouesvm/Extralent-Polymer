@@ -10,6 +10,7 @@ import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -63,7 +64,8 @@ public class Connection {
                         List<NbtCompound> out = new ArrayList<>();
                         for (Connection connection : connections) {
                             NbtCompound compound = new NbtCompound();
-                            compound.putInt("side", connection.getSide().getIndex());
+                            @Nullable Direction side = connection.getSide();
+                            compound.putInt("side", side != null ? side.getIndex() : Direction.DOWN.getIndex());
                             compound.putInt("weight", connection.getWeight());
                             compound.putLong("pos", connection.getPos().asLong());
                             out.add(compound);

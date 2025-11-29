@@ -127,14 +127,18 @@ public class HarvesterBlockEntity extends BasicMachineBlockEntity {
 
         if (!soilQueue.isEmpty()) {
             BlockPos pos = soilQueue.poll();
-            plantSapling(world, pos);
-            didWork = true;
+            if (isLoaded(pos)) {
+                plantSapling(world, pos);
+                didWork = true;
+            }
         }
 
         if (!toHarvestQueue.isEmpty()) {
             BlockPos pos = toHarvestQueue.poll();
-            harvestTree(world, pos);
-            didWork = true;
+            if (isLoaded(pos)) {
+                harvestTree(world, pos);
+                didWork = true;
+            }
         }
 
         if (didWork) {
