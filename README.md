@@ -1,3 +1,1 @@
-A reimagining of my side project called "Extralent"!
-
--- A server-side tech mod.
+A server sided tech mod that I don't wanna see the code of
